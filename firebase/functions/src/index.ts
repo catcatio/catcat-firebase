@@ -5,7 +5,10 @@ admin.initializeApp(functions.config().firebase)
 
 import { ticketing } from './ticketing'
 
-const config = {}
+const config = {
+  firestore: admin
+}
+
 const ticketingSystem = ticketing(config)
 
 const sendOKAt = (res, data, error?) =>
