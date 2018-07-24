@@ -45,7 +45,8 @@ export const oz = functions.https.onRequest((req, res) => {
 
     const { action } = req.body
     if (!action) return res.status(200).send({
-      "dialogflow": {
+      "dialogflow":
+      {
         "message": {
           "text": `No action...`
         }
@@ -110,10 +111,20 @@ export const oz = functions.https.onRequest((req, res) => {
       })
       case "events.tickets.book-yes": return res.status(200).send({
         "dialogflow":
-        {
-          "type": "Image",
-          "imageUrl": "https://firebasestorage.googleapis.com/v0/b/catcatchatbot.appspot.com/o/0b0a69b119e86bb5c66bd1e3e72f853062bec514375c4ad25187a945891fa18b.png?alt=media&token=69e49c03-1d9b-4749-a529-2d3ac6b900e3"
-        }
+          [
+            {
+              "image": {
+                "imageUri": "https://firebasestorage.googleapis.com/v0/b/catcatchatbot.appspot.com/o/0b0a69b119e86bb5c66bd1e3e72f853062bec514375c4ad25187a945891fa18b.png?alt=media&token=69e49c03-1d9b-4749-a529-2d3ac6b900e3"
+              }
+            },
+            {
+              "text": {
+                "text": [
+                  "See you at event! Do show this QR when attend"
+                ]
+              }
+            }
+          ]
       })
       default: return ({
         "dialogflow":
