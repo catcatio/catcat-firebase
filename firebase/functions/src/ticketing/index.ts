@@ -1,33 +1,24 @@
 const { fbTemplate } = require('claudia-bot-builder')
+import * as StellarSdk from 'stellar-sdk'
 import {default as firestoreRepoFactory} from './firestoreRepository'
 import {default as eventStoreFactory} from './eventStore'
+import {default as userStoreFactory} from './userStore'
+import {default as stellarWrapperFactory} from './stellarWrapper'
 
+export const ticketing = ({firestore, stellarUrl, stellarNetwork, masterAssetCode, masterIssuerKey, masterDistributorKey}) => {
 
-const bookEvent = async (eventTitle) => {
-  const confirmTicketUrl = `https://firebasestorage.googleapis.com/v0/b/ticketing-dlt-poc.appspot.com/o/qr%2Faec2e826501e801c0dd1f4c6d0068f2ae1df012701d07918c7ceb9553cff2379.png?alt=media&token=318ac652-e2ea-4c02-9150-975941d8f2d6`
-  return ({
-    "dialogflow":
-      [
-        {
-          "image": {
-            "imageUri": "https://firebasestorage.googleapis.com/v0/b/catcatchatbot.appspot.com/o/0b0a69b119e86bb5c66bd1e3e72f853062bec514375c4ad25187a945891fa18b.png?alt=media&token=69e49c03-1d9b-4749-a529-2d3ac6b900e3"
-          }
-        },
-        {
-          "text": {
-            "text": [
-              "See you at event! Do show this QR when attend"
-            ]
-          }
-        }
-      ]
-  })
-}
+  const masterDistributor = StellarSdk.Keypair.fromSecret(masterDistributorKey)
+  const masterIssuer = StellarSdk.Keypair.fromSecret(masterIssuerKey)
+  const masterAsset = new StellarSdk.Asset(masterAssetCode, masterIssuer.publicKey())
 
-export const ticketing = ({firestore}) => {
+  const server = new StellarSdk.Server(stellarUrl)
+  stellarNetwork !== 'live' && StellarSdk.Network.useTestNetwork()
 
+  const strllarWrapper = stellarWrapperFactory(server, masterDistributor)
   const eventRepository = firestoreRepoFactory(firestore, 'events')
   const eventStore = eventStoreFactory(eventRepository)
+  const userRepository = firestoreRepoFactory(firestore, 'users')
+  const userStore = userStoreFactory(userRepository)
 
   const listEvent = async () => {
     const events = await eventStore.getAllEvents()
@@ -42,6 +33,50 @@ export const ticketing = ({firestore}) => {
     return {
       "facebook": generic.get()
     }
+  }
+
+  const bookEvent = async (eventTitle) => {
+    // Get Event by title
+    let startTime = Date.now()
+    const event = await eventStore.getByTitle(eventTitle)
+    console.log(`get Event By Title: ${Date.now() - startTime}`); startTime = Date.now()
+    if (!event) {
+      return Promise.reject(new Error('EVENT_NOTFOUND'))
+    }
+
+    const user  = await userStore.getByPreInit(event.code)
+    console.log(`get User By PreInit ${event.code}: ${Date.now() - startTime}`); startTime = Date.now()
+    if (!user) {
+      throw new Error('EVENT_FULL')
+    }
+
+    try {
+      const tx = await strllarWrapper.makeOffer(user.keypair, masterAsset, event.asset, 1, 1, `B:${event.asset.getCode()}:${user.uuid}`)
+      console.log(`make offer: ${Date.now() - startTime}`); startTime = Date.now()
+      console.log(`tx: ${tx}`)
+    }
+    catch (error) {
+      throw new Error(`BOOKING_FAILED: ${error.message}`)
+    }
+
+    const confirmTicketUrl = `https://firebasestorage.googleapis.com/v0/b/ticketing-dlt-poc.appspot.com/o/qr%2Faec2e826501e801c0dd1f4c6d0068f2ae1df012701d07918c7ceb9553cff2379.png?alt=media&token=318ac652-e2ea-4c02-9150-975941d8f2d6`
+    return ({
+      "dialogflow":
+        [
+          {
+            "image": {
+              "imageUri": confirmTicketUrl
+            }
+          },
+          {
+            "text": {
+              "text": [
+                "See you at event! Do show this QR when attend"
+              ]
+            }
+          }
+        ]
+    })
   }
 
   return {

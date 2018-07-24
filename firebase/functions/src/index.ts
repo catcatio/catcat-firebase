@@ -6,7 +6,12 @@ admin.initializeApp(functions.config().firebase)
 import { ticketing } from './ticketing'
 
 const config = {
-  firestore: admin
+  firestore: admin,
+  stellarUrl: 'https://horizon-testnet.stellar.org',
+  stellarNetwork: 'test',
+  masterAssetCode: functions.config().ticketing.masterassetcode,
+  masterIssuerKey: functions.config().ticketing.masterissuerkey,
+  masterDistributorKey: functions.config().ticketing.masterdistributorkey,
 }
 
 const ticketingSystem = ticketing(config)
@@ -63,7 +68,7 @@ export const oz = functions.https.onRequest((req, res) => {
           })
           .catch(err => res.status(400).send(`ACTION_FAILED: ${err.message}`))
       case "events.tickets.book-yes":
-        const title = req.body.title
+        const title = req.body.parameters['event-title']
         return ticketingSystem.bookEvent(title)
           .then(response => {
             res.status(200).send(response)

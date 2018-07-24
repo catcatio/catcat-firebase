@@ -33,17 +33,17 @@ const userStoreFactory = (userRepository) => {
   }
 
   const get = async (userId) => {
-    let user = await userRepository.get(userId)
+    const user = await userRepository.get(userId)
     return user ? User.fromJSON(user) : null
   }
 
   const getByUuid = async (uuid) => {
-    let users = await userRepository.query('uuid', uuid)
+    const users = await userRepository.query('uuid', uuid)
     return users && users.length > 0 ? User.fromJSON(users[0]) : null
   }
 
   const getByPreInit = async (preInit) => {
-    let users = await userRepository.query('preInit', preInit)
+    const users = await userRepository.query('preInit', preInit)
     return users && users.length > 0 ? User.fromJSON(users[0]) : null
   }
 
