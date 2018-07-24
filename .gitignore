@@ -23,5 +23,6 @@ yarn-error.log*
 *.log
 
 serviceAccountKey.json
+.runtimeconfig.json
 *.js
 *.js.map

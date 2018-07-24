@@ -7,7 +7,7 @@ const firestoreRepoFactory = (firebase, collectionName) => {
   }
 
   const get = (key) => {
-    let startTime = Date.now()
+    const startTime = Date.now()
     return collection.doc(key).get()
       .then(doc => {
         console.log(`firebase get: ${Date.now() - startTime}`)
@@ -17,6 +17,10 @@ const firestoreRepoFactory = (firebase, collectionName) => {
           return doc.data()
         }
       })
+  }
+
+  const update = (key, value) => {
+    return collection.doc(key).update(value)
   }
 
   const has = (key) => {
@@ -55,6 +59,7 @@ const firestoreRepoFactory = (firebase, collectionName) => {
   return {
     put,
     get,
+    update,
     del,
     close,
     has,

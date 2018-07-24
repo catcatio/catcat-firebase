@@ -48,10 +48,7 @@ const userStoreFactory = (userRepository) => {
   }
 
   const clearPreInit = async (userId) => {
-    const user = await userRepository.get(userId)
-    if (!user) return null;
-    (user.preInit = '') && userRepository.put(userId, user)
-    return User.fromJSON(user)
+    return userRepository.update(userId, {preInit: ''})
   }
 
   return {

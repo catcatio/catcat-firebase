@@ -31,7 +31,7 @@ const stellarWrapperFactory = (server: StellarSdk.Server, masterSigner: StellarS
         source: srcKey.publicKey()
       } as StellarSdk.Operation.ManageOfferOptions
 
-    return server.loadAccount(srcKey.publicKey())
+    return server.loadAccount(masterSigner.publicKey())
       .then((account: StellarSdk.Account) => {
         const transaction = new StellarSdk.TransactionBuilder(account)
           .addOperation(StellarSdk.Operation.manageOffer(options))
