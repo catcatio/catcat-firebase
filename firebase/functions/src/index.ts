@@ -37,7 +37,7 @@ export const oz = functions.https.onRequest((req, res) => {
     if (!req.body) return res.status(200).send({
       "dialogflow":
       {
-        "message": {
+        "text": {
           "text": `No body...`
         }
       }
@@ -47,7 +47,7 @@ export const oz = functions.https.onRequest((req, res) => {
     if (!action) return res.status(200).send({
       "dialogflow":
       {
-        "message": {
+        "text": {
           "text": `No action...`
         }
       }
@@ -129,7 +129,7 @@ export const oz = functions.https.onRequest((req, res) => {
       default: return ({
         "dialogflow":
         {
-          "message": {
+          "text": {
             "text": `Something went wrong with ${action}`
           }
         }
