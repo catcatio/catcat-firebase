@@ -63,6 +63,7 @@ export const ticketing = (facebook, { firestore, stellarUrl, stellarNetwork, mas
 
       userStore.addMemo(user.userId, `${senderId}:OK`)
       console.log(`user.userId (senderId): ${user.userId} ${senderId}, SUCCESS`)
+      console.log(`make offer: ${Date.now() - startTime}`); startTime = Date.now()
       return facebook.sendImageToFacebook(senderId, qrCode)
         .then(() => facebook.sendMessage(senderId, `See you at "${eventTitle}"! Do show this QR when attend`))
       // TODO: handle failure case
@@ -73,8 +74,8 @@ export const ticketing = (facebook, { firestore, stellarUrl, stellarNetwork, mas
       userStore.addMemo(user.userId, `${senderId}:ERROR:${error.message}`)
       // throw new Error(`BOOKING_FAILED: ${error.message}`)
       console.log(`user.userId (senderId): ${user.userId} ${senderId}, BOOKING_FAILED: ${error.message}`)
+      console.log(`make offer: ${Date.now() - startTime}`); startTime = Date.now()
     }
-    console.log(`make offer: ${Date.now() - startTime}`); startTime = Date.now()
   }
 
   return {
