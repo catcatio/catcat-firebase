@@ -2,9 +2,9 @@ import * as functions from 'firebase-functions';
 const cors = require('cors')({ origin: true })
 const admin = require('firebase-admin')
 
-
 admin.initializeApp(functions.config().firebase)
 
+import { facebookClient } from './facebookClient'
 import { ticketing } from './ticketing'
 
 const ticketingConfig = functions.config().ticketing
@@ -22,7 +22,8 @@ const config = {
   ticketconfirmurl: ticketingConfig.ticketconfirmurl
 }
 
-const ticketingSystem = ticketing(config)
+const facebook = facebookClient(config)
+const ticketingSystem = ticketing(facebook, config)
 
 const sendOKAt = (res, data, error?) =>
   res.status(200).send({
@@ -53,7 +54,7 @@ export const link = functions.https.onRequest((req, res) => {
 const sendDialogflowTextMessage = (res, text: string, retCode: number = 200) => {
   return res.status(retCode).send({
     "dialogflow": {
-      "message": {
+      "text": {
         text
       }
     }
