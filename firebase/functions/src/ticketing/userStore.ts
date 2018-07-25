@@ -51,13 +51,18 @@ const userStoreFactory = (userRepository) => {
     return userRepository.update(userId, {preInit: ''})
   }
 
+  const addMemo = async (userId, memo) => {
+    return userRepository.update(userId, {memo})
+  }
+
   return {
     setUserCreator,
     getOrCreate,
     get,
     getByUuid,
     getByPreInit,
-    clearPreInit
+    clearPreInit,
+    addMemo
   }
 }
 

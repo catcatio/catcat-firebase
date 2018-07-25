@@ -1,11 +1,53 @@
-const { fbTemplate } = require('claudia-bot-builder')
-import * as StellarSdk from 'stellar-sdk'
-import { default as firestoreRepoFactory } from './firestoreRepository'
-import { default as eventStoreFactory } from './eventStore'
-import { default as userStoreFactory } from './userStore'
-import { default as stellarWrapperFactory } from './stellarWrapper'
+const facebookClient = (fburl, fbaccesstoken) => {
+  const { postJSON } = require('@rabbotio/fetcher')
+  const url = `${fburl}?access_token=${fbaccesstoken}`
+  const sendImageToFacebook = async (recipientId, imageUrl) => {
+    const payload = {
+      "messaging_type": "NON_PROMOTIONAL_SUBSCRIPTION",
+      "recipient": {
+        "id": recipientId
+      },
+      "message": {
+        "attachment": {
+          "type": "image",
+          "payload": {
+            "is_reusable": true,
+            "url": imageUrl
+          }
+        }
+      }
+    }
+    return postJSON(url, payload).catch(err => console.log(err))
+  }
 
-export const ticketing = ({ firestore, stellarUrl, stellarNetwork, masterAssetCode, masterIssuerKey, masterDistributorKey }) => {
+  const sendMessage = async (recipientId, text) => {
+    const payload = {
+      "messaging_type": "NON_PROMOTIONAL_SUBSCRIPTION",
+      "recipient": {
+        "id": recipientId
+      },
+      "message": {
+        text
+      }
+    }
+    return postJSON(url, payload).catch(err => console.log(err))
+  }
+
+  return {
+    sendImageToFacebook,
+    sendMessage
+  }
+}
+
+export const ticketing = ({ firestore, stellarUrl, stellarNetwork, masterAssetCode, masterIssuerKey, masterDistributorKey, qrcodeservice, fbaccesstoken, fburl, ticketconfirmurl }) => {
+  const { fbTemplate } = require('claudia-bot-builder')
+  const StellarSdk = require('stellar-sdk')
+  const firestoreRepoFactory = require('./firestoreRepository').default
+  const eventStoreFactory = require('./eventStore').default
+  const userStoreFactory = require('./userStore').default
+  const stellarWrapperFactory = require('./stellarWrapper').default
+
+  const fbClient = facebookClient(fburl, fbaccesstoken)
 
   const masterDistributor = StellarSdk.Keypair.fromSecret(masterDistributorKey)
   const masterIssuer = StellarSdk.Keypair.fromSecret(masterIssuerKey)
@@ -35,7 +77,7 @@ export const ticketing = ({ firestore, stellarUrl, stellarNetwork, masterAssetCo
     }
   }
 
-  const bookEvent = async (eventTitle) => {
+  const bookEvent = async (senderId, eventTitle) => {
     // Get Event by title
     let startTime = Date.now()
     const event = await eventStore.getByTitle(eventTitle)
@@ -60,30 +102,20 @@ export const ticketing = ({ firestore, stellarUrl, stellarNetwork, masterAssetCo
       }
 
       console.log(`tx: ${tx}`)
+      const confirmTicketUrl = `${ticketconfirmurl}${tx}`
+      const qrCode = `${qrcodeservice}${encodeURI(confirmTicketUrl)}`
+
+      userStore.addMemo(user.userId, `${senderId}:OK`)
+      return fbClient.sendImageToFacebook(senderId, qrCode)
+      // TODO: handle failure case
     }
     catch (error) {
+      fbClient.sendMessage(senderId, 'Sorry, something went wrong. We will get back to you asap.')
+      userStore.clearPreInit(user.userId)
+      userStore.addMemo(user.userId, `${senderId}:ERROR:${error.message}`)
       throw new Error(`BOOKING_FAILED: ${error.message}`)
     }
     console.log(`make offer: ${Date.now() - startTime}`); startTime = Date.now()
-
-    const confirmTicketUrl = `https://firebasestorage.googleapis.com/v0/b/ticketing-dlt-poc.appspot.com/o/qr%2Faec2e826501e801c0dd1f4c6d0068f2ae1df012701d07918c7ceb9553cff2379.png?alt=media&token=318ac652-e2ea-4c02-9150-975941d8f2d6`
-    return ({
-      "dialogflow":
-        [
-          {
-            "image": {
-              "imageUri": confirmTicketUrl
-            }
-          },
-          {
-            "text": {
-              "text": [
-                "See you at event! Do show this QR when attend"
-              ]
-            }
-          }
-        ]
-    })
   }
 
   return {
