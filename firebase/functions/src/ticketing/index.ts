@@ -35,8 +35,10 @@ export const ticketing = (facebook, { firestore, stellarUrl, stellarNetwork, mas
   }
 
   const bookEvent = async (senderId, eventTitle) => {
+    console.log(`${senderId} start book event`)
     // Get Event by title
-    let startTime = Date.now()
+    let atBeginning = Date.now()
+    let startTime = atBeginning
     const event = await eventStore.getByTitle(eventTitle)
     console.log(`get Event By Title: ${Date.now() - startTime}`); startTime = Date.now()
     if (!event) {
@@ -63,7 +65,8 @@ export const ticketing = (facebook, { firestore, stellarUrl, stellarNetwork, mas
 
       userStore.addMemo(user.userId, `${senderId}:OK`)
       console.log(`user.userId (senderId): ${user.userId} ${senderId}, SUCCESS`)
-      console.log(`make offer: ${Date.now() - startTime}`); startTime = Date.now()
+      console.log(`make offer: ${Date.now() - startTime}`);
+      console.log(`${senderId} total book time: ${Date.now() - atBeginning}`);
       return facebook.sendImageToFacebook(senderId, qrCode)
         .then(() => facebook.sendMessage(senderId, `See you at "${eventTitle}"! Do show this QR when attend`))
       // TODO: handle failure case
@@ -74,7 +77,8 @@ export const ticketing = (facebook, { firestore, stellarUrl, stellarNetwork, mas
       userStore.addMemo(user.userId, `${senderId}:ERROR:${error.message}`)
       // throw new Error(`BOOKING_FAILED: ${error.message}`)
       console.log(`user.userId (senderId): ${user.userId} ${senderId}, BOOKING_FAILED: ${error.message}`)
-      console.log(`make offer: ${Date.now() - startTime}`); startTime = Date.now()
+      console.log(`make offer: ${Date.now() - startTime}`);
+      console.log(`${senderId} total book time: ${Date.now() - atBeginning}`);
     }
   }
 

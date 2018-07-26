@@ -1,5 +1,5 @@
-const firestoreRepoFactory = (firebase, collectionName) => {
-  const db = firebase.firestore()
+const firestoreRepoFactory = (firestore, collectionName) => {
+  const db = firestore
   const collection = db.collection(collectionName)
 
   const put = (key, value) => {

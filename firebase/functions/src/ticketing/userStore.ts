@@ -55,6 +55,12 @@ const userStoreFactory = (userRepository) => {
     return userRepository.update(userId, {memo})
   }
 
+
+  const markAsUsed = async (userId) => {
+    return userRepository.update(userId, {used: true})
+  }
+
+
   return {
     setUserCreator,
     getOrCreate,
@@ -62,7 +68,8 @@ const userStoreFactory = (userRepository) => {
     getByUuid,
     getByPreInit,
     clearPreInit,
-    addMemo
+    addMemo,
+    markAsUsed
   }
 }
 

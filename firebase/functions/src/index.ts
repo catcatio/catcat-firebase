@@ -8,9 +8,10 @@ import { facebookClient } from './facebookClient'
 import { ticketing } from './ticketing'
 
 const ticketingConfig = functions.config().ticketing
-
+const firestore = admin.firestore()
+firestore.settings({ timestampsInSnapshots: true })
 const config = {
-  firestore: admin,
+  firestore: firestore,
   stellarUrl: 'https://horizon-testnet.stellar.org',
   stellarNetwork: 'test',
   masterAssetCode: ticketingConfig.masterassetcode,
@@ -62,8 +63,9 @@ const sendDialogflowTextMessage = (res, text: string, retCode: number = 200) => 
 }
 
 export const oz = functions.https.onRequest((req, res) => {
+  console.log('start of oz request')
   cors(req, res, () => {
-
+    console.log('start of oz (cors) request')
     if (!req.body) return sendDialogflowTextMessage(res, `No body...`)
 
     const { action } = req.body
