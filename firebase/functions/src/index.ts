@@ -62,6 +62,10 @@ const sendDialogflowTextMessage = (res, text: string, retCode: number = 200) => 
   })
 }
 
+const delay = (ms) => new Promise((resolve) => {
+  setTimeout(resolve, ms)
+})
+
 export const oz = functions.https.onRequest((req, res) => {
   console.log('start of oz request')
   cors(req, res, () => {
@@ -82,7 +86,7 @@ export const oz = functions.https.onRequest((req, res) => {
         const title = req.body.parameters['event-title']
         const senderId = req.body.senderId
 
-        sendDialogflowTextMessage(res, `Hold on, we're now booking ${title} for you...`)
+        delay(2000).then(() => sendDialogflowTextMessage(res, `Hold on, we're now booking ${title} for you...`))
 
         return ticketingSystem.bookEvent(senderId, title)
       default:
