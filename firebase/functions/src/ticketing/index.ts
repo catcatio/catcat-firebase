@@ -37,7 +37,7 @@ export const ticketing = (facebook, { firestore, stellarUrl, stellarNetwork, mas
   const bookEvent = async (senderId, eventTitle) => {
     console.log(`${senderId} start book event`)
     // Get Event by title
-    let atBeginning = Date.now()
+    const atBeginning = Date.now()
     let startTime = atBeginning
     const event = await eventStore.getByTitle(eventTitle)
     console.log(`get Event By Title: ${Date.now() - startTime}`); startTime = Date.now()
