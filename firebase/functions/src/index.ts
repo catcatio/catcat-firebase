@@ -5,6 +5,7 @@ const admin = require('firebase-admin')
 admin.initializeApp(functions.config().firebase)
 
 import { facebookClient } from './facebookClient'
+import { lineClient } from './lineClient'
 import { ticketing } from './ticketing'
 
 const ticketingConfig = functions.config().ticketing
@@ -20,11 +21,14 @@ const config = {
   qrcodeservice: ticketingConfig.qrcodeservice,
   fbaccesstoken: ticketingConfig.fbaccesstoken,
   fburl: ticketingConfig.fburl,
-  ticketconfirmurl: ticketingConfig.ticketconfirmurl
+  ticketconfirmurl: ticketingConfig.ticketconfirmurl,
+  linemessageapi: ticketingConfig.linemessageapi,
+  linechannelaccesstoken: ticketingConfig.linechannelaccesstoken
 }
 
 const facebook = facebookClient(config)
-const ticketingSystem = ticketing(facebook, config)
+const line = lineClient(config)
+const ticketingSystem = ticketing({facebook, line}, config)
 
 const sendOKAt = (res, data, error?) =>
   res.status(200).send({
@@ -66,29 +70,35 @@ const delay = (ms) => new Promise((resolve) => {
   setTimeout(resolve, ms)
 })
 
+const sendDelayResponse = (res, message, delayMs = 1000) => {
+  return delay(delayMs).then(() => sendDialogflowTextMessage(res, message))
+}
+
 export const oz = functions.https.onRequest((req, res) => {
   console.log('start of oz request')
   cors(req, res, () => {
     console.log('start of oz (cors) request')
     if (!req.body) return sendDialogflowTextMessage(res, `No body...`)
 
-    const { action } = req.body
+    const { action, requestSource, userId, senderId } = req.body
     if (!action) return sendDialogflowTextMessage(res, `No action...`)
+
+    const requestParams = {
+      requestSource,
+      from: requestSource === 'LINE' ? userId : senderId
+    }
 
     switch (action) {
       case "list.events":
-        return ticketingSystem.listEvent()
-          .then(response => {
-            res.status(200).send(response)
-          })
-          .catch(err => res.status(400).send(`ACTION_FAILED: ${err.message}`))
+        sendDelayResponse(res, '')
+
+        return ticketingSystem.listEvent(requestParams)
       case "events.tickets.book-yes":
         const title = req.body.parameters['event-title']
-        const senderId = req.body.senderId
 
-        delay(2000).then(() => sendDialogflowTextMessage(res, `Hold on, we're now booking ${title} for you...`))
+        sendDelayResponse(res, `Hold on, we're now booking ${title} for you...`)
 
-        return ticketingSystem.bookEvent(senderId, title)
+        return ticketingSystem.bookEvent(requestParams, title)
       default:
         return sendDialogflowTextMessage(res, `Something went wrong with ${action}`)
     }

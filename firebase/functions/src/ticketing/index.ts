@@ -1,4 +1,6 @@
-export const ticketing = (facebook, { firestore, stellarUrl, stellarNetwork, masterAssetCode, masterIssuerKey, masterDistributorKey, qrcodeservice, fbaccesstoken, fburl, ticketconfirmurl }) => {
+import { text } from "../../node_modules/@types/body-parser";
+
+export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNetwork, masterAssetCode, masterIssuerKey, masterDistributorKey, qrcodeservice, fbaccesstoken, fburl, ticketconfirmurl }) => {
   const { fbTemplate } = require('claudia-bot-builder')
   const StellarSdk = require('stellar-sdk')
   const firestoreRepoFactory = require('./firestoreRepository').default
@@ -19,8 +21,11 @@ export const ticketing = (facebook, { firestore, stellarUrl, stellarNetwork, mas
   const userRepository = firestoreRepoFactory(firestore, 'users')
   const userStore = userStoreFactory(userRepository)
 
-  const listEvent = async () => {
-    const events = await eventStore.getAllEvents()
+  const limitChar = (str, limit) => {
+    return str.substr(0, limit)
+  }
+
+  const facebookEventListFormatter = (events) => {
     const generic = new fbTemplate.Generic()
     events.forEach(event => {
       generic.addBubble(event.title, event.subtitle)
@@ -29,13 +34,52 @@ export const ticketing = (facebook, { firestore, stellarUrl, stellarNetwork, mas
         .addButton('See more detail', event.url)
         .addButton(`Join ${event.title}`, `Join ${event.title}`)
     })
+    return generic.get()
+  }
+
+  const lineEventListFormatter = (events) => {
     return {
-      "facebook": generic.get()
+      'type': 'template',
+      'altText': 'Here is list of events',
+      'template': {
+        'type': 'carousel',
+        'actions': [],
+        'columns': events.map(event => ({
+          'thumbnailImageUrl': event.coverImage,
+          'title': event.title,
+          'text': `${limitChar(event.subtitle, 60)}`,
+          "defaultAction": {
+            "type": "uri",
+            "label": "View detail",
+            "uri": event.url
+          },
+          'actions': [
+            {
+              'type': 'uri',
+              'label': 'MORE',
+              'uri': event.url
+            },
+            {
+              'type': 'postback',
+              'label': `JOIN`,
+              'text': `Join ${event.title}`,
+              'data': `Join ${event.title}`
+            }
+          ]
+        }))
+      }
     }
   }
 
-  const bookEvent = async (senderId, eventTitle) => {
-    console.log(`${senderId} start book event`)
+  const listEvent = async ({ requestSource, from }) => {
+    const events = await eventStore.getAllEvents()
+    const formatter = requestSource === 'LINE' ? lineEventListFormatter : facebookEventListFormatter
+    const messageSender = requestSource === 'LINE' ? line : facebook
+    return messageSender.sendCustomMessages(from, formatter(events))
+  }
+
+  const bookEvent = async ({ requestSource, from }, eventTitle) => {
+    console.log(`${requestSource}: ${from} start book event`)
     // Get Event by title
     const atBeginning = Date.now()
     let startTime = atBeginning
@@ -63,22 +107,23 @@ export const ticketing = (facebook, { firestore, stellarUrl, stellarNetwork, mas
       const confirmTicketUrl = `${ticketconfirmurl}${tx}`
       const qrCode = `${qrcodeservice}${encodeURI(confirmTicketUrl)}`
 
-      userStore.addMemo(user.userId, `${senderId}:OK`)
-      console.log(`user.userId (senderId): ${user.userId} ${senderId}, SUCCESS`)
+      userStore.addMemo(user.userId, `${from}:OK`)
+      console.log(`user.userId (senderId): ${user.userId} ${from}, SUCCESS`)
       console.log(`make offer: ${Date.now() - startTime}`);
-      console.log(`${senderId} total book time: ${Date.now() - atBeginning}`);
-      return facebook.sendImageToFacebook(senderId, qrCode)
-        .then(() => facebook.sendMessage(senderId, `See you at "${eventTitle}"! Do show this QR when attend`))
-      // TODO: handle failure case
+      console.log(`${from} total book time: ${Date.now() - atBeginning}`);
+
+    const messageSender = requestSource === 'LINE' ? line : facebook
+    return messageSender.sendImage(from, qrCode, qrCode)
+      .then(() => messageSender.sendMessage(from, `See you at '${eventTitle}'! Do show this QR when attend`))
     }
     catch (error) {
-      facebook.sendMessage(senderId, 'Sorry, something went wrong. We will get back to you asap.')
+      facebook.sendMessage(from, 'Sorry, something went wrong. We will get back to you asap.')
       userStore.clearPreInit(user.userId)
-      userStore.addMemo(user.userId, `${senderId}:ERROR:${error.message}`)
+      userStore.addMemo(user.userId, `${from}:ERROR:${error.message}`)
       // throw new Error(`BOOKING_FAILED: ${error.message}`)
-      console.log(`user.userId (senderId): ${user.userId} ${senderId}, BOOKING_FAILED: ${error.message}`)
+      console.log(`user.userId (senderId): ${user.userId} ${from}, BOOKING_FAILED: ${error.message}`)
       console.log(`make offer: ${Date.now() - startTime}`);
-      console.log(`${senderId} total book time: ${Date.now() - atBeginning}`);
+      console.log(`${from} total book time: ${Date.now() - atBeginning}`);
     }
   }
 
