@@ -1,6 +1,4 @@
-import { text } from "../../node_modules/@types/body-parser";
-
-export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNetwork, masterAssetCode, masterIssuerKey, masterDistributorKey, qrcodeservice, fbaccesstoken, fburl, ticketconfirmurl }) => {
+export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNetwork, masterAssetCode, masterIssuerKey, masterDistributorKey, qrcodeservice, ticketconfirmurl }) => {
   const { fbTemplate } = require('claudia-bot-builder')
   const StellarSdk = require('stellar-sdk')
   const firestoreRepoFactory = require('./firestoreRepository').default
@@ -19,7 +17,8 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
   const eventRepository = firestoreRepoFactory(firestore, 'events')
   const eventStore = eventStoreFactory(eventRepository)
   const userRepository = firestoreRepoFactory(firestore, 'users')
-  const userStore = userStoreFactory(userRepository)
+  const tempUserRepository = firestoreRepoFactory(firestore, 'tmpusers')
+  const userStore = userStoreFactory(userRepository, tempUserRepository)
 
   const limitChar = (str, limit) => {
     return str.substr(0, limit)
@@ -28,10 +27,10 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
   const facebookEventListFormatter = (events) => {
     const generic = new fbTemplate.Generic()
     events.forEach(event => {
-      generic.addBubble(event.title, event.subtitle)
+      generic.addBubble(event.title, event.description)
         .addImage(event.coverImage)
-        .addDefaultAction(event.url)
-        .addButton('See more detail', event.url)
+        .addDefaultAction(event.link)
+        .addButton('See more detail', event.link)
         .addButton(`Join ${event.title}`, `Join ${event.title}`)
     })
     return generic.get()
@@ -47,17 +46,17 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
         'columns': events.map(event => ({
           'thumbnailImageUrl': event.coverImage,
           'title': event.title,
-          'text': `${limitChar(event.subtitle, 60)}`,
+          'text': `${limitChar(event.description, 60)}`,
           "defaultAction": {
             "type": "uri",
             "label": "View detail",
-            "uri": event.url
+            "uri": event.link
           },
           'actions': [
             {
               'type': 'uri',
               'label': 'MORE',
-              'uri': event.url
+              'uri': event.link
             },
             {
               'type': 'postback',
@@ -80,55 +79,80 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
 
   const bookEvent = async ({ requestSource, from }, eventTitle) => {
     console.log(`${requestSource}: ${from} start book event`)
+    const messageSender = requestSource === 'LINE' ? line : facebook
     // Get Event by title
     const atBeginning = Date.now()
     let startTime = atBeginning
     const event = await eventStore.getByTitle(eventTitle)
     console.log(`get Event By Title: ${Date.now() - startTime}`); startTime = Date.now()
+
     if (!event) {
-      return Promise.reject(new Error('EVENT_NOTFOUND'))
+      console.error('EVENT_NOT_FOUND')
+      return messageSender.sendMessage(from, `Sorry, we cannot not find your '${eventTitle}' event`)
     }
 
-    const user = await userStore.getByPreInit(event.code)
-    console.log(`get User By PreInit ${event.code}: ${Date.now() - startTime}`); startTime = Date.now()
+    console.log(`event: ${event.id}`)
+
+    let user = await userStore.getByRequstSource(requestSource, from)
+    user = user || await userStore.createUserFromTemp(requestSource, from, masterAsset)
+
+    console.log(`get User by RequstSource: ${Date.now() - startTime}`); startTime = Date.now()
+
     if (!user) {
-      throw new Error('EVENT_FULL')
+      console.error('EVENT_NOT_FULL')
+      return messageSender.sendMessage(from, `Sorry, the '${eventTitle}' event is fully booked out`)
     }
-    console.log(`user.userId: ${user.userId} ${user.account_id}`)
 
-    try {
-      const tx = await strllarWrapper.makeOffer(user.keypair, masterAsset, event.asset, 1, 1, `B:${event.asset.getCode()}:${user.uuid}`)
+    console.log(`user: ${user.id} ${user.publicKey}`)
+    const unusedTicket = await eventStore.getUnusedTicket(event.id)
+    console.log(`getUnusedTicket ${event.id}: ${Date.now() - startTime}`); startTime = Date.now()
 
-      if (tx) {
-        await userStore.clearPreInit(user.userId)
-      }
+    if (!unusedTicket) {
+      console.error('EVENT_NOT_FULL')
+      return messageSender.sendMessage(from, `Sorry, the '${eventTitle}' event is fully booked out`)
+    }
 
-      console.log(`tx: ${tx}`)
-      const confirmTicketUrl = `${ticketconfirmurl}${tx}`
-      const qrCode = `${qrcodeservice}${encodeURI(confirmTicketUrl)}`
+    const userKey = StellarSdk.Keypair.fromPublicKey(user.publicKey)
+    const tmpEvent = Object.assign({}, event)
+    tmpEvent.asset = new StellarSdk.Asset(event.id, event.issuer)
+    tmpEvent.distributor = StellarSdk.Keypair.fromPublicKey(event.distributor)
 
-      userStore.addMemo(user.userId, `${from}:OK`)
-      console.log(`user.userId (senderId): ${user.userId} ${from}, SUCCESS`)
-      console.log(`make offer: ${Date.now() - startTime}`);
-      console.log(`${from} total book time: ${Date.now() - atBeginning}`);
+    const bought_tx = await strllarWrapper.doBookTicket(masterDistributor, masterAsset, userKey, tmpEvent, 1, `B:${tmpEvent.asset.getCode()}:${unusedTicket.id}`)
+      .catch(() => null)
+    console.log(`doBookTicket ${event.id}: ${Date.now() - startTime}`); startTime = Date.now()
 
-    const messageSender = requestSource === 'LINE' ? line : facebook
-    return messageSender.sendImage(from, qrCode, qrCode)
+    if (!bought_tx) {
+      console.error('EVENT_BOOK_ERROR')
+      return messageSender.sendMessage(from, 'Sorry, something went wrong. We will get back to you asap.')
+    }
+
+    await eventStore.updateBoughtTicket(user, tmpEvent, unusedTicket, bought_tx)
+    await userStore.updateBoughtTicket(user.id, tmpEvent.id, unusedTicket.id)
+    console.log(`updateBoughtTicket ${bought_tx}: ${Date.now() - startTime}`); startTime = Date.now()
+
+    const confirmTicketUrl = `${ticketconfirmurl}${bought_tx}`
+    const qrCodeUrl = `${qrcodeservice}${encodeURI(confirmTicketUrl)}`
+
+    await messageSender.sendImage(from, qrCodeUrl, qrCodeUrl)
       .then(() => messageSender.sendMessage(from, `See you at '${eventTitle}'! Do show this QR when attend`))
-    }
-    catch (error) {
-      facebook.sendMessage(from, 'Sorry, something went wrong. We will get back to you asap.')
-      userStore.clearPreInit(user.userId)
-      userStore.addMemo(user.userId, `${from}:ERROR:${error.message}`)
-      // throw new Error(`BOOKING_FAILED: ${error.message}`)
-      console.log(`user.userId (senderId): ${user.userId} ${from}, BOOKING_FAILED: ${error.message}`)
-      console.log(`make offer: ${Date.now() - startTime}`);
-      console.log(`${from} total book time: ${Date.now() - atBeginning}`);
-    }
+
+    console.log(`total book time: ${Date.now() - atBeginning}`); startTime = Date.now()
+    console.info('EVENT_BOOK_OK')
+    return 'EVENT_BOOK_OK'
+  }
+
+  const confirmTicket = async (tx) => {
+    // Validate the ticket
+  }
+
+  const useTicket = async (tx) => {
+    // Burn the ticket
   }
 
   return {
     listEvent,
-    bookEvent
+    bookEvent,
+    confirmTicket,
+    useTicket
   }
 }

@@ -37,10 +37,9 @@ const wrapApi = (api: (req: Request, res: Response) => any) =>
   https.onRequest((req: Request, res: Response) =>
     cors(req, res, () => api(req, res)))
 
-const link = wrapApi(linkApi(admin.database))
-const oz = wrapApi(ozApi({line, facebook}, firebaseConfig))
+const linkzz = wrapApi(linkApi(admin.database))
+const ooozzz = wrapApi(ozApi({line, facebook}, firebaseConfig))
 
 export {
-  link,
-  oz
+  ooozzz
 }

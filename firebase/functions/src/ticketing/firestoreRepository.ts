@@ -65,7 +65,8 @@ const firestoreRepoFactory = (firestore, collectionName) => {
     has,
     keys,
     query,
-    all
+    all,
+    collection
   }
 }
 

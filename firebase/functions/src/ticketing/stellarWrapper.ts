@@ -22,14 +22,58 @@ const stellarWrapperFactory = (server: StellarSdk.Server, masterSigner: StellarS
     }
   }
 
+  const doBookTicket = (masterAccount, masterAsset, user, event, amount, memo) => {
+    return server.loadAccount(masterAccount.publicKey())
+      .then(account => {
+        const transaction = new StellarSdk.TransactionBuilder(account)
+          .addOperation(StellarSdk.Operation.changeTrust({
+            asset: event.asset,
+            source: user.publicKey()
+          }))
+          .addOperation(StellarSdk.Operation.payment({
+            destination: user.publicKey(),
+            asset: masterAsset,
+            amount: `${amount}`
+          }))
+          .addOperation(StellarSdk.Operation.manageOffer({
+            selling: event.asset,
+            buying: masterAsset,
+            amount: `${amount}`,
+            price: amount,
+            source: event.distributor.publicKey()
+          } as any))
+          .addOperation(StellarSdk.Operation.manageOffer({
+            selling: masterAsset,
+            buying: event.asset,
+            amount: `${amount}`,
+            price: amount,
+            source: user.publicKey()
+          }  as any))
+          .addMemo(safeMemoText(`${memo ? memo : `book:${event.asset.getCode()}`}`))
+          .build()
+
+        transaction.sign(masterSigner)
+        return server.submitTransaction(transaction)
+      })
+      .then((result) => {
+        return result.hash
+      })
+      .catch((error) => {
+        const errMsg = `Something went wrong! (doBookTicket): ${getErrorCode(error)}`
+        console.warn(errMsg)
+        throw new Error(errMsg)
+      })
+  }
+
+
   const makeOffer = (srcKey: StellarSdk.Keypair, sellingAsset: StellarSdk.Asset, buyingAsset: StellarSdk.Asset, sellingAmount: number = 1, buyingPrice: number = 1, memo: string = '') => {
     const options: StellarSdk.Operation.ManageOfferOptions = {
-        selling: sellingAsset,
-        buying: buyingAsset,
-        amount: `${sellingAmount}`,
-        price: buyingPrice,
-        source: srcKey.publicKey()
-      } as StellarSdk.Operation.ManageOfferOptions
+      selling: sellingAsset,
+      buying: buyingAsset,
+      amount: `${sellingAmount}`,
+      price: buyingPrice,
+      source: srcKey.publicKey()
+    } as StellarSdk.Operation.ManageOfferOptions
 
     return server.loadAccount(masterSigner.publicKey())
       .then((account: StellarSdk.Account) => {
@@ -52,7 +96,8 @@ const stellarWrapperFactory = (server: StellarSdk.Server, masterSigner: StellarS
   }
 
   return {
-    makeOffer
+    makeOffer,
+    doBookTicket
   }
 
 }

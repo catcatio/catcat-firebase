@@ -1,6 +1,5 @@
 import { Event } from './Event'
 
-
 const eventStoreFactory = (eventRepository) => {
   let stellarEventCreator = null
 
@@ -37,8 +36,32 @@ const eventStoreFactory = (eventRepository) => {
 
   const getByTitle = async (title) => {
     const events = await eventRepository.query('title', title)
-    return events && events.length > 0 ? Event.fromJSON(events[0]) : null
+    return events && events.length > 0 ? events[0] : null
+  }
 
+  const getUnusedTicket = async (eventId) => {
+    const ticketsCollection = eventRepository.collection.doc(eventId).collection('tickets')
+    const ret = await ticketsCollection.where('bought_tx', '==', '').limit(1).get()
+      .then(x => x.docs.map(doc => doc.data()))
+      .catch(err => {
+        console.log('Error getting documents', err)
+        return []
+      })
+
+    return ret.length > 0 ? ret[0] : null
+  }
+
+  const updateBoughtTicket = async (user, event, ticket, bought_tx) => {
+    const ticketsCollection = eventRepository.collection.doc(event.id).collection('tickets')
+    return await ticketsCollection.doc(ticket.id).update({
+      bought_tx,
+      owner_token: `${event.asset.getCode()}:${event.asset.getIssuer()}`,
+      owner_id: user.id,
+      owned_date: new Date().toISOString()
+    }).then(() => ({
+      ticket_id: ticket.id,
+      event_id: event.id
+    }))
   }
 
   return {
@@ -46,7 +69,9 @@ const eventStoreFactory = (eventRepository) => {
     getOrCreate,
     getAllEvents,
     getByTitle,
-    get
+    get,
+    getUnusedTicket,
+    updateBoughtTicket
   }
 }
 

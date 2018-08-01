@@ -1,11 +1,12 @@
 
 import { User } from './User'
+import { firestore } from 'firebase-admin'
 
 const randNum = (min = 100, max = 1000) => {
   return Math.floor(Math.random() * (max - min) + min)
 }
 
-const userStoreFactory = (userRepository) => {
+const userStoreFactory = (userRepository, tmpUserRepository) => {
   let stellarUserCreator = null
 
   const setUserCreator = (userCreator) => {
@@ -42,6 +43,41 @@ const userStoreFactory = (userRepository) => {
     return users && users.length > 0 ? User.fromJSON(users[0]) : null
   }
 
+  const getByRequstSource = async (provider, id) => {
+    const lowerProvider = provider.toLowerCase()
+    const ret = await userRepository.query(`providers.${lowerProvider}`, id)
+
+    return ret.length > 0 ? ret[0] : null
+  }
+
+  const createUserFromTemp = async (provider, id, masterAsset) => {
+    console.log('createUserFromTemp')
+    const lowerProvider = provider.toLowerCase()
+    const ret = await tmpUserRepository.collection.limit(1).get()
+      .then(x => x.docs.map(d => d.data()))
+
+    const tmpUser = ret.length > 0 ? ret[0] : null
+
+    if (!tmpUser) return null
+
+    const newUser = Object.assign({
+      providers: {
+        [lowerProvider]: id
+      },
+      chains: {
+        [masterAsset.getCode()]: `${masterAsset.getIssuer()}`
+      },
+      bought_tickets: {},
+      burnt_tickets: {},
+      kept_tickets: {}
+    }, tmpUser)
+
+    await userRepository.put(newUser.id, newUser)
+      .then(() => tmpUserRepository.collection.doc(tmpUser.id).delete())
+
+    return newUser
+  }
+
   const getByPreInit = async (preInit) => {
     const users = await userRepository.query('preInit', preInit)
     return users && users.length > 0 ? User.fromJSON(users[0]) : null
@@ -60,16 +96,31 @@ const userStoreFactory = (userRepository) => {
     return userRepository.update(userId, {used: true})
   }
 
+  const updateBoughtTicket = async (userId, event_id, ticket_id) => {
+    await userRepository.update(userId, {
+      [`bought_tickets.${event_id}.${ticket_id}`]: true
+    })
+  }
+
+  const updateBurntTicket = async (owner_id, event_id, ticket_id) => {
+    await userRepository.update(owner_id, {
+      [`bought_tickets.${event_id}.${ticket_id}`]: firestore.FieldValue.delete(),
+      [`burnt_tickets.${event_id}.${ticket_id}`]: true
+    })
+  }
+
 
   return {
     setUserCreator,
     getOrCreate,
     get,
     getByUuid,
-    getByPreInit,
-    clearPreInit,
+    getByRequstSource,
     addMemo,
-    markAsUsed
+    markAsUsed,
+    createUserFromTemp,
+    updateBoughtTicket,
+    updateBurntTicket
   }
 }
 
