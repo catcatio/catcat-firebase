@@ -51,6 +51,18 @@ const eventStoreFactory = (eventRepository) => {
     return ret.length > 0 ? ret[0] : null
   }
 
+  const getTicketById = async (eventId, ticketId) => {
+    const ticketsCollection = eventRepository.collection.doc(eventId).collection('tickets')
+    return await ticketsCollection.doc(ticketId).get()
+      .then(doc => {
+        if (!doc.exists) {
+          return null
+        } else {
+          return doc.data()
+        }
+      })
+  }
+
   const updateBoughtTicket = async (user, event, ticket, bought_tx) => {
     const ticketsCollection = eventRepository.collection.doc(event.id).collection('tickets')
     return await ticketsCollection.doc(ticket.id).update({
@@ -71,6 +83,7 @@ const eventStoreFactory = (eventRepository) => {
     getByTitle,
     get,
     getUnusedTicket,
+    getTicketById,
     updateBoughtTicket
   }
 }

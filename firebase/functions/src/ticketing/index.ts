@@ -103,6 +103,21 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
       return messageSender.sendMessage(from, `Sorry, the '${eventTitle}' event is fully booked out`)
     }
 
+    if (user.bought_tickets && user.bought_tickets[event.id] && (Object.keys(user.bought_tickets[event.id]).length > 0)) {
+      console.error('EVENT_ALREADY_BOOK')
+      let retPromise = messageSender.sendMessage(from, `You already have booked the event`)
+
+      const ticket = await eventStore.getTicketById(event.id, Object.keys(user.bought_tickets[event.id])[0])
+      if (ticket) {
+        console.log(JSON.stringify(ticket, null, 2))
+        const ticketUrl = `${qrcodeservice}${encodeURI(`${ticketconfirmurl}${ticket.bought_tx}`)}`
+        retPromise = retPromise.then(() => messageSender.sendMessage(from, `Here is your ticket`))
+        retPromise = retPromise.then(() => messageSender.sendImage(from, ticketUrl, ticketUrl))
+      }
+
+      return retPromise
+    }
+
     console.log(`user: ${user.id} ${user.publicKey}`)
     const unusedTicket = await eventStore.getUnusedTicket(event.id)
     console.log(`getUnusedTicket ${event.id}: ${Date.now() - startTime}`); startTime = Date.now()
