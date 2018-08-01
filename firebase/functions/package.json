@@ -8,7 +8,8 @@
     "shell": "npm run build && firebase experimental:functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log"
+    "logs": "firebase functions:log",
+    "initToken": "mocha test/initToken.test.ts"
   },
   "main": "lib/index.js",
   "dependencies": {
@@ -20,7 +21,10 @@
     "stellar-sdk": "^0.9.2"
   },
   "devDependencies": {
+    "@types/mocha": "^5.2.5",
     "@types/stellar-sdk": "^0.8.4",
+    "mocha": "^5.2.0",
+    "ts-node": "^7.0.0",
     "tslint": "^5.11.0",
     "typescript": "^2.9.2"
   },

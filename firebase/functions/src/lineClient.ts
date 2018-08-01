@@ -1,6 +1,7 @@
-export const lineClient = ({ linemessageapi, linechannelaccesstoken }) => {
-  const { postJSON } = require('@rabbotio/fetcher')
-  const url = `${linemessageapi}/push`
+export const lineClient = ({ linebotapi, linechannelaccesstoken }) => {
+  const { postJSON, getJSON } = require('@rabbotio/fetcher')
+  const messageApiUrl = `${linebotapi}/message/push`
+  const profileApiUrl = `${linebotapi}/profile`
 
   const headers = {
     'Authorization': `Bearer ${linechannelaccesstoken}`,
@@ -11,7 +12,7 @@ export const lineClient = ({ linemessageapi, linechannelaccesstoken }) => {
       "to": recipientId,
       "messages": messages
     }
-    return postJSON(url, data, { headers })
+    return postJSON(messageApiUrl, data, { headers })
   }
 
   const sendImage = async (recipientId, imageUrl, thumbnailUrl, textMessage = null) => {
@@ -42,9 +43,14 @@ export const lineClient = ({ linemessageapi, linechannelaccesstoken }) => {
     return sendMessages(recipientId, ...messages).catch(err => console.log(err))
   }
 
+  const getProfile = (userId) => {
+    return getJSON(`${profileApiUrl}/${userId}`, {}, { headers }).catch(err => console.log(err))
+  }
+
   return {
     sendImage,
     sendMessage,
-    sendCustomMessages
+    sendCustomMessages,
+    getProfile
   }
 }

@@ -26,7 +26,7 @@ const firebaseConfig = {
   fbaccesstoken: ticketingConfig.fbaccesstoken,
   fburl: ticketingConfig.fburl,
   ticketconfirmurl: ticketingConfig.ticketconfirmurl,
-  linemessageapi: ticketingConfig.linemessageapi,
+  linebotapi: ticketingConfig.linebotapi,
   linechannelaccesstoken: ticketingConfig.linechannelaccesstoken
 }
 
