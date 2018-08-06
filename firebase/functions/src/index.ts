@@ -11,7 +11,7 @@ admin.initializeApp(config().firebase)
 console.log('functions started')
 
 const ticketingConfig = config().ticketing
-const database = admin.database()
+const database = null // admin.database()
 const firestore = admin.firestore()
 firestore.settings({ timestampsInSnapshots: true })
 

@@ -142,7 +142,8 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
       const ticket = await eventStore.getTicketById(event.id, Object.keys(user.bought_tickets[event.id])[0])
       if (ticket) {
         console.log(JSON.stringify(ticket, null, 2))
-        const ticketUrl = `${qrcodeservice}${encodeURI(`${ticketconfirmurl}${ticket.bought_tx}`)}`
+        const ticketUrl = `${qrcodeservice}${encodeURIComponent(`${ticketconfirmurl}${ticket.bought_tx}`)}`
+        console.log(ticketUrl)
         retPromise = retPromise.then(() => messageSender.sendMessage(from, `Here is your ticket`))
         retPromise = retPromise.then(() => messageSender.sendImage(from, ticketUrl, ticketUrl))
       }
@@ -178,7 +179,8 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
     console.log(`updateBoughtTicket ${bought_tx}: ${Date.now() - startTime}`); startTime = Date.now()
 
     const confirmTicketUrl = `${ticketconfirmurl}${bought_tx}`
-    const qrCodeUrl = `${qrcodeservice}${encodeURI(confirmTicketUrl)}`
+    const qrCodeUrl = `${qrcodeservice}${encodeURIComponent(confirmTicketUrl)}`
+    console.log(qrCodeUrl)
 
     await messageSender.sendImage(from, qrCodeUrl, qrCodeUrl)
       .then(() => messageSender.sendMessage(from, `See you at '${eventTitle}'! Do show this QR when attend`))
@@ -243,7 +245,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
       await orgMessageSender.sendImage(orgAddress, profile.pictureUrl, profile.pictureUrl)
     }
 
-    await orgMessageSender.sendCustomMessages(orgAddress, formatter(`Confirm using ticket '${ticket.event_id}'?`, tx))
+    await orgMessageSender.sendCustomMessages(orgAddress, formatter(`Confirm using ticket '${event.title}'?`, tx))
 
     console.log(`total ticket confirm time: ${Date.now() - atBeginning}`); startTime = Date.now()
     console.info('EVENT_TICKET_CONFIRMED')

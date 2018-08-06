@@ -66,7 +66,7 @@ const confirmApiHandler = (facebook, line, config): RequestHandler => {
 
   return (req: Request, res: Response) => {
     const bought_tx = req.params.bought_tx
-    sendDelayResponse(res, `Please wait, Let me check your ticket...`, 500)
+    sendDelayResponse(res, `Please wait, Let me check your ticket...`)
     return ticketingSystem.confirmTicket(bought_tx)
   }
 }
