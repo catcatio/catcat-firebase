@@ -14,14 +14,6 @@ const sendDialogflowTextMessage = (res, text: string, retCode: number = 200) => 
   })
 }
 
-const delay = (ms) => new Promise((resolve) => {
-  setTimeout(resolve, ms)
-})
-
-const sendDelayResponse = (res, message, delayMs = 1000) => {
-  return delay(delayMs).then(() => sendDialogflowTextMessage(res, message))
-}
-
 const apiHandler = (facebook, line, config): RequestHandler => {
   const ticketingSystem = ticketing({ facebook, line }, config)
 
@@ -42,17 +34,17 @@ const apiHandler = (facebook, line, config): RequestHandler => {
     switch (action) {
       case "list.events":
         return ticketingSystem.listEvent(requestParams)
-          .then(() => sendDelayResponse(res, ''))
+          .then(() => sendDialogflowTextMessage(res, ''))
 
       case "events.tickets.book-yes":
         const title = req.body.parameters['event-title']
         return ticketingSystem.bookEvent(requestParams, title)
-          .then(() => sendDelayResponse(res, ''))
+          .then(() => sendDialogflowTextMessage(res, ''))
 
       case "events.tickets.use-yes":
         const tx = req.body.parameters['tx']
         return ticketingSystem.useTicket(tx, requestParams)
-          .then(() => sendDelayResponse(res, ''))
+          .then(() => sendDialogflowTextMessage(res, ''))
 
       default:
         return sendDialogflowTextMessage(res, `Something went wrong with ${action}`)
@@ -66,7 +58,8 @@ const confirmApiHandler = (facebook, line, config): RequestHandler => {
   return (req: Request, res: Response) => {
     const bought_tx = req.params.bought_tx
     return ticketingSystem.confirmTicket(bought_tx)
-      .then(() => sendDelayResponse(res, `Please wait, Let me check your ticket...`))
+      .then(ret => sendDialogflowTextMessage(res, ret))
+      .catch(err => sendDialogflowTextMessage(res, err))
   }
 }
 

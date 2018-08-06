@@ -210,10 +210,16 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
       return Promise.reject('EVENT_NOTFOUND')
     }
 
+    const orgAddress = event.providers.line || event.providers.facebook
+    const provider = event.providers.line ? 'line' : 'facebook'
+    const orgMessageSender = event.providers.line ? line : facebook
+    const formatter = event.providers.line ? lineQuickReplyFormatter : facebookQuickReplyFormatter
+
     const ticket = await eventStore.getTicketById(txAction.eventId, txAction.ticketId)
     console.log(`get ticket ${txAction.eventId} ${txAction.ticketId}: ${Date.now() - startTime}`); startTime = Date.now()
     if (!ticket) {
       console.error('EVENT_TICKET_NOTFOUND')
+      await orgMessageSender.sendMessage(orgAddress, `Ticket not found ${tx}`)
       return Promise.reject('EVENT_TICKET_NOTFOUND')
     }
 
@@ -221,6 +227,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
     console.log(`get owner ${ticket.owner_id}: ${Date.now() - startTime}`); startTime = Date.now()
     if (!owner) {
       console.error('EVENT_OWNER_NOTFOUND')
+      await orgMessageSender.sendMessage(orgAddress, `Owner not found ${tx}`)
       return Promise.reject('EVENT_OWNER_NOTFOUND')
     }
 
@@ -229,16 +236,13 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
 
     if (ticket.burnt_tx) {
       console.error('EVENT_TICKET_USED')
+      await orgMessageSender.sendMessage(orgAddress, `Ticket has been used ${tx}`)
       return Promise.reject('EVENT_TICKET_USED')
     }
 
     const profile = owner.providers.line ? await line.getProfile(owner.providers.line) : null
 
     // post confirm options to organizer
-    const orgAddress = event.providers.line || event.providers.facebook
-    const provider = event.providers.line ? 'line' : 'facebook'
-    const orgMessageSender = event.providers.line ? line : facebook
-    const formatter = event.providers.line ? lineQuickReplyFormatter : facebookQuickReplyFormatter
 
     if (profile) {
       await orgMessageSender.sendMessage(orgAddress, `Attendee (${provider}): ${profile.displayName}`)
@@ -263,6 +267,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
 
   const useTicket = async (tx, orgRequestParams) => {
     const orgMessageSender = orgRequestParams.requestSource === 'LINE' ? line : facebook
+    orgMessageSender.sendMessage(orgRequestParams.from, `Burning ticket ${tx}`)
 
     // Validate the ticket
     const txAction = await stellarWrapper.queryTransactionAction(tx)
@@ -305,7 +310,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
       .then(() => userStore.updateBurntTicket(owner.id, txAction.eventId, txAction.ticketId))
       .then(() => {
         userMessageSender.sendMessage(userAddress, `Welcome to '${event.title}'`)
-        orgMessageSender.sendMessage(orgRequestParams.from, `Brunt Org '${ticket.event_id}'`)
+        orgMessageSender.sendMessage(orgRequestParams.from, `Ticket burnt ${tx}\n\n${burnt_tx}`)
       })
   }
 
