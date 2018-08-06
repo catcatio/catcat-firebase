@@ -34,6 +34,10 @@ const eventStoreFactory = (eventRepository) => {
     return null
   }
 
+  const getById = async (eventCode) => {
+    return await eventRepository.get(eventCode)
+  }
+
   const getByTitle = async (title) => {
     const events = await eventRepository.query('title', title)
     return events && events.length > 0 ? events[0] : null
@@ -76,15 +80,24 @@ const eventStoreFactory = (eventRepository) => {
     }))
   }
 
+  const updateBurntTicket = async (eventId, ticketId, burnt_tx) => {
+    const ticketsCollection = eventRepository.collection.doc(eventId).collection('tickets')
+    return await ticketsCollection.doc(ticketId).update({
+      burnt_tx,
+    })
+  }
+
   return {
     setEventCreator,
     getOrCreate,
     getAllEvents,
     getByTitle,
     get,
+    getById,
     getUnusedTicket,
     getTicketById,
-    updateBoughtTicket
+    updateBoughtTicket,
+    updateBurntTicket
   }
 }
 

@@ -43,6 +43,10 @@ const userStoreFactory = (userRepository, tmpUserRepository) => {
     return users && users.length > 0 ? User.fromJSON(users[0]) : null
   }
 
+  const getUserById = async (userId) => {
+    return await userRepository.get(userId)
+  }
+
   const getByRequstSource = async (provider, id) => {
     const lowerProvider = provider.toLowerCase()
     const ret = await userRepository.query(`providers.${lowerProvider}`, id)
@@ -114,6 +118,7 @@ const userStoreFactory = (userRepository, tmpUserRepository) => {
     setUserCreator,
     getOrCreate,
     get,
+    getUserById,
     getByUuid,
     getByRequstSource,
     addMemo,

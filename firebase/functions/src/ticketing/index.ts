@@ -13,7 +13,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
   const server = new StellarSdk.Server(stellarUrl)
   if (stellarNetwork !== 'live') StellarSdk.Network.useTestNetwork()
 
-  const strllarWrapper = stellarWrapperFactory(server, masterDistributor)
+  const stellarWrapper = stellarWrapperFactory(server, masterDistributor)
   const eventRepository = firestoreRepoFactory(firestore, 'events')
   const eventStore = eventStoreFactory(eventRepository)
   const userRepository = firestoreRepoFactory(firestore, 'users')
@@ -47,10 +47,10 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
           'thumbnailImageUrl': event.coverImage,
           'title': event.title,
           'text': `${limitChar(event.description, 60)}`,
-          "defaultAction": {
-            "type": "uri",
-            "label": "View detail",
-            "uri": event.link
+          'defaultAction': {
+            'type': 'uri',
+            'label': 'View detail',
+            'uri': event.link
           },
           'actions': [
             {
@@ -70,6 +70,38 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
     }
   }
 
+  const lineQuickReplyFormatter = (message, tx) => ({
+    'type': 'text',
+    'text': message,
+    'quickReply': {
+      'items': [
+        {
+          'type': 'action',
+          'action': {
+            'type': 'message',
+            'label': 'Confirm',
+            'text': `use ticket ${tx}`
+          }
+        },
+        {
+          'type': 'action',
+          'action': {
+            'type': 'message',
+            'label': 'Cancel',
+            'text': 'Cancel'
+          }
+        }
+      ]
+    }
+  })
+
+  const facebookQuickReplyFormatter = (message, tx) => {
+    const text = new fbTemplate.Text(message);
+    return text
+      .addQuickReply('Confirm', `use ticket ${tx}`)
+      .addQuickReply('Cancel xx', `Cancel`)
+      .get();
+  }
   const listEvent = async ({ requestSource, from }) => {
     const events = await eventStore.getAllEvents()
     const formatter = requestSource === 'LINE' ? lineEventListFormatter : facebookEventListFormatter
@@ -132,7 +164,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
     tmpEvent.asset = new StellarSdk.Asset(event.id, event.issuer)
     tmpEvent.distributor = StellarSdk.Keypair.fromPublicKey(event.distributor)
 
-    const bought_tx = await strllarWrapper.doBookTicket(masterDistributor, masterAsset, userKey, tmpEvent, 1, `B:${tmpEvent.asset.getCode()}:${unusedTicket.id}`)
+    const bought_tx = await stellarWrapper.doBookTicket(masterDistributor, masterAsset, userKey, tmpEvent, 1, `B:${tmpEvent.asset.getCode()}:${unusedTicket.id}`)
       .catch(() => null)
     console.log(`doBookTicket ${event.id}: ${Date.now() - startTime}`); startTime = Date.now()
 
@@ -157,11 +189,122 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
   }
 
   const confirmTicket = async (tx) => {
+    console.log(`start confirm ticket`)
+    const atBeginning = Date.now()
+    let startTime = atBeginning
+
     // Validate the ticket
+    const txAction = await stellarWrapper.queryTransactionAction(tx)
+    console.log(`get transaction by id: ${Date.now() - startTime}`); startTime = Date.now()
+    if (!txAction || txAction.action !== 'B') {
+      console.error('EVENT_TX_NOTFOUND')
+      return Promise.reject('EVENT_TX_NOTFOUND')
+    }
+
+    const event = await eventStore.getById(txAction.eventId)
+    console.log(`get event by id: ${Date.now() - startTime}`); startTime = Date.now()
+    if (!event) {
+      console.error('EVENT_NOTFOUND')
+      return Promise.reject('EVENT_NOTFOUND')
+    }
+
+    const ticket = await eventStore.getTicketById(txAction.eventId, txAction.ticketId)
+    console.log(`get ticket ${txAction.eventId} ${txAction.ticketId}: ${Date.now() - startTime}`); startTime = Date.now()
+    if (!ticket) {
+      console.error('EVENT_TICKET_NOTFOUND')
+      return Promise.reject('EVENT_TICKET_NOTFOUND')
+    }
+
+    const owner = await userStore.getUserById(ticket.owner_id)
+    console.log(`get owner ${ticket.owner_id}: ${Date.now() - startTime}`); startTime = Date.now()
+    if (!owner) {
+      console.error('EVENT_OWNER_NOTFOUND')
+      return Promise.reject('EVENT_OWNER_NOTFOUND')
+    }
+
+    // const messageSender = owner.providers.line ? line : facebook
+    // const userAddress = owner.providers.line || owner.providers.facebook
+
+    if (ticket.burnt_tx) {
+      console.error('EVENT_TICKET_USED')
+      return Promise.reject('EVENT_TICKET_USED')
+    }
+
+    const profile = owner.providers.line ? await line.getProfile(owner.providers.line) : null
+
+    // post confirm options to organizer
+    const orgAddress = event.providers.line || event.providers.facebook
+    const provider = event.providers.line ? 'line' : 'facebook'
+    const orgMessageSender = event.providers.line ? line : facebook
+    const formatter = event.providers.line ? lineQuickReplyFormatter : facebookQuickReplyFormatter
+
+    if (profile) {
+      await orgMessageSender.sendMessage(orgAddress, `Attendee (${provider}): ${profile.displayName}`)
+      await orgMessageSender.sendImage(orgAddress, profile.pictureUrl, profile.pictureUrl)
+    }
+
+    await orgMessageSender.sendCustomMessages(orgAddress, formatter(`Confirm using ticket '${ticket.event_id}'?`, tx))
+
+    console.log(`total ticket confirm time: ${Date.now() - atBeginning}`); startTime = Date.now()
+    console.info('EVENT_TICKET_CONFIRMED')
+    return 'EVENT_TICKET_CONFIRMED'
   }
 
-  const useTicket = async (tx) => {
-    // Burn the ticket
+  const parseEventToken = (eventToken) => {
+    if (!eventToken) return null
+
+    const chunks = eventToken.split(':')
+    if (chunks.length !== 2) return null
+
+    return new StellarSdk.Asset(chunks[0], chunks[1])
+  }
+
+  const useTicket = async (tx, orgRequestParams) => {
+    const orgMessageSender = orgRequestParams.requestSource === 'LINE' ? line : facebook
+
+    // Validate the ticket
+    const txAction = await stellarWrapper.queryTransactionAction(tx)
+    if (!txAction || txAction.action !== 'B') {
+      console.error('EVENT_TX_NOTFOUND')
+      return orgMessageSender.sendMessage(orgRequestParams.from, 'Tx not found')
+    }
+
+    const event = await eventStore.getById(txAction.eventId)
+    if (!event) {
+      console.error('EVENT_NOTFOUND')
+      return orgMessageSender.sendMessage(orgRequestParams.from, 'Event not found')
+    }
+
+    const ticket = await eventStore.getTicketById(txAction.eventId, txAction.ticketId)
+    if (!ticket) {
+      console.error('EVENT_TICKET_NOTFOUND')
+      return orgMessageSender.sendMessage(orgRequestParams.from, 'Ticket not found')
+    }
+
+    const owner = await userStore.getUserById(ticket.owner_id)
+    if (!owner) {
+      console.error('EVENT_OWNER_NOTFOUND')
+      return orgMessageSender.sendMessage(orgRequestParams.from, 'Owner not found')
+    }
+
+    const userMessageSender = owner.providers.line ? line : facebook
+    const userAddress = owner.providers.line || owner.providers.facebook
+
+    if (ticket.burnt_tx) {
+      console.error('EVENT_TICKET_USED')
+      return orgMessageSender.sendMessage(orgRequestParams.from, 'The ticket is used')
+    }
+
+    const asset = parseEventToken(ticket.event_token)
+    const userKey = StellarSdk.Keypair.fromPublicKey(owner.publicKey)
+    const burnt_tx = await stellarWrapper.transfer(userKey, asset.getIssuer(), 1, asset, `C:${txAction.eventId}:${txAction.ticketId}`)
+
+    return eventStore.updateBurntTicket(txAction.eventId, txAction.ticketId, burnt_tx)
+      .then(() => userStore.updateBurntTicket(owner.id, txAction.eventId, txAction.ticketId))
+      .then(() => {
+        userMessageSender.sendMessage(userAddress, `Welcome to '${event.title}'`)
+        orgMessageSender.sendMessage(orgRequestParams.from, `Brunt Org '${ticket.event_id}'`)
+      })
   }
 
   return {

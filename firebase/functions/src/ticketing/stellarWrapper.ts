@@ -48,7 +48,7 @@ const stellarWrapperFactory = (server: StellarSdk.Server, masterSigner: StellarS
             amount: `${amount}`,
             price: amount,
             source: user.publicKey()
-          }  as any))
+          } as any))
           .addMemo(safeMemoText(`${memo ? memo : `book:${event.asset.getCode()}`}`))
           .build()
 
@@ -95,9 +95,65 @@ const stellarWrapperFactory = (server: StellarSdk.Server, masterSigner: StellarS
       })
   }
 
+  const parseTxAction = (memoText) => {
+    if (!memoText) return null
+
+    const chunks = memoText.split(':')
+    if (chunks.length !== 3) return null
+
+    return { action: chunks[0], eventId: chunks[1], ticketId: chunks[2] }
+  }
+
+  const queryTransactionMemo = (txId) => {
+    return server.transactions()
+      .transaction(txId)
+      .call()
+      .then((result: any) =>
+        result.memo
+      )
+  }
+
+  const queryTransactionAction = async (tx) => {
+    const memo = await queryTransactionMemo(tx)
+      .catch(() => '')
+
+    return parseTxAction(memo)
+  }
+
+  const transfer = (srcKey, desPublicKey, amount, asset = StellarSdk.Asset.native(), memo = null) => {
+    return server.loadAccount(desPublicKey)
+      .catch(err => {
+        throw err
+      })
+      .then(() => server.loadAccount(srcKey.publicKey()))
+      .then((account) => {
+        const transaction = new StellarSdk.TransactionBuilder(account)
+          .addOperation(StellarSdk.Operation.payment({
+            destination: desPublicKey,
+            asset: asset,
+            amount: `${amount}`
+          }))
+          .addMemo(safeMemoText(memo ? memo : `Tx: ${Date.now()}`))
+          .build()
+        transaction.sign(masterSigner || srcKey)
+        return server.submitTransaction(transaction)
+      })
+      .then((result) => {
+        // console.log(`Success! Results (transfer): ${result._links.transaction.href}`)
+        return result.hash
+      })
+      .catch((error) => {
+        const errMsg = `Something went wrong! (transfer): ${getErrorCode(error)}`
+        console.warn(errMsg)
+        throw new Error(errMsg)
+      })
+  }
+
   return {
     makeOffer,
-    doBookTicket
+    doBookTicket,
+    queryTransactionAction,
+    transfer
   }
 
 }

@@ -22,7 +22,7 @@ const sendDelayResponse = (res, message, delayMs = 1000) => {
   return delay(delayMs).then(() => sendDialogflowTextMessage(res, message))
 }
 
-export const apiHandler = (facebook, line, config) => {
+const apiHandler = (facebook, line, config): RequestHandler => {
   const ticketingSystem = ticketing({ facebook, line }, config)
 
   return (req: Request, res: Response) => {
@@ -42,22 +42,39 @@ export const apiHandler = (facebook, line, config) => {
     switch (action) {
       case "list.events":
         sendDelayResponse(res, '')
-
         return ticketingSystem.listEvent(requestParams)
+
       case "events.tickets.book-yes":
         const title = req.body.parameters['event-title']
 
         sendDelayResponse(res, `Hold on, we're now booking ${title} for you...`)
         return ticketingSystem.bookEvent(requestParams, title)
+
+      case "events.tickets.use-yes":
+        const tx = req.body.parameters['tx']
+        sendDelayResponse(res, '')
+        return ticketingSystem.useTicket(tx, requestParams)
+
       default:
         return sendDialogflowTextMessage(res, `Something went wrong with ${action}`)
     }
   }
 }
 
-export const ozApi = ({ facebook, line }, config) => {
+const confirmApiHandler = (facebook, line, config): RequestHandler => {
+  const ticketingSystem = ticketing({ facebook, line }, config)
+
+  return (req: Request, res: Response) => {
+    const bought_tx = req.params.bought_tx
+    sendDelayResponse(res, `Please wait, Let me check your ticket...`, 500)
+    return ticketingSystem.confirmTicket(bought_tx)
+  }
+}
+
+export const ozApi = ({ facebook, line }, config) : Express => {
   const api = express()
   api.use(Cors({ origin: true }))
   api.post('/', apiHandler(facebook, line, config))
+  api.get('/v1/confirm/:bought_tx', confirmApiHandler(facebook, line, config))
   return api
 }
