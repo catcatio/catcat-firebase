@@ -41,19 +41,18 @@ const apiHandler = (facebook, line, config): RequestHandler => {
 
     switch (action) {
       case "list.events":
-        sendDelayResponse(res, '')
         return ticketingSystem.listEvent(requestParams)
+          .then(() => sendDelayResponse(res, ''))
 
       case "events.tickets.book-yes":
         const title = req.body.parameters['event-title']
-
-        sendDelayResponse(res, `Hold on, we're now booking ${title} for you...`)
         return ticketingSystem.bookEvent(requestParams, title)
+          .then(() => sendDelayResponse(res, ''))
 
       case "events.tickets.use-yes":
         const tx = req.body.parameters['tx']
-        sendDelayResponse(res, '')
         return ticketingSystem.useTicket(tx, requestParams)
+          .then(() => sendDelayResponse(res, ''))
 
       default:
         return sendDialogflowTextMessage(res, `Something went wrong with ${action}`)
@@ -66,8 +65,8 @@ const confirmApiHandler = (facebook, line, config): RequestHandler => {
 
   return (req: Request, res: Response) => {
     const bought_tx = req.params.bought_tx
-    sendDelayResponse(res, `Please wait, Let me check your ticket...`)
     return ticketingSystem.confirmTicket(bought_tx)
+      .then(() => sendDelayResponse(res, `Please wait, Let me check your ticket...`))
   }
 }
 

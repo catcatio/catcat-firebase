@@ -8,7 +8,7 @@ import { lineClient } from './lineClient'
 
 admin.initializeApp(config().firebase)
 
-console.log('functions started')
+console.log(`functions started: ${process.version}`)
 
 const ticketingConfig = config().ticketing
 const database = null // admin.database()

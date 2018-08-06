@@ -124,6 +124,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
     }
 
     console.log(`event: ${event.id}`)
+    messageSender.sendMessage(from, `Hold on, we're now booking ${eventTitle} for you...`)
 
     let user = await userStore.getByRequstSource(requestSource, from)
     user = user || await userStore.createUserFromTemp(requestSource, from, masterAsset)
@@ -143,7 +144,6 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
       if (ticket) {
         console.log(JSON.stringify(ticket, null, 2))
         const ticketUrl = `${qrcodeservice}${encodeURIComponent(`${ticketconfirmurl}${ticket.bought_tx}`)}`
-        console.log(ticketUrl)
         retPromise = retPromise.then(() => messageSender.sendMessage(from, `Here is your ticket`))
         retPromise = retPromise.then(() => messageSender.sendImage(from, ticketUrl, ticketUrl))
       }
