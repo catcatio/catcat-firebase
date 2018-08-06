@@ -71,9 +71,10 @@ const confirmApiHandler = (facebook, line, config): RequestHandler => {
   }
 }
 
-export const ozApi = ({ facebook, line }, config) : Express => {
+export const ozApi = ({ facebook, line }, config): Express => {
   const api = express()
   api.use(Cors({ origin: true }))
+  api.use(require('./fbdummy').fbdummy) // use static response for facebook, until app review process complete
   api.post('/', apiHandler(facebook, line, config))
   api.get('/v1/confirm/:bought_tx', confirmApiHandler(facebook, line, config))
   return api

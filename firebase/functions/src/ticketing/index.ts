@@ -99,7 +99,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
     const text = new fbTemplate.Text(message);
     return text
       .addQuickReply('Confirm', `use ticket ${tx}`)
-      .addQuickReply('Cancel xx', `Cancel`)
+      .addQuickReply('Cancel', `cancel`)
       .get();
   }
   const listEvent = async ({ requestSource, from }) => {
