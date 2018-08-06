@@ -1,17 +1,17 @@
-import {config, Request, Response, https} from 'firebase-functions';
-import * as Cors from 'cors'
+import { config, Request, Response, https } from 'firebase-functions';
+
 import * as admin from 'firebase-admin'
 
-import {linkApi, ozApi} from './api'
+import { linkApi, ozApi } from './api'
 import { facebookClient } from './facebookClient'
 import { lineClient } from './lineClient'
 
-const cors = Cors({ origin: true })
 admin.initializeApp(config().firebase)
 
 console.log('functions started')
 
 const ticketingConfig = config().ticketing
+const database = admin.database()
 const firestore = admin.firestore()
 firestore.settings({ timestampsInSnapshots: true })
 
@@ -33,12 +33,17 @@ const firebaseConfig = {
 const line = lineClient(firebaseConfig)
 const facebook = facebookClient(firebaseConfig)
 
-const wrapApi = (api: (req: Request, res: Response) => any) =>
-  https.onRequest((req: Request, res: Response) =>
-    cors(req, res, () => api(req, res)))
+const wrapApi = (api: (request: Request, response: Response) => any) =>
+  https.onRequest((request: Request, response: Response) => {
+    if (!request.path) {
+      request.url = `/${request.url}` // prepend '/' to keep query params if any
+    }
+    return api(request, response)
+  })
 
-const link = wrapApi(linkApi(admin.database))
-const oz = wrapApi(ozApi({line, facebook}, firebaseConfig))
+
+const link = wrapApi(linkApi(database))
+const oz = wrapApi(ozApi({ line, facebook }, firebaseConfig))
 
 export {
   link,

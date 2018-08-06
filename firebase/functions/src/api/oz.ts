@@ -1,4 +1,7 @@
-import { Request, Response } from 'firebase-functions';
+import * as express from 'express'
+// tslint:disable-next-line:no-duplicate-imports
+import { Express, Request, Response, RequestHandler } from 'express'
+import * as Cors from 'cors'
 import { ticketing } from '../ticketing'
 
 const sendDialogflowTextMessage = (res, text: string, retCode: number = 200) => {
@@ -19,7 +22,7 @@ const sendDelayResponse = (res, message, delayMs = 1000) => {
   return delay(delayMs).then(() => sendDialogflowTextMessage(res, message))
 }
 
-export const ozApi = ({ facebook, line }, config) => {
+export const apiHandler = (facebook, line, config) => {
   const ticketingSystem = ticketing({ facebook, line }, config)
 
   return (req: Request, res: Response) => {
@@ -33,6 +36,8 @@ export const ozApi = ({ facebook, line }, config) => {
       requestSource,
       from: requestSource === 'LINE' ? userId : senderId
     }
+
+    if (!requestParams.requestSource || !requestParams.from) return sendDialogflowTextMessage(res, 'No invalid request...')
 
     switch (action) {
       case "list.events":
@@ -48,4 +53,11 @@ export const ozApi = ({ facebook, line }, config) => {
         return sendDialogflowTextMessage(res, `Something went wrong with ${action}`)
     }
   }
+}
+
+export const ozApi = ({ facebook, line }, config) => {
+  const api = express()
+  api.use(Cors({ origin: true }))
+  api.post('/', apiHandler(facebook, line, config))
+  return api
 }

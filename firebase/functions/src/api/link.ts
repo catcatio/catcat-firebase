@@ -1,6 +1,10 @@
-import { Request, Response } from 'firebase-functions';
+import * as express from 'express'
+// tslint:disable-next-line:no-duplicate-imports
+import { Express, Request, Response, RequestHandler } from 'express'
+import * as Cors from 'cors'
+import { database } from 'firebase-admin'
 
-export const linkApi = (database) => (req: Request, res: Response) => {
+const apiHandler = (db: database.Database): RequestHandler => (req: Request, res: Response) => {
   const sendOKAt = (data: any, error?: any) =>
     res.status(200).send({
       data,
@@ -9,7 +13,7 @@ export const linkApi = (database) => (req: Request, res: Response) => {
     })
 
   const willLink = async (provider, id, publicKey) => {
-    const ref = database.ref(`/${provider}`)
+    const ref = db.ref(`/${provider}`)
     await ref.child(id).set(publicKey)
     return { id }
   }
@@ -24,4 +28,11 @@ export const linkApi = (database) => (req: Request, res: Response) => {
       .then(payload => sendOKAt(payload))
       .catch(err => sendOKAt(null, err))
   }
+}
+
+export const linkApi = (db: database.Database): Express => {
+  const api = express()
+  api.use(Cors({ origin: true }))
+  api.post('/', apiHandler(db))
+  return api
 }
