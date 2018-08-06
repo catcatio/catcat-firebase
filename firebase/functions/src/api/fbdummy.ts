@@ -1,11 +1,6 @@
-
 import { Request, Response, NextFunction, RequestHandler } from 'express'
 
-export const fbdummy: RequestHandler = (request: Request, response: Response, nextFunction: NextFunction) => {
-  if (request.body && request.body.requestSource !== "FACEBOOK") {
-    return nextFunction()
-  }
-
+const apiHandler = (request: Request, response: Response) => {
   const { action } = request.body
 
   switch (action) {
@@ -89,6 +84,14 @@ export const fbdummy: RequestHandler = (request: Request, response: Response, ne
         }
       }
     })
+  }
+}
+
+export const fbdummy: RequestHandler = (request: Request, response: Response, nextFunction: NextFunction) => {
+  if (request.body && request.body.requestSource === "FACEBOOK") {
+    apiHandler(request, response)
+  } else {
+    nextFunction()
   }
 }
 
