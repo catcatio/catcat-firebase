@@ -86,6 +86,15 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
         {
           'type': 'action',
           'action': {
+            'type': 'postback',
+            'label': 'Confirm',
+            'displayText': 'Sure, let\'s do it',
+            'data': `use ticket ${tx}`
+          }
+        },
+        {
+          'type': 'action',
+          'action': {
             'type': 'message',
             'label': 'Cancel',
             'text': 'Cancel'
@@ -138,7 +147,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
 
     if (user.bought_tickets && user.bought_tickets[event.id] && (Object.keys(user.bought_tickets[event.id]).length > 0)) {
       console.error('EVENT_ALREADY_BOOK')
-      let retPromise = messageSender.sendMessage(from, `You already have booked the event`)
+      let retPromise = messageSender.sendMessage(from, `You have already booked the event`)
 
       const ticket = await eventStore.getTicketById(event.id, Object.keys(user.bought_tickets[event.id])[0])
       if (ticket) {

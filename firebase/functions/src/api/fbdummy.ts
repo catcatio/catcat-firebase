@@ -76,7 +76,17 @@ const apiHandler = (request: Request, response: Response) => {
           }
         ]
     })
-    default: return ({
+    case "events.tickets.use-yes": return response.status(200).send({
+      "dialogflow":
+      {
+        "text": {
+          "text": [
+            "Welcome to the event"
+          ]
+        }
+      }
+    })
+    default: return response.status(200).send({
       "dialogflow":
       {
         "text": {
