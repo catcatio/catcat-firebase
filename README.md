@@ -28,6 +28,20 @@ npm run deploy
 
 ## TODO
 ### Before event
+#### Welcome process
+- [ ] User will see welcome message via `LINE`.
+  > We can determine user linked with provider via `provider.line_${line_id}`
+  ```
+  How can I help you?
+  ```
+  `Show events` `Nothing`
+
+#### List process
+- [ ] User will see `ticket_brought/ticket_max` beside `JOIN` button.
+  ```
+  JOIN (10/100)
+  ```
+
 #### Book process
 - [ ] User will see `QR` ticket with user name after book in middle center.
 - [ ] User will see `QR` ticket with user profile picture after book in middle center.
