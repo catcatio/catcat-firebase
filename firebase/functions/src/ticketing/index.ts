@@ -187,8 +187,9 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
     await userStore.updateBoughtTicket(user.id, tmpEvent.id, unusedTicket.id)
     console.log(`updateBoughtTicket ${bought_tx}: ${Date.now() - startTime}`); startTime = Date.now()
 
-    const confirmTicketUrl = `${ticketconfirmurl}${bought_tx}`
-    const qrCodeUrl = `${qrcodeservice}${encodeURIComponent(confirmTicketUrl)}`
+    // const confirmTicketUrl = `${ticketconfirmurl}${bought_tx}`
+    // const qrCodeUrl = `${qrcodeservice}${encodeURIComponent(confirmTicketUrl)}`
+    const qrCodeUrl = `${qrcodeservice}/${tmpEvent.id}/${unusedTicket.id}/${user.id}/${bought_tx}`
     console.log(qrCodeUrl)
 
     await messageSender.sendImage(from, qrCodeUrl, qrCodeUrl)
@@ -252,8 +253,8 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
     const profile = owner.providers.line ? await line.getProfile(owner.providers.line) : null
 
     // post confirm options to organizer
-
     if (profile) {
+      console.log(profile.pictureUrl)
       await orgMessageSender.sendMessage(orgAddress, `Attendee (${provider}): ${profile.displayName}`)
       await orgMessageSender.sendImage(orgAddress, profile.pictureUrl, profile.pictureUrl)
     }
@@ -323,10 +324,33 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
       })
   }
 
+  const getTicketParams = async ({eventId, ticketId, ownerId, tx}) => {
+    console.log(`start get ticket params`)
+    const atBeginning = Date.now()
+    let startTime = atBeginning
+
+    const owner = await userStore.getUserById(ownerId)
+    console.log(`get owner info: ${Date.now() - startTime}`); startTime = Date.now()
+
+    const profile = owner.providers.line ? (await line.getProfile(owner.providers.line)) : {}
+    console.log(`get user profile: ${Date.now() - startTime}`); startTime = Date.now()
+    console.log(`total ticket confirm time: ${Date.now() - atBeginning}`);
+
+    const confirmTicketUrl = `${ticketconfirmurl}${tx}`
+    return {
+      'text': confirmTicketUrl,
+      'logoUrl': profile.pictureUrl || 'empty',
+      'logoText': profile.displayName || 'anonymous',
+      'maskTextLine1': eventId.substr(0, 4),
+      'maskTextLine2': eventId.substr(5, 10)
+    }
+  }
+
   return {
     listEvent,
     bookEvent,
     confirmTicket,
-    useTicket
+    useTicket,
+    getTicketParams
   }
 }

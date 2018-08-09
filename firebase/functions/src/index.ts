@@ -22,7 +22,7 @@ const firebaseConfig = {
   masterAssetCode: ticketingConfig.masterassetcode,
   masterIssuerKey: ticketingConfig.masterissuerkey,
   masterDistributorKey: ticketingConfig.masterdistributorkey,
-  qrcodeservice: ticketingConfig.qrcodeservice,
+  qrcodeservice: ticketingConfig.qrcodeservice2,
   fbaccesstoken: ticketingConfig.fbaccesstoken,
   fburl: ticketingConfig.fburl,
   ticketconfirmurl: ticketingConfig.ticketconfirmurl,

@@ -7,10 +7,10 @@ const firestoreRepoFactory = (firestore, collectionName) => {
   }
 
   const get = (key) => {
-    const startTime = Date.now()
+    // const startTime = Date.now()
     return collection.doc(key).get()
       .then(doc => {
-        console.log(`firebase get: ${Date.now() - startTime}`)
+        // console.log(`firebase get: ${Date.now() - startTime}`)
         if (!doc.exists) {
           return null
         } else {
