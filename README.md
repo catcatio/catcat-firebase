@@ -43,10 +43,10 @@ npm run deploy
   ```
 
 #### Book process
-- [ ] User will see `QR` ticket with user name after book in middle center.
-- [ ] User will see `QR` ticket with user profile picture after book in middle center.
-- [ ] User will see `QR` ticket with event token code as mask at top.
-- [ ] User will see `QR` ticket with event bump code as mask at bottom.
+- [x] User will see `QR` ticket with user name after book in middle center.
+- [x] User will see `QR` ticket with user profile picture after book in middle center.
+- [x] User will see `QR` ticket with event token code as mask at top.
+- [x] User will see `QR` ticket with event bump code as mask at bottom.
 
 #### At event
 #### Confirm process
