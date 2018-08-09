@@ -1,4 +1,4 @@
-export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNetwork, masterAssetCode, masterIssuerKey, masterDistributorKey, qrcodeservice, ticketconfirmurl }) => {
+export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNetwork, masterAssetCode, masterIssuerKey, masterDistributorKey, qrcodeservice, ticketconfirmurl, imageresizeservice }) => {
   const { fbTemplate } = require('claudia-bot-builder')
   const StellarSdk = require('stellar-sdk')
   const firestoreRepoFactory = require('./firestoreRepository').default
@@ -70,6 +70,23 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
     }
   }
 
+  const lineWelcomeMessageFormatter = (message, ...options) => {
+    return {
+      'type': 'text',
+      'text': message,
+      'quickReply': {
+        'items': options.map(op => ({
+          'type': 'action',
+          'action': {
+            'type': 'message',
+            'label': op,
+            'text': op
+          }
+        }))
+      }
+    }
+  }
+
   const lineQuickReplyFormatter = (message, tx) => ({
     'type': 'text',
     'text': message,
@@ -86,15 +103,6 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
         {
           'type': 'action',
           'action': {
-            'type': 'postback',
-            'label': 'Confirm',
-            'displayText': 'Sure, let\'s do it',
-            'data': `use ticket ${tx}`
-          }
-        },
-        {
-          'type': 'action',
-          'action': {
             'type': 'message',
             'label': 'Cancel',
             'text': 'Cancel'
@@ -103,6 +111,39 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
       ]
     }
   })
+
+  const lineConfirmTemplateFormatter = (imageUrl, ownerDisplayName, ownerProvider, eventName, tx) => {
+    return {
+      'type': 'template',
+      'altText': `Confirm using ticket ${ownerDisplayName}`,
+      'template': {
+        'type': 'buttons',
+        'thumbnailImageUrl': `${imageresizeservice}${encodeURIComponent(imageUrl)}`,
+        'imageAspectRatio': 'rectangle',
+        'imageSize': 'cover',
+        'imageBackgroundColor': '#FFFFFF',
+        'title': `${ownerDisplayName} (Provider: ${ownerProvider})`,
+        'text': `Enter event ${eventName}?`,
+        // 'defaultAction': {
+        //   'type': 'uri',
+        //   'label': 'View detail',
+        //   'uri': 'http://example.com/page/123'
+        // },
+        'actions': [
+          {
+            'type': 'message',
+            'label': 'Confirm',
+            'text': `use ticket ${tx}`
+          },
+          {
+            'type': 'message',
+            'label': 'Cancel',
+            'text': 'Cancel'
+          }
+        ]
+      }
+    }
+  }
 
   const facebookQuickReplyFormatter = (message, tx) => {
     const text = new fbTemplate.Text(message);
@@ -152,7 +193,8 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
       const ticket = await eventStore.getTicketById(event.id, Object.keys(user.bought_tickets[event.id])[0])
       if (ticket) {
         console.log(JSON.stringify(ticket, null, 2))
-        const ticketUrl = `${qrcodeservice}${encodeURIComponent(`${ticketconfirmurl}${ticket.bought_tx}`)}`
+        // const ticketUrl = `${qrcodeservice}${encodeURIComponent(`${ticketconfirmurl}${ticket.bought_tx}`)}`
+        const ticketUrl = `${qrcodeservice}/${event.id}/${ticket.id}/${user.id}/${ticket.bought_tx}`
         retPromise = retPromise.then(() => messageSender.sendMessage(from, `Here is your ticket`))
         retPromise = retPromise.then(() => messageSender.sendImage(from, ticketUrl, ticketUrl))
       }
@@ -251,15 +293,17 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
     }
 
     const profile = owner.providers.line ? await line.getProfile(owner.providers.line) : null
-
+    const ownerProvider = owner.providers.line ? 'line' : 'facebook'
     // post confirm options to organizer
     if (profile) {
       console.log(profile.pictureUrl)
-      await orgMessageSender.sendMessage(orgAddress, `Attendee (${provider}): ${profile.displayName}`)
-      await orgMessageSender.sendImage(orgAddress, profile.pictureUrl, profile.pictureUrl)
+      const message = lineConfirmTemplateFormatter(profile.pictureUrl, profile.displayName, ownerProvider, event.title, tx)
+      await orgMessageSender.sendCustomMessages(orgAddress, message)
+      // await orgMessageSender.sendMessage(orgAddress, `Attendee (${provider}): ${profile.displayName}`)
+      // await orgMessageSender.sendImage(orgAddress, profile.pictureUrl, profile.pictureUrl)
     }
 
-    await orgMessageSender.sendCustomMessages(orgAddress, formatter(`Confirm using ticket '${event.title}'?`, tx))
+    // await orgMessageSender.sendCustomMessages(orgAddress, formatter(`Confirm using ticket '${event.title}'?`, tx))
 
     console.log(`total ticket confirm time: ${Date.now() - atBeginning}`); startTime = Date.now()
     console.info('EVENT_TICKET_CONFIRMED')
@@ -309,7 +353,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
 
     if (ticket.burnt_tx) {
       console.error('EVENT_TICKET_USED')
-      return orgMessageSender.sendMessage(orgRequestParams.from, 'The ticket is used')
+      return orgMessageSender.sendMessage(orgRequestParams.from, 'This thicket has been used')
     }
 
     const asset = parseEventToken(ticket.event_token)
@@ -324,7 +368,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
       })
   }
 
-  const getTicketParams = async ({eventId, ticketId, ownerId, tx}) => {
+  const getTicketParams = async ({ eventId, ticketId, ownerId, tx }) => {
     console.log(`start get ticket params`)
     const atBeginning = Date.now()
     let startTime = atBeginning
@@ -346,11 +390,20 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
     }
   }
 
+  const sendWelcomeMessage = async ({ requestSource, from }) => {
+    if (requestSource !== 'LINE') {
+      return
+    }
+
+    return line.sendCustomMessages(from, lineWelcomeMessageFormatter('Hi there, what can I help you?', 'Show Events', 'Nothing'))
+  }
+
   return {
     listEvent,
     bookEvent,
     confirmTicket,
     useTicket,
-    getTicketParams
+    getTicketParams,
+    sendWelcomeMessage
   }
 }

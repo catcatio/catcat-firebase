@@ -45,6 +45,10 @@ const apiHandler = (ticketingSystem): RequestHandler => {
         return ticketingSystem.useTicket(tx, requestParams)
           .then(() => sendDialogflowTextMessage(res, ''))
 
+      case 'user.welcome':
+        return ticketingSystem.sendWelcomeMessage(requestParams)
+          .then(() => sendDialogflowTextMessage(res, ''))
+
       default:
         return sendDialogflowTextMessage(res, `Something went wrong with ${action}`)
     }

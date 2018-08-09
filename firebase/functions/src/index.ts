@@ -2,7 +2,7 @@ import { config, Request, Response, https } from 'firebase-functions';
 
 import * as admin from 'firebase-admin'
 
-import { linkApi, ozApi } from './api'
+import { linkApi, ozApi, imgApi } from './api'
 import { facebookClient } from './facebookClient'
 import { lineClient } from './lineClient'
 
@@ -24,6 +24,7 @@ const firebaseConfig = {
   masterDistributorKey: ticketingConfig.masterdistributorkey,
   qrcodeservice: ticketingConfig.qrcodeservice2,
   fbaccesstoken: ticketingConfig.fbaccesstoken,
+  imageresizeservice: ticketingConfig.imageresizeservice,
   fburl: ticketingConfig.fburl,
   ticketconfirmurl: ticketingConfig.ticketconfirmurl,
   linebotapi: ticketingConfig.linebotapi,
@@ -41,11 +42,12 @@ const wrapApi = (api: (request: Request, response: Response) => any) =>
     return api(request, response)
   })
 
-
 const link = wrapApi(linkApi(database))
 const oz = wrapApi(ozApi({ line, facebook }, firebaseConfig))
+const img = wrapApi(imgApi())
 
 export {
   link,
-  oz
+  oz,
+  img
 }

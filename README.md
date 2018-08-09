@@ -50,13 +50,13 @@ npm run deploy
 
 #### At event
 #### Confirm process
-- [ ] Creator will see `Card` with user name, user profile, event title, event description while doing confirm.
-- [ ] Creator can `confirm` via `Card`.
+- [x] Creator will see `Card` with user name, user profile, event title, event description while doing confirm.
+- [x] Creator can `confirm` via `Card`.
 
 #### After event
-- [ ] Creator will able to command `burn` with confirmation 
+- [ ] Creator will able to command `burn` with confirmation
   ```
-  Burn all unused tickets?` 
+  Burn all unused tickets?`
   ```
   `OK` `Cancel`
 - [ ] User will see `ending message`
