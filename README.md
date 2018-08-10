@@ -6,9 +6,17 @@ Firebase related
 
 - create `serviceAccountKey.json` under `firebase`
 
-```shell
+```bash
 > cd firebase/functions
 > firebase functions:config:get > .runtimeconfig.json
+```
+
+- setup gcloud-cli for deploying to asia-northeast1 https://cloud.google.com/sdk/docs/quickstart-macos
+
+- Sign in with gcloud-cli and select your project
+
+```bash
+> gcloud init
 ```
 
 ## Develop
@@ -24,6 +32,9 @@ npm run serve
 
 # Deploy functions
 npm run deploy
+
+# Deploy asia region
+npm run deploy:asia
 ```
 
 ## TODO
