@@ -121,6 +121,184 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
     }
   }
 
+  const lineTicketTemplateFormatter = (event, ticketUrl) => {
+    return {
+      'type': 'flex',
+      'altText': `this is flex message`,
+      'contents': lineTicketTemplateFormatterX(event, ticketUrl)
+    }
+  }
+
+  const lineTicketTemplateFormatterX = (event, ticketUrl) => {
+    return {
+      "type": "bubble",
+      "hero": {
+        "type": "image",
+        "url": `${event.coverImage}`,
+        "size": "full",
+        "aspectRatio": "20:13",
+        "aspectMode": "cover",
+        "action": {
+          "type": "uri",
+          "uri": event.link
+        }
+      },
+      "body": {
+        "type": "box",
+        "layout": "vertical",
+        "spacing": "md",
+        "contents": [
+          {
+            "type": "text",
+            "text": event.title,
+            "wrap": true,
+            "weight": "bold",
+            "gravity": "center",
+            "size": "xl"
+          },
+          {
+            "type": "box",
+            "layout": "baseline",
+            "margin": "md",
+            "contents": [
+              {
+                "type": "icon",
+                "size": "sm",
+                "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png"
+              },
+              {
+                "type": "icon",
+                "size": "sm",
+                "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png"
+              },
+              {
+                "type": "icon",
+                "size": "sm",
+                "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png"
+              },
+              {
+                "type": "icon",
+                "size": "sm",
+                "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png"
+              },
+              {
+                "type": "icon",
+                "size": "sm",
+                "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gray_star_28.png"
+              },
+              {
+                "type": "text",
+                "text": "4.0",
+                "size": "sm",
+                "color": "#999999",
+                "margin": "md",
+                "flex": 0
+              }
+            ]
+          },
+          {
+            "type": "box",
+            "layout": "vertical",
+            "margin": "lg",
+            "spacing": "sm",
+            "contents": [
+              {
+                "type": "box",
+                "layout": "baseline",
+                "spacing": "sm",
+                "contents": [
+                  {
+                    "type": "text",
+                    "text": "Date",
+                    "color": "#aaaaaa",
+                    "size": "sm",
+                    "flex": 1
+                  },
+                  {
+                    "type": "text",
+                    "text": event.startDate,
+                    "wrap": true,
+                    "size": "sm",
+                    "color": "#666666",
+                    "flex": 4
+                  }
+                ]
+              },
+              {
+                "type": "box",
+                "layout": "baseline",
+                "spacing": "sm",
+                "contents": [
+                  {
+                    "type": "text",
+                    "text": "Place",
+                    "color": "#aaaaaa",
+                    "size": "sm",
+                    "flex": 1
+                  },
+                  {
+                    "type": "text",
+                    "text": "7 Floor, No.3",
+                    "wrap": true,
+                    "color": "#666666",
+                    "size": "sm",
+                    "flex": 4
+                  }
+                ]
+              },
+              {
+                "type": "box",
+                "layout": "baseline",
+                "spacing": "sm",
+                "contents": [
+                  {
+                    "type": "text",
+                    "text": "Seats",
+                    "color": "#aaaaaa",
+                    "size": "sm",
+                    "flex": 1
+                  },
+                  {
+                    "type": "text",
+                    "text": "HUBBA",
+                    "wrap": true,
+                    "color": "#666666",
+                    "size": "sm",
+                    "flex": 4
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "box",
+            "layout": "vertical",
+            "margin": "xxl",
+            "contents": [
+              {
+                "type": "spacer"
+              },
+              {
+                "type": "image",
+                "url": ticketUrl,
+                "aspectMode": "cover",
+                "size": "xl"
+              },
+              {
+                "type": "text",
+                "text": "You can enter the event by using this code instead of a ticket",
+                "color": "#aaaaaa",
+                "wrap": true,
+                "margin": "xxl",
+                "size": "xs"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+
   // const facebookQuickReplyFormatter = (message, tx) => {
   //   const text = new fbTemplate.Text(message);
   //   return text
@@ -171,9 +349,10 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
       if (ticket) {
         console.log(JSON.stringify(ticket, null, 2))
         // const ticketUrl = `${qrcodeservice}${encodeURIComponent(`${ticketconfirmurl}${ticket.bought_tx}`)}`
-        const ticketUrl = `${ticketqrurl}/${event.id}/${ticket.id}/${user.id}/${ticket.bought_tx}`
+        const currTicketUrl = `${ticketqrurl}/${event.id}/${ticket.id}/${user.id}/${ticket.bought_tx}`
         retPromise = retPromise.then(() => messageSender.sendMessage(from, `Here is your ticket`))
-        retPromise = retPromise.then(() => messageSender.sendImage(from, ticketUrl, ticketUrl))
+        retPromise = retPromise.then(() => messageSender.sendImage(from, currTicketUrl, currTicketUrl))
+        retPromise = retPromise.then(() => messageSender.sendCustomMessages(from, lineTicketTemplateFormatter(event, currTicketUrl)))
       }
 
       return retPromise
@@ -208,10 +387,11 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
 
     // const confirmTicketUrl = `${ticketconfirmurl}${bought_tx}`
     // const qrCodeUrl = `${qrcodeservice}${encodeURIComponent(confirmTicketUrl)}`
-    const qrCodeUrl = `${ticketqrurl}/${tmpEvent.id}/${unusedTicket.id}/${user.id}/${bought_tx}`
-    console.log(qrCodeUrl)
+    const ticketUrl = `${ticketqrurl}/${tmpEvent.id}/${unusedTicket.id}/${user.id}/${bought_tx}`
+    console.log(ticketUrl)
+    await messageSender.sendCustomMessages(from, lineTicketTemplateFormatter(event, ticketUrl))
 
-    await messageSender.sendImage(from, qrCodeUrl, qrCodeUrl)
+    await messageSender.sendImage(from, ticketUrl, ticketUrl)
       .then(() => messageSender.sendMessage(from, `See you at '${eventTitle}'! Do show this QR when attend`))
 
     console.log(`total book time: ${Date.now() - atBeginning}`); startTime = Date.now()
