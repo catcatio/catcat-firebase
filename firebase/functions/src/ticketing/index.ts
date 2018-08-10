@@ -121,14 +121,6 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
     }
   }
 
-  const lineTicketTemplateFormatter = (event, ticketUrl) => {
-    return {
-      'type': 'flex',
-      'altText': `this is flex message`,
-      'contents': lineTicketTemplateFormatterX(event, ticketUrl)
-    }
-  }
-
   const lineTicketTemplateFormatterX = (event, ticketUrl) => {
     return {
       "type": "bubble",
@@ -296,6 +288,14 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
           }
         ]
       }
+    }
+  }
+
+  const lineTicketTemplateFormatter = (event, ticketUrl) => {
+    return {
+      'type': 'flex',
+      'altText': `this is flex message`,
+      'contents': lineTicketTemplateFormatterX(event, ticketUrl)
     }
   }
 
