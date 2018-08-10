@@ -1,10 +1,10 @@
 const { Keypair } = require('stellar-sdk')
 
 class User {
-  _userId: any;
-  account_id: any;
-  _uuid: string;
-  _preInit: string;
+  _userId: any
+  account_id: any
+  _uuid: string
+  _preInit: string
   constructor({user_id, account_id, uuid = '', preInit = ''}) {
     this._userId = user_id
     this.account_id = account_id

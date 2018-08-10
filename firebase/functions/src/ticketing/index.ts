@@ -584,7 +584,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
 
     const profile = provider === 'line' ? (await line.getProfile(provierId)) : {}
     console.log(`get user profile: ${Date.now() - startTime}`); startTime = Date.now()
-    console.log(`total getTicketParams time: ${Date.now() - atBeginning}`);
+    console.log(`total getTicketParams time: ${Date.now() - atBeginning}`)
 
     const confirmTicketUrl = `${ticketconfirmurl}${tx}`
     return {

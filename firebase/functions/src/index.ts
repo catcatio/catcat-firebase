@@ -1,4 +1,4 @@
-import { config, Request, Response, https } from 'firebase-functions';
+import { config, Request, Response, https } from 'firebase-functions'
 
 import * as admin from 'firebase-admin'
 

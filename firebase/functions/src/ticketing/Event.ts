@@ -1,24 +1,24 @@
 import { Keypair, Asset } from 'stellar-sdk'
 
 export class Event {
-  _code: any;
-  _limit: any;
-  _startDate: any;
-  _endDate: any;
-  _title: any;
-  _description: any;
-  _coverImage: any;
-  _venue: any;
-  _host: any;
-  _email: any;
-  _uuid: any;
-  _url: any;
-  _subtitle: any;
-  _constriaint: any;
-  _issuer: any;
-  _distributor: any;
-  url: any;
-  subtitle: any;
+  _code: any
+  _limit: any
+  _startDate: any
+  _endDate: any
+  _title: any
+  _description: any
+  _coverImage: any
+  _venue: any
+  _host: any
+  _email: any
+  _uuid: any
+  _url: any
+  _subtitle: any
+  _constriaint: any
+  _issuer: any
+  _distributor: any
+  url: any
+  subtitle: any
 
   constructor({
     code,

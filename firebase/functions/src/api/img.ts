@@ -14,7 +14,7 @@ export const sizeApiHandler = (): RequestHandler => {
     const url = req.query.url
     const size = req.query.size || 512
     console.log(url, size)
-    const resize = im().resize(`${size}x${size}`).quality(90);
+    const resize = im().resize(`${size}x${size}`).quality(90)
     request.get(url).pipe(resize).pipe(res)
   }
 }
