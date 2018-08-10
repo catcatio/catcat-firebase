@@ -36,6 +36,7 @@ npm run deploy
 # Deploy asia region
 npm run deploy:asia
 ```
+- - -
 
 ## TODO - Alpha
 
@@ -95,6 +96,8 @@ npm run deploy:asia
   ```txt
   Any suggestions?
   ```
+
+- - -
 
 ## TODO - v1
 
