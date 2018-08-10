@@ -15,7 +15,7 @@ Firebase related
 
 under `firebase/functions`
 
-```shell
+```bash
 # Develop
 npm run dev
 

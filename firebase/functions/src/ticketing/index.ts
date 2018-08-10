@@ -18,7 +18,8 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
   const eventStore = eventStoreFactory(eventRepository)
   const userRepository = firestoreRepoFactory(firestore, 'users')
   const tempUserRepository = firestoreRepoFactory(firestore, 'tmpusers')
-  const userStore = userStoreFactory(userRepository, tempUserRepository)
+  const providersRepository = firestoreRepoFactory(firestore, 'providers')
+  const userStore = userStoreFactory(userRepository, tempUserRepository, providersRepository)
 
   const limitChar = (str, limit) => {
     return str.substr(0, limit)
@@ -121,7 +122,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
     }
   }
 
-  const lineTicketTemplateFormatterX = (event, ticketUrl) => {
+  const lineTicketBubbleFormatter = (event, ticketUrl) => {
     return {
       "type": "bubble",
       "hero": {
@@ -294,8 +295,8 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
   const lineTicketTemplateFormatter = (event, ticketUrl) => {
     return {
       'type': 'flex',
-      'altText': `this is flex message`,
-      'contents': lineTicketTemplateFormatterX(event, ticketUrl)
+      'altText': `Here is your ticket`,
+      'contents': lineTicketBubbleFormatter(event, ticketUrl)
     }
   }
 
@@ -389,10 +390,10 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
     // const qrCodeUrl = `${qrcodeservice}${encodeURIComponent(confirmTicketUrl)}`
     const ticketUrl = `${ticketqrurl}/${tmpEvent.id}/${unusedTicket.id}/${user.id}/${bought_tx}`
     console.log(ticketUrl)
-    await messageSender.sendCustomMessages(from, lineTicketTemplateFormatter(event, ticketUrl))
 
     await messageSender.sendImage(from, ticketUrl, ticketUrl)
       .then(() => messageSender.sendMessage(from, `See you at '${eventTitle}'! Do show this QR when attend`))
+    await messageSender.sendCustomMessages(from, lineTicketTemplateFormatter(event, ticketUrl))
 
     console.log(`total book time: ${Date.now() - atBeginning}`); startTime = Date.now()
     console.info('EVENT_BOOK_OK')

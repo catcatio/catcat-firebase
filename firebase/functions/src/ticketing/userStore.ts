@@ -6,7 +6,7 @@ const randNum = (min = 100, max = 1000) => {
   return Math.floor(Math.random() * (max - min) + min)
 }
 
-const userStoreFactory = (userRepository, tmpUserRepository) => {
+const userStoreFactory = (userRepository, tmpUserRepository, providersRepository) => {
   let stellarUserCreator = null
 
   const setUserCreator = (userCreator) => {
@@ -78,6 +78,13 @@ const userStoreFactory = (userRepository, tmpUserRepository) => {
 
     await userRepository.put(newUser.id, newUser)
       .then(() => tmpUserRepository.collection.doc(tmpUser.id).delete())
+
+    const providerInfo = {
+      id: `${provider.toLowerCase()}_${id}`,
+      userId: newUser.id
+    }
+    // fire and forgot
+    providersRepository.put(providerInfo.id, providerInfo)
 
     return newUser
   }
