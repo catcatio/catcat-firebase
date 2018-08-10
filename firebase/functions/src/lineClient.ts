@@ -14,6 +14,7 @@ export const lineClient = ({ linebotapi, linechannelaccesstoken }) => {
     }, (err, response, body) => {
       if (err) {
         reject(err)
+        console.log(err)
         return
       }
       resolve(body)
