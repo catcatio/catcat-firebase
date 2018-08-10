@@ -350,7 +350,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
       if (ticket) {
         console.log(JSON.stringify(ticket, null, 2))
         // const ticketUrl = `${qrcodeservice}${encodeURIComponent(`${ticketconfirmurl}${ticket.bought_tx}`)}`
-        const currTicketUrl = `${ticketqrurl}/${event.id}/${ticket.id}/${user.id}/${ticket.bought_tx}`
+        const currTicketUrl = `${ticketqrurl}/${event.id}/${ticket.id}/${requestSource.toLowerCase()}_${from}/${ticket.bought_tx}`
         retPromise = retPromise.then(() => messageSender.sendMessage(from, `Here is your ticket`))
         retPromise = retPromise.then(() => messageSender.sendImage(from, currTicketUrl, currTicketUrl))
         retPromise = retPromise.then(() => messageSender.sendCustomMessages(from, lineTicketTemplateFormatter(event, currTicketUrl)))
@@ -526,17 +526,15 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
       })
   }
 
-  const getTicketParams = async ({ eventId, ticketId, ownerId, tx }) => {
+  const getTicketParams = async ({ eventId, ticketId, userProvider, tx }) => {
     console.log(`start get ticket params`)
     const atBeginning = Date.now()
     let startTime = atBeginning
+    const [provider, provierId] = userProvider.split('_')
 
-    const owner = await userStore.getUserById(ownerId)
-    console.log(`get owner info: ${Date.now() - startTime}`); startTime = Date.now()
-
-    const profile = owner.providers.line ? (await line.getProfile(owner.providers.line)) : {}
+    const profile = provider === 'line' ? (await line.getProfile(provierId)) : {}
     console.log(`get user profile: ${Date.now() - startTime}`); startTime = Date.now()
-    console.log(`total ticket confirm time: ${Date.now() - atBeginning}`);
+    console.log(`total getTicketParams time: ${Date.now() - atBeginning}`);
 
     const confirmTicketUrl = `${ticketconfirmurl}${tx}`
     return {

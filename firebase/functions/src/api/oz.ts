@@ -85,7 +85,7 @@ export const ozApi = ({ facebook, line }, config): Express => {
   api.use(require('./fbdummy').fbdummy) // use static response for facebook, until app review process complete
   api.post('/', apiHandler(ticketingSystem))
   api.get('/v1/confirm/:bought_tx', confirmApiHandler(ticketingSystem))
-  api.get('/v1/ticket/:eventId/:ticketId/:ownerId/:tx', qrApiHandler(ticketingSystem))
+  api.get('/v1/ticket/:eventId/:ticketId/:userProvider/:tx', qrApiHandler(ticketingSystem))
   api.get('/v1/img', sizeApiHandler())
   return api
 }
