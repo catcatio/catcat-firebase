@@ -30,10 +30,15 @@ npm run deploy
 
 ### Before event
 
+#### Localization
+
+- [ ] Support Thai conversation
+
 #### Welcome process
 
-- [ ] User will see welcome message via `LINE`.
+- [x] User will see welcome message via `LINE`.
   > We can determine user linked with provider via `provider.line_${line_id}`
+  > and store user's session in `sessions` collection
 
   ```txt
   How can I help you?
@@ -48,6 +53,8 @@ npm run deploy
   ```txt
   JOIN (10/100)
   ```
+
+- [ ] Event list cards to support desktop version
 
 #### Book process
 
