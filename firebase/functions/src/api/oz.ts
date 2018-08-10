@@ -21,15 +21,18 @@ const apiHandler = (ticketingSystem): RequestHandler => {
     console.log(`start of oz request \n ${JSON.stringify(req.body)}`)
     if (!req.body) return sendDialogflowTextMessage(res, 'No body...')
 
-    const { action, requestSource, userId, senderId } = req.body
+    const { action, requestSource, userId, senderId, session } = req.body
     if (!action) return sendDialogflowTextMessage(res, 'No action...')
 
     const requestParams = {
       requestSource,
-      from: requestSource === 'LINE' ? userId : senderId
+      from: requestSource === 'LINE' ? userId : senderId,
+      session
     }
 
     if (!requestParams.requestSource || !requestParams.from) return sendDialogflowTextMessage(res, 'No invalid request...')
+
+    const sessionTask = ticketingSystem.isNewSession(requestParams)
 
     switch (action) {
       case 'list.events':
@@ -46,12 +49,9 @@ const apiHandler = (ticketingSystem): RequestHandler => {
         return ticketingSystem.useTicket(tx, requestParams)
           .then(() => sendDialogflowTextMessage(res, ''))
 
-      case 'user.welcome':
-        return ticketingSystem.sendWelcomeMessage(requestParams)
-          .then(() => sendDialogflowTextMessage(res, ''))
-
       default:
-        return sendDialogflowTextMessage(res, `Something went wrong with ${action}`)
+        return sessionTask.then(isNew => isNew && ticketingSystem.sendWelcomeMessage(requestParams))
+          .then(() => sendDialogflowTextMessage(res, ''))
     }
   }
 }

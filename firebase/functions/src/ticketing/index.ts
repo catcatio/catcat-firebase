@@ -19,6 +19,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
   const userRepository = firestoreRepoFactory(firestore, 'users')
   const tempUserRepository = firestoreRepoFactory(firestore, 'tmpusers')
   const providersRepository = firestoreRepoFactory(firestore, 'providers')
+  const sessionsRepository = firestoreRepoFactory(firestore, 'sessions')
   const userStore = userStoreFactory(userRepository, tempUserRepository, providersRepository)
 
   const limitChar = (str, limit) => {
@@ -547,11 +548,21 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
   }
 
   const sendWelcomeMessage = async ({ requestSource, from }) => {
+    console.log(`send greeting message tp ${from}`)
     if (requestSource !== 'LINE') {
       return
     }
 
     return line.sendCustomMessages(from, lineWelcomeMessageFormatter('Hi there, what can I help you?', 'Show Events', 'Nothing'))
+  }
+
+  const isNewSession = async ({ session, from }) => {
+    const lastSession = await sessionsRepository.get(from)
+    if (!lastSession || lastSession.session !== session) {
+      await sessionsRepository.put(from, {session})
+      return true
+    }
+    return false
   }
 
   return {
@@ -560,6 +571,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
     confirmTicket,
     useTicket,
     getTicketParams,
-    sendWelcomeMessage
+    sendWelcomeMessage,
+    isNewSession,
   }
 }
