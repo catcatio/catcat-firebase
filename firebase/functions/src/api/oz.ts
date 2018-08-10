@@ -49,9 +49,16 @@ const apiHandler = (ticketingSystem): RequestHandler => {
         return ticketingSystem.useTicket(tx, requestParams)
           .then(() => sendDialogflowTextMessage(res, ''))
 
+      case 'input.welcome':
+      return ticketingSystem.sendWelcomeMessage(requestParams)
+        .then(() => sendDialogflowTextMessage(res, ''))
+
       default:
-        return sessionTask.then(isNew => isNew && ticketingSystem.sendWelcomeMessage(requestParams))
-          .then(() => sendDialogflowTextMessage(res, ''))
+        return sessionTask.then(isNew => {
+          isNew && ticketingSystem.sendWelcomeMessage(requestParams)
+          return isNew
+        })
+          .then(isNew => sendDialogflowTextMessage(res, !isNew ? 'hmm...?' : ''))
     }
   }
 }
