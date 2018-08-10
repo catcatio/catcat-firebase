@@ -553,7 +553,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
       return
     }
 
-    return line.sendCustomMessages(from, lineWelcomeMessageFormatter('Hi there, what can I help you?', 'Show Events', 'Nothing'))
+    return line.sendCustomMessages(from, lineWelcomeMessageFormatter('Hi there, how can I help you?', 'Show Events', 'Nothing'))
   }
 
   const isNewSession = async ({ session, from }) => {
