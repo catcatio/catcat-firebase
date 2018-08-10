@@ -82,19 +82,9 @@ const userStoreFactory = (userRepository, tmpUserRepository) => {
     return newUser
   }
 
-  const getByPreInit = async (preInit) => {
-    const users = await userRepository.query('preInit', preInit)
-    return users && users.length > 0 ? User.fromJSON(users[0]) : null
-  }
-
-  const clearPreInit = async (userId) => {
-    return userRepository.update(userId, {preInit: ''})
-  }
-
   const addMemo = async (userId, memo) => {
     return userRepository.update(userId, {memo})
   }
-
 
   const markAsUsed = async (userId) => {
     return userRepository.update(userId, {used: true})

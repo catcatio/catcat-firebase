@@ -27,6 +27,7 @@ const firebaseConfig = {
   imageresizeservice: ticketingConfig.imageresizeservice,
   fburl: ticketingConfig.fburl,
   ticketconfirmurl: ticketingConfig.ticketconfirmurl,
+  ticketqrurl: ticketingConfig.ticketqrurl,
   linebotapi: ticketingConfig.linebotapi,
   linechannelaccesstoken: ticketingConfig.linechannelaccesstoken
 }

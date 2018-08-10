@@ -1,4 +1,4 @@
-export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNetwork, masterAssetCode, masterIssuerKey, masterDistributorKey, qrcodeservice, ticketconfirmurl, imageresizeservice }) => {
+export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNetwork, masterAssetCode, masterIssuerKey, masterDistributorKey, ticketconfirmurl, ticketqrurl, imageresizeservice }) => {
   const { fbTemplate } = require('claudia-bot-builder')
   const StellarSdk = require('stellar-sdk')
   const firestoreRepoFactory = require('./firestoreRepository').default
@@ -87,30 +87,6 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
     }
   }
 
-  const lineQuickReplyFormatter = (message, tx) => ({
-    'type': 'text',
-    'text': message,
-    'quickReply': {
-      'items': [
-        {
-          'type': 'action',
-          'action': {
-            'type': 'message',
-            'label': 'Confirm',
-            'text': `use ticket ${tx}`
-          }
-        },
-        {
-          'type': 'action',
-          'action': {
-            'type': 'message',
-            'label': 'Cancel',
-            'text': 'Cancel'
-          }
-        }
-      ]
-    }
-  })
 
   const lineConfirmTemplateFormatter = (imageUrl, ownerDisplayName, ownerProvider, eventName, tx) => {
     return {
@@ -145,13 +121,14 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
     }
   }
 
-  const facebookQuickReplyFormatter = (message, tx) => {
-    const text = new fbTemplate.Text(message);
-    return text
-      .addQuickReply('Confirm', `use ticket ${tx}`)
-      .addQuickReply('Cancel', `cancel`)
-      .get();
-  }
+  // const facebookQuickReplyFormatter = (message, tx) => {
+  //   const text = new fbTemplate.Text(message);
+  //   return text
+  //     .addQuickReply('Confirm', `use ticket ${tx}`)
+  //     .addQuickReply('Cancel', `cancel`)
+  //     .get();
+  // }
+
   const listEvent = async ({ requestSource, from }) => {
     const events = await eventStore.getAllEvents()
     const formatter = requestSource === 'LINE' ? lineEventListFormatter : facebookEventListFormatter
@@ -194,7 +171,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
       if (ticket) {
         console.log(JSON.stringify(ticket, null, 2))
         // const ticketUrl = `${qrcodeservice}${encodeURIComponent(`${ticketconfirmurl}${ticket.bought_tx}`)}`
-        const ticketUrl = `${qrcodeservice}/${event.id}/${ticket.id}/${user.id}/${ticket.bought_tx}`
+        const ticketUrl = `${ticketqrurl}/${event.id}/${ticket.id}/${user.id}/${ticket.bought_tx}`
         retPromise = retPromise.then(() => messageSender.sendMessage(from, `Here is your ticket`))
         retPromise = retPromise.then(() => messageSender.sendImage(from, ticketUrl, ticketUrl))
       }
@@ -231,7 +208,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
 
     // const confirmTicketUrl = `${ticketconfirmurl}${bought_tx}`
     // const qrCodeUrl = `${qrcodeservice}${encodeURIComponent(confirmTicketUrl)}`
-    const qrCodeUrl = `${qrcodeservice}/${tmpEvent.id}/${unusedTicket.id}/${user.id}/${bought_tx}`
+    const qrCodeUrl = `${ticketqrurl}/${tmpEvent.id}/${unusedTicket.id}/${user.id}/${bought_tx}`
     console.log(qrCodeUrl)
 
     await messageSender.sendImage(from, qrCodeUrl, qrCodeUrl)
@@ -263,9 +240,9 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
     }
 
     const orgAddress = event.providers.line || event.providers.facebook
-    const provider = event.providers.line ? 'line' : 'facebook'
+    // const provider = event.providers.line ? 'line' : 'facebook'
     const orgMessageSender = event.providers.line ? line : facebook
-    const formatter = event.providers.line ? lineQuickReplyFormatter : facebookQuickReplyFormatter
+    // const formatter = event.providers.line ? lineQuickReplyFormatter : facebookQuickReplyFormatter
 
     const ticket = await eventStore.getTicketById(txAction.eventId, txAction.ticketId)
     console.log(`get ticket ${txAction.eventId} ${txAction.ticketId}: ${Date.now() - startTime}`); startTime = Date.now()
