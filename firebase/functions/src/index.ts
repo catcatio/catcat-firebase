@@ -2,7 +2,7 @@ import { config, Request, Response, https } from 'firebase-functions';
 
 import * as admin from 'firebase-admin'
 
-import { linkApi, ozApi, imgApi } from './api'
+import { linkApi, ozApi } from './api'
 import { facebookClient } from './facebookClient'
 import { lineClient } from './lineClient'
 
@@ -45,10 +45,8 @@ const wrapApi = (api: (request: Request, response: Response) => any) =>
 
 const link = wrapApi(linkApi(database))
 const oz = wrapApi(ozApi({ line, facebook }, firebaseConfig))
-const img = wrapApi(imgApi())
 
 export {
   link,
-  oz,
-  img
+  oz
 }

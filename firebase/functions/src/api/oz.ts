@@ -4,6 +4,7 @@ import * as request from 'request'
 import { Express, Request, Response, RequestHandler } from 'express'
 import * as Cors from 'cors'
 import { ticketing } from '../ticketing'
+import { sizeApiHandler } from './img'
 
 const sendDialogflowTextMessage = (res, text: string, retCode: number = 200) => {
   return res.status(retCode).send({
@@ -85,5 +86,6 @@ export const ozApi = ({ facebook, line }, config): Express => {
   api.post('/', apiHandler(ticketingSystem))
   api.get('/v1/confirm/:bought_tx', confirmApiHandler(ticketingSystem))
   api.get('/v1/ticket/:eventId/:ticketId/:ownerId/:tx', qrApiHandler(ticketingSystem))
+  api.get('/v1/img', sizeApiHandler())
   return api
 }
