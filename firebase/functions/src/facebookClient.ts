@@ -3,16 +3,16 @@ export const facebookClient = ({fburl, fbaccesstoken}) => {
   const url = `${fburl}?access_token=${fbaccesstoken}`
   const sendImage = async (recipientId, imageUrl) => {
     const payload = {
-      "messaging_type": "NON_PROMOTIONAL_SUBSCRIPTION",
-      "recipient": {
-        "id": recipientId
+      'messaging_type': 'NON_PROMOTIONAL_SUBSCRIPTION',
+      'recipient': {
+        'id': recipientId
       },
-      "message": {
-        "attachment": {
-          "type": "image",
-          "payload": {
-            "is_reusable": true,
-            "url": imageUrl
+      'message': {
+        'attachment': {
+          'type': 'image',
+          'payload': {
+            'is_reusable': true,
+            'url': imageUrl
           }
         }
       }
@@ -22,11 +22,11 @@ export const facebookClient = ({fburl, fbaccesstoken}) => {
 
   const sendMessage = (recipientId, text) => {
     const payload = {
-      "messaging_type": "NON_PROMOTIONAL_SUBSCRIPTION",
-      "recipient": {
-        "id": recipientId
+      'messaging_type': 'NON_PROMOTIONAL_SUBSCRIPTION',
+      'recipient': {
+        'id': recipientId
       },
-      "message": {
+      'message': {
         text
       }
     }
@@ -35,11 +35,11 @@ export const facebookClient = ({fburl, fbaccesstoken}) => {
 
   const sendCustomMessages = (recipientId, message) => {
     const payload = {
-      "messaging_type": "NON_PROMOTIONAL_SUBSCRIPTION",
-      "recipient": {
-        "id": recipientId
+      'messaging_type': 'NON_PROMOTIONAL_SUBSCRIPTION',
+      'recipient': {
+        'id': recipientId
       },
-      "message": message
+      'message': message
     }
     return postJSON(url, payload).catch(err => console.log(err))
   }

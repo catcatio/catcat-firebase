@@ -11,7 +11,7 @@ Firebase related
 > firebase functions:config:get > .runtimeconfig.json
 ```
 
-- setup gcloud-cli for deploying to asia-northeast1 https://cloud.google.com/sdk/docs/quickstart-macos
+- setup gcloud-cli for deploying to asia-northeast1 [quickstart guide](https://cloud.google.com/sdk/docs/quickstart-macos)
 
 - Sign in with gcloud-cli and select your project
 

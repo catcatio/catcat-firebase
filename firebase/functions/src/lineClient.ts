@@ -27,22 +27,22 @@ export const lineClient = ({ linebotapi, linechannelaccesstoken }) => {
 
   const sendMessages = (recipientId, ...messages) => {
     const data = {
-      "to": recipientId,
-      "messages": messages
+      'to': recipientId,
+      'messages': messages
     }
     return postJSON(messageApiUrl, data, { headers })
   }
 
   const sendImage = async (recipientId, imageUrl, thumbnailUrl, textMessage = null) => {
     const messages: any[] = [{
-      "type": "image",
-      "originalContentUrl": imageUrl,
-      "previewImageUrl": thumbnailUrl
+      'type': 'image',
+      'originalContentUrl': imageUrl,
+      'previewImageUrl': thumbnailUrl
     }]
 
     textMessage && messages.push({
-      "type": "text",
-      "text": textMessage
+      'type': 'text',
+      'text': textMessage
     })
 
     return sendMessages(recipientId, ...messages).catch(err => console.log(err))
@@ -50,8 +50,8 @@ export const lineClient = ({ linebotapi, linechannelaccesstoken }) => {
 
   const sendMessage = (recipientId, text) => {
     const message = {
-      "type": "text",
-      "text": text
+      'type': 'text',
+      'text': text
     }
 
     return sendMessages(recipientId, message).catch(err => console.log(err))

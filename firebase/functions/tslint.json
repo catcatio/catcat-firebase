@@ -74,6 +74,9 @@
     // Disallow duplicate imports in the same file.
     "no-duplicate-imports": true,
 
+    // use single quote for string
+    "quotemark": [true, "single", "avoid-escape", "avoid-template"],
+
 
     // -- Strong Warnings --
     // These rules should almost never be needed, but may be included due to legacy code.

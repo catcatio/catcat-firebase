@@ -344,7 +344,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
   const lineTicketTemplateFormatter = (event, ticketUrl) => {
     return {
       'type': 'flex',
-      'altText': `Here is your ticket`,
+      'altText': 'Here is your ticket',
       'contents': lineTicketBubbleFormatter(event, ticketUrl)
     }
   }
@@ -393,16 +393,17 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
 
     if (user.bought_tickets && user.bought_tickets[event.id] && (Object.keys(user.bought_tickets[event.id]).length > 0)) {
       console.error('EVENT_ALREADY_BOOK')
-      let retPromise = messageSender.sendMessage(from, `You have already booked the event`)
+      let retPromise = messageSender.sendMessage(from, 'You have already booked the event')
 
       const ticket = await eventStore.getTicketById(event.id, Object.keys(user.bought_tickets[event.id])[0])
       if (ticket) {
         console.log(JSON.stringify(ticket, null, 2))
         // const ticketUrl = `${qrcodeservice}${encodeURIComponent(`${ticketconfirmurl}${ticket.bought_tx}`)}`
         const currTicketUrl = `${ticketqrurl}/${event.id}/${ticket.id}/${requestSource.toLowerCase()}_${from}/${ticket.bought_tx}`
-        retPromise = retPromise.then(() => messageSender.sendMessage(from, `Here is your ticket`))
+        retPromise = retPromise.then(() => messageSender.sendMessage(from, 'Here is your ticket'))
         retPromise = retPromise.then(() => messageSender.sendImage(from, currTicketUrl, currTicketUrl))
         retPromise = retPromise.then(() => messageSender.sendCustomMessages(from, lineTicketTemplateFormatter(event, currTicketUrl)))
+        console.log(currTicketUrl)
       }
 
       return retPromise
@@ -450,7 +451,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
   }
 
   const confirmTicket = async (tx) => {
-    console.log(`start confirm ticket`)
+    console.log('start confirm ticket')
     const atBeginning = Date.now()
     let startTime = atBeginning
 
@@ -576,7 +577,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
   }
 
   const getTicketParams = async ({ eventId, ticketId, userProvider, tx }) => {
-    console.log(`start get ticket params`)
+    console.log('start get ticket params')
     const atBeginning = Date.now()
     let startTime = atBeginning
     const [provider, provierId] = userProvider.split('_')
