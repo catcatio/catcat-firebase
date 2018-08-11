@@ -1,5 +1,4 @@
 export const lineClient = ({ linebotapi, linechannelaccesstoken }) => {
-  const { getJSON } = require('@rabbotio/fetcher')
   const request = require('request')
   const messageApiUrl = `${linebotapi}/message/push`
   const profileApiUrl = `${linebotapi}/profile`
@@ -17,7 +16,34 @@ export const lineClient = ({ linebotapi, linechannelaccesstoken }) => {
         console.log(err)
         return
       }
-      resolve(body)
+
+      if (typeof body === 'string') {
+        resolve(JSON.parse(body))
+      } else {
+        resolve(body)
+      }
+    })
+  })
+
+  const getJSON = (url, data, opts) => new Promise((resolve, reject) => {
+    request({
+      method: 'GET',
+      url: url,
+      headers: Object.assign({}, opts.headers, { 'Content-Type': 'application/json' }),
+
+    }, (err, response, body) => {
+      if (err) {
+        reject(err)
+        console.log(err)
+        return
+      }
+      console.log(typeof body)
+      if (typeof body === 'string') {
+        resolve(JSON.parse(body))
+      } else {
+        resolve(body)
+      }
+
     })
   })
 

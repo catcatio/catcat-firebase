@@ -138,35 +138,75 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
   }
 
 
-  const lineConfirmTemplateFormatter = (imageUrl, ownerDisplayName, ownerProvider, eventName, tx) => {
+  // const lineConfirmTemplateFormatter = (imageUrl, ownerDisplayName, ownerProvider, eventName, tx) => {
+  //   return {
+  //     'type': 'template',
+  //     'altText': `Confirm using ticket ${ownerDisplayName}`,
+  //     'template': {
+  //       'type': 'buttons',
+  //       'thumbnailImageUrl': `${imageresizeservice}${encodeURIComponent(imageUrl)}`,
+  //       'imageAspectRatio': 'rectangle',
+  //       'imageSize': 'cover',
+  //       'imageBackgroundColor': '#FFFFFF',
+  //       'title': `${ownerDisplayName} (Provider: ${ownerProvider})`,
+  //       'text': `Enter event ${eventName}?`,
+  //       'actions': [
+  //         {
+  //           'type': 'message',
+  //           'label': 'Confirm',
+  //           'text': `use ticket ${tx}`
+  //         }
+  //       ]
+  //     }
+  //   }
+  // }
+
+  const lineConfirmTemplateFormatter = (imageUrl, ownerDisplayName, ownerProvider, eventTitle, tx) => {
+    console.log(`${imageresizeservice}${encodeURIComponent(imageUrl)}`)
     return {
-      'type': 'template',
-      'altText': `Confirm using ticket ${ownerDisplayName}`,
-      'template': {
-        'type': 'buttons',
-        'thumbnailImageUrl': `${imageresizeservice}${encodeURIComponent(imageUrl)}`,
-        'imageAspectRatio': 'rectangle',
-        'imageSize': 'cover',
-        'imageBackgroundColor': '#FFFFFF',
-        'title': `${ownerDisplayName} (Provider: ${ownerProvider})`,
-        'text': `Enter event ${eventName}?`,
-        // 'defaultAction': {
-        //   'type': 'uri',
-        //   'label': 'View detail',
-        //   'uri': 'http://example.com/page/123'
-        // },
-        'actions': [
-          {
-            'type': 'message',
-            'label': 'Confirm',
-            'text': `use ticket ${tx}`
-          },
-          {
-            'type': 'message',
-            'label': 'Cancel',
-            'text': 'Cancel'
-          }
-        ]
+      'type': 'flex',
+      'altText': `Confirm ticket ${eventTitle}`,
+      'contents': {
+        'type': 'bubble',
+        'hero': {
+          'type': 'image',
+          'url': `${imageresizeservice}${encodeURIComponent(imageUrl)}`,
+          'size': 'full',
+          'aspectRatio': '20:13',
+          'aspectMode': 'cover'
+        },
+        'body': {
+          'type': 'box',
+          'layout': 'vertical',
+          'spacing': 'md',
+          'contents': [
+            {
+              'type': 'text',
+              'text': `${ownerDisplayName} (${ownerProvider})`,
+              'wrap': true,
+              'weight': 'bold',
+              'gravity': 'center',
+              'size': 'xl'
+            },
+            {
+              'type': 'text',
+              'text': eventTitle,
+              'wrap': true,
+              'weight': 'bold',
+              'gravity': 'center',
+              'size': 'md'
+            },
+            {
+              'type': 'button',
+              'style': 'primary',
+              'action': {
+                'type': 'message',
+                'label': 'CONFIRM',
+                'text': `use ticket ${tx}`,
+              }
+            },
+          ]
+        }
       }
     }
   }
@@ -398,7 +438,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
       const ticket = await eventStore.getTicketById(event.id, Object.keys(user.bought_tickets[event.id])[0])
       if (ticket) {
         console.log(JSON.stringify(ticket, null, 2))
-        // const ticketUrl = `${qrcodeservice}${encodeURIComponent(`${ticketconfirmurl}${ticket.bought_tx}`)}`
+        // const ticketUrl = `${qrcodeservice}${encodeURIComponent(`${ticketconfirmurl}/${ticket.bought_tx}`)}`
         const currTicketUrl = `${ticketqrurl}/${event.id}/${ticket.id}/${requestSource.toLowerCase()}_${from}/${ticket.bought_tx}`
         retPromise = retPromise.then(() => messageSender.sendMessage(from, 'Here is your ticket'))
         retPromise = retPromise.then(() => messageSender.sendImage(from, currTicketUrl, currTicketUrl))
@@ -436,9 +476,9 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
     await userStore.updateBoughtTicket(user.id, tmpEvent.id, unusedTicket.id)
     console.log(`updateBoughtTicket ${bought_tx}: ${Date.now() - startTime}`); startTime = Date.now()
 
-    // const confirmTicketUrl = `${ticketconfirmurl}${bought_tx}`
+    // const confirmTicketUrl = `${ticketconfirmurl}/${bought_tx}`
     // const qrCodeUrl = `${qrcodeservice}${encodeURIComponent(confirmTicketUrl)}`
-    const ticketUrl = `${ticketqrurl}/${tmpEvent.id}/${unusedTicket.id}/${user.id}/${bought_tx}`
+    const ticketUrl = `${ticketqrurl}/${tmpEvent.id}/${unusedTicket.id}/${requestSource.toLowerCase()}_${from}/${bought_tx}`
     console.log(ticketUrl)
 
     await messageSender.sendImage(from, ticketUrl, ticketUrl)
@@ -581,19 +621,22 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
     const atBeginning = Date.now()
     let startTime = atBeginning
     const [provider, provierId] = userProvider.split('_')
-
+    console.log(userProvider, provider, provierId)
     const profile = provider === 'line' ? (await line.getProfile(provierId)) : {}
     console.log(`get user profile: ${Date.now() - startTime}`); startTime = Date.now()
-    console.log(`total getTicketParams time: ${Date.now() - atBeginning}`)
 
-    const confirmTicketUrl = `${ticketconfirmurl}${tx}`
-    return {
+
+    const confirmTicketUrl = `${ticketconfirmurl}/${tx}`
+    const params = {
       'text': confirmTicketUrl,
       'logoUrl': profile.pictureUrl || 'empty',
       'logoText': profile.displayName || 'anonymous',
       'maskTextLine1': eventId.substr(0, 4),
       'maskTextLine2': eventId.substr(5, 10)
     }
+    console.log(params)
+    console.log(`total getTicketParams time: ${Date.now() - atBeginning}`)
+    return params
   }
 
   const sendWelcomeMessage = async ({ requestSource, from }) => {
