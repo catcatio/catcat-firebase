@@ -2,9 +2,9 @@ import * as express from 'express'
 // tslint:disable-next-line:no-duplicate-imports
 import { Express, Request, Response, RequestHandler } from 'express'
 import * as Cors from 'cors'
-import { database } from 'firebase-admin'
+import { database as firebase } from 'firebase-admin'
 
-const apiHandler = (db: database.Database): RequestHandler => (req: Request, res: Response) => {
+const apiHandler = (db: firebase.Database): RequestHandler => (req: Request, res: Response) => {
   const sendOKAt = (data: any, error?: any) =>
     res.status(200).send({
       data,
@@ -30,9 +30,9 @@ const apiHandler = (db: database.Database): RequestHandler => (req: Request, res
   }
 }
 
-export const linkApi = (db: database.Database): Express => {
+export const linkApi = ({database}): Express => {
   const api = express()
   api.use(Cors({ origin: true }))
-  api.post('/', apiHandler(db))
+  api.post('/', apiHandler(database))
   return api
 }

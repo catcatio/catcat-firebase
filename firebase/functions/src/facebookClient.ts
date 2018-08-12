@@ -1,6 +1,6 @@
-export const facebookClient = ({fburl, fbaccesstoken}) => {
+export const facebookClient = ({fbUrl, fbAccessToken}) => {
   const { postJSON } = require('@rabbotio/fetcher')
-  const url = `${fburl}?access_token=${fbaccesstoken}`
+  const url = `${fbUrl}?access_token=${fbAccessToken}`
   const sendImage = async (recipientId, imageUrl) => {
     const payload = {
       'messaging_type': 'NON_PROMOTIONAL_SUBSCRIPTION',

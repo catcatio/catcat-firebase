@@ -1,49 +1,24 @@
-import { config, Request, Response, https } from 'firebase-functions'
-
+import { config } from 'firebase-functions'
 import * as admin from 'firebase-admin'
 
 import { linkApi, ozApi } from './api'
 import { facebookClient } from './facebookClient'
 import { lineClient } from './lineClient'
-
-admin.initializeApp(config().firebase)
+import { wrapApi } from './utils/wrapApi'
 
 console.log(`functions started: ${process.version}`)
 
-const ticketingConfig = config().ticketing
+admin.initializeApp(config().firebase)
+
 const database = null // admin.database()
 const firestore = admin.firestore()
 firestore.settings({ timestampsInSnapshots: true })
 
-const firebaseConfig = {
-  firestore: firestore,
-  stellarUrl: 'https://horizon-testnet.stellar.org',
-  stellarNetwork: 'test',
-  masterAssetCode: ticketingConfig.masterassetcode,
-  masterIssuerKey: ticketingConfig.masterissuerkey,
-  masterDistributorKey: ticketingConfig.masterdistributorkey,
-  qrcodeservice: ticketingConfig.qrcodeservice2,
-  fbaccesstoken: ticketingConfig.fbaccesstoken,
-  imageresizeservice: ticketingConfig.imageresizeservice,
-  fburl: ticketingConfig.fburl,
-  ticketconfirmurl: ticketingConfig.ticketconfirmurl,
-  ticketqrurl: ticketingConfig.ticketqrurl,
-  linebotapi: ticketingConfig.linebotapi,
-  linechannelaccesstoken: ticketingConfig.linechannelaccesstoken
-}
-
+const firebaseConfig = require('./firebaseConfig')(firestore, database)
 const line = lineClient(firebaseConfig)
 const facebook = facebookClient(firebaseConfig)
 
-const wrapApi = (api: (request: Request, response: Response) => any) =>
-  https.onRequest((request: Request, response: Response) => {
-    if (!request.path) {
-      request.url = `/${request.url}` // prepend '/' to keep query params if any
-    }
-    return api(request, response)
-  })
-
-const link = wrapApi(linkApi(database))
+const link = wrapApi(linkApi(firebaseConfig))
 const oz = wrapApi(ozApi({ line, facebook }, firebaseConfig))
 
 export {

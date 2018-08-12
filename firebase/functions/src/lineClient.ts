@@ -1,7 +1,7 @@
-export const lineClient = ({ linebotapi, linechannelaccesstoken }) => {
+export const lineClient = ({ lineBotApi, lineChannelAccessToken }) => {
   const request = require('request')
-  const messageApiUrl = `${linebotapi}/message/push`
-  const profileApiUrl = `${linebotapi}/profile`
+  const messageApiUrl = `${lineBotApi}/message/push`
+  const profileApiUrl = `${lineBotApi}/profile`
 
   const postJSON = (url, data, opts) => new Promise((resolve, reject) => {
     request({
@@ -48,7 +48,7 @@ export const lineClient = ({ linebotapi, linechannelaccesstoken }) => {
   })
 
   const headers = {
-    'Authorization': `Bearer ${linechannelaccesstoken}`,
+    'Authorization': `Bearer ${lineChannelAccessToken}`,
   }
 
   const sendMessages = (recipientId, ...messages) => {

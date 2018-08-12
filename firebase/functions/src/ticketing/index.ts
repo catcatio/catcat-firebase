@@ -1,4 +1,4 @@
-export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNetwork, masterAssetCode, masterIssuerKey, masterDistributorKey, ticketconfirmurl, ticketqrurl, imageresizeservice }) => {
+export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNetwork, masterAssetCode, masterIssuerKey, masterDistributorKey, ticketConfirmUrl, ticketQrUrl, imageResizeService }) => {
   const { fbTemplate } = require('claudia-bot-builder')
   const StellarSdk = require('stellar-sdk')
   const firestoreRepoFactory = require('./firestoreRepository').default
@@ -39,7 +39,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
   }
 
   const lineEventListFormatter = (events) => {
-    console.log('lineEventListFormatter', events.length)
+    console.log('number of events', events.length)
     return {
       'type': 'flex',
       'altText': 'Event list',
@@ -137,32 +137,8 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
     }
   }
 
-
-  // const lineConfirmTemplateFormatter = (imageUrl, ownerDisplayName, ownerProvider, eventName, tx) => {
-  //   return {
-  //     'type': 'template',
-  //     'altText': `Confirm using ticket ${ownerDisplayName}`,
-  //     'template': {
-  //       'type': 'buttons',
-  //       'thumbnailImageUrl': `${imageresizeservice}${encodeURIComponent(imageUrl)}`,
-  //       'imageAspectRatio': 'rectangle',
-  //       'imageSize': 'cover',
-  //       'imageBackgroundColor': '#FFFFFF',
-  //       'title': `${ownerDisplayName} (Provider: ${ownerProvider})`,
-  //       'text': `Enter event ${eventName}?`,
-  //       'actions': [
-  //         {
-  //           'type': 'message',
-  //           'label': 'Confirm',
-  //           'text': `use ticket ${tx}`
-  //         }
-  //       ]
-  //     }
-  //   }
-  // }
-
   const lineConfirmTemplateFormatter = (imageUrl, ownerDisplayName, ownerProvider, eventTitle, tx) => {
-    console.log(`${imageresizeservice}${encodeURIComponent(imageUrl)}`)
+    console.log(`${imageResizeService}${encodeURIComponent(imageUrl)}`)
     return {
       'type': 'flex',
       'altText': `Confirm ticket ${eventTitle}`,
@@ -170,7 +146,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
         'type': 'bubble',
         'hero': {
           'type': 'image',
-          'url': `${imageresizeservice}${encodeURIComponent(imageUrl)}`,
+          'url': `${imageResizeService}${encodeURIComponent(imageUrl)}`,
           'size': 'full',
           'aspectRatio': '20:13',
           'aspectMode': 'cover'
@@ -438,8 +414,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
       const ticket = await eventStore.getTicketById(event.id, Object.keys(user.bought_tickets[event.id])[0])
       if (ticket) {
         console.log(JSON.stringify(ticket, null, 2))
-        // const ticketUrl = `${qrcodeservice}${encodeURIComponent(`${ticketconfirmurl}/${ticket.bought_tx}`)}`
-        const currTicketUrl = `${ticketqrurl}/${event.id}/${ticket.id}/${requestSource.toLowerCase()}_${from}/${ticket.bought_tx}`
+        const currTicketUrl = `${ticketQrUrl}/${event.id}/${ticket.id}/${requestSource.toLowerCase()}_${from}/${ticket.bought_tx}`
         retPromise = retPromise.then(() => messageSender.sendMessage(from, 'Here is your ticket'))
         retPromise = retPromise.then(() => messageSender.sendImage(from, currTicketUrl, currTicketUrl))
         retPromise = retPromise.then(() => messageSender.sendCustomMessages(from, lineTicketTemplateFormatter(event, currTicketUrl)))
@@ -476,9 +451,9 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
     await userStore.updateBoughtTicket(user.id, tmpEvent.id, unusedTicket.id)
     console.log(`updateBoughtTicket ${bought_tx}: ${Date.now() - startTime}`); startTime = Date.now()
 
-    // const confirmTicketUrl = `${ticketconfirmurl}/${bought_tx}`
+    // const confirmTicketUrl = `${ticketConfirmUrl}/${bought_tx}`
     // const qrCodeUrl = `${qrcodeservice}${encodeURIComponent(confirmTicketUrl)}`
-    const ticketUrl = `${ticketqrurl}/${tmpEvent.id}/${unusedTicket.id}/${requestSource.toLowerCase()}_${from}/${bought_tx}`
+    const ticketUrl = `${ticketQrUrl}/${tmpEvent.id}/${unusedTicket.id}/${requestSource.toLowerCase()}_${from}/${bought_tx}`
     console.log(ticketUrl)
 
     await messageSender.sendImage(from, ticketUrl, ticketUrl)
@@ -626,7 +601,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
     console.log(`get user profile: ${Date.now() - startTime}`); startTime = Date.now()
 
 
-    const confirmTicketUrl = `${ticketconfirmurl}/${tx}`
+    const confirmTicketUrl = `${ticketConfirmUrl}/${tx}`
     const params = {
       'text': confirmTicketUrl,
       'logoUrl': profile.pictureUrl || 'empty',
