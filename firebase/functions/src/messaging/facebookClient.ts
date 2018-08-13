@@ -1,4 +1,6 @@
-export const facebookClient = ({fbUrl, fbAccessToken}) => {
+import { IMessagingClient } from './messagingClient'
+
+export const facebookClient = ({fbUrl, fbAccessToken}): IMessagingClient => {
   const { postJSON } = require('@rabbotio/fetcher')
   const url = `${fbUrl}?access_token=${fbAccessToken}`
   const sendImage = async (recipientId, imageUrl) => {
@@ -44,9 +46,15 @@ export const facebookClient = ({fbUrl, fbAccessToken}) => {
     return postJSON(url, payload).catch(err => console.log(err))
   }
 
+  const getProfile = () => {
+    return {}
+  }
+
   return {
     sendImage,
     sendMessage,
-    sendCustomMessages
+    sendCustomMessages,
+    getProfile,
+    providerName: 'facebook'
   }
 }

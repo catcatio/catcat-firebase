@@ -1,4 +1,7 @@
-export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNetwork, masterAssetCode, masterIssuerKey, masterDistributorKey, ticketConfirmUrl, ticketQrUrl, imageResizeService }) => {
+import { IMessageingProvider } from '../messaging'
+import { IFirebaseConfig } from '../firebaseConfig'
+
+export const ticketing = (messagingProvider: IMessageingProvider, { firestore, stellarUrl, stellarNetwork, masterAssetCode, masterIssuerKey, masterDistributorKey, ticketConfirmUrl, ticketQrUrl, imageResizeService }: IFirebaseConfig) => {
   const { fbTemplate } = require('claudia-bot-builder')
   const StellarSdk = require('stellar-sdk')
   const firestoreRepoFactory = require('./firestoreRepository').default
@@ -376,13 +379,13 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
   const listEvent = async ({ requestSource, from }) => {
     const events = await eventStore.getAllEvents()
     const formatter = requestSource === 'LINE' ? lineEventListFormatter : facebookEventListFormatter
-    const messageSender = requestSource === 'LINE' ? line : facebook
+    const messageSender = messagingProvider.get(requestSource)
     return messageSender.sendCustomMessages(from, formatter(events))
   }
 
   const bookEvent = async ({ requestSource, from }, eventTitle) => {
     console.log(`${requestSource}: ${from} start book event`)
-    const messageSender = requestSource === 'LINE' ? line : facebook
+    const messageSender = messagingProvider.get(requestSource)
     // Get Event by title
     const atBeginning = Date.now()
     let startTime = atBeginning
@@ -487,7 +490,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
 
     const orgAddress = event.providers.line || event.providers.facebook
     // const provider = event.providers.line ? 'line' : 'facebook'
-    const orgMessageSender = event.providers.line ? line : facebook
+    const orgMessageSender = messagingProvider.get(event.providers)
     // const formatter = event.providers.line ? lineQuickReplyFormatter : facebookQuickReplyFormatter
 
     const ticket = await eventStore.getTicketById(txAction.eventId, txAction.ticketId)
@@ -515,7 +518,8 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
       return Promise.reject('EVENT_TICKET_USED')
     }
 
-    const profile = owner.providers.line ? await line.getProfile(owner.providers.line) : null
+    const ownerMessageSender = messagingProvider.get(owner.providers)
+    const profile = owner.providers.line ? await ownerMessageSender.getProfile(owner.providers.line) : null
     const ownerProvider = owner.providers.line ? 'line' : 'facebook'
     // post confirm options to organizer
     if (profile) {
@@ -543,7 +547,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
   }
 
   const useTicket = async (tx, orgRequestParams) => {
-    const orgMessageSender = orgRequestParams.requestSource === 'LINE' ? line : facebook
+    const orgMessageSender = messagingProvider.get(orgRequestParams.requestSource)
     orgMessageSender.sendMessage(orgRequestParams.from, `Burning ticket ${tx}`)
 
     // Validate the ticket
@@ -571,7 +575,7 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
       return orgMessageSender.sendMessage(orgRequestParams.from, 'Owner not found')
     }
 
-    const userMessageSender = owner.providers.line ? line : facebook
+    const userMessageSender = messagingProvider.get(owner.providers)
     const userAddress = owner.providers.line || owner.providers.facebook
 
     if (ticket.burnt_tx) {
@@ -597,7 +601,8 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
     let startTime = atBeginning
     const [provider, provierId] = userProvider.split('_')
     console.log(userProvider, provider, provierId)
-    const profile = provider === 'line' ? (await line.getProfile(provierId)) : {}
+    const messageSender = messagingProvider.get(provider)
+    const profile = provider === 'line' ? (await messageSender.getProfile(provierId)) : {}
     console.log(`get user profile: ${Date.now() - startTime}`); startTime = Date.now()
 
 
@@ -616,11 +621,8 @@ export const ticketing = ({ facebook, line }, { firestore, stellarUrl, stellarNe
 
   const sendWelcomeMessage = async ({ requestSource, from }) => {
     console.log(`send greeting message tp ${from}`)
-    if (requestSource !== 'LINE') {
-      return
-    }
-
-    return line.sendCustomMessages(from, lineWelcomeMessageFormatter('Hi there, how can I help you?', 'Show Events', 'Nothing'))
+    const messageSender = messagingProvider.get(requestSource)
+    return messageSender && messageSender.sendCustomMessages(from, lineWelcomeMessageFormatter('Hi there, how can I help you?', 'Show Events', 'Nothing'))
   }
 
   const isNewSession = async ({ session, from }) => {

@@ -2,13 +2,13 @@ import { config } from 'firebase-functions'
 import * as admin from 'firebase-admin'
 
 admin.initializeApp(config().firebase)
-const database = null // admin.database()
+const database = admin.database()
 const firestore = admin.firestore()
 firestore.settings({ timestampsInSnapshots: true })
 
 const ticketingConfig = config().ticketing
 
-export default {
+const firebaseConfig: IFirebaseConfig = {
   firestore: firestore,
   database: database,
   stellarUrl: 'https://horizon-testnet.stellar.org',
@@ -24,3 +24,22 @@ export default {
   lineBotApi: ticketingConfig.linebotapi,
   lineChannelAccessToken: ticketingConfig.linechannelaccesstoken
 }
+
+export interface IFirebaseConfig {
+  firestore?: admin.firestore.Firestore,
+  database: admin.database.Database,
+  stellarUrl: string,
+  stellarNetwork: 'test' | 'live',
+  masterAssetCode: string,
+  masterIssuerKey: string,
+  masterDistributorKey: string,
+  fbAccessToken: string,
+  imageResizeService: string,
+  fbUrl: string,
+  ticketConfirmUrl: string,
+  ticketQrUrl: string,
+  lineBotApi: string,
+  lineChannelAccessToken: string
+}
+
+export default firebaseConfig

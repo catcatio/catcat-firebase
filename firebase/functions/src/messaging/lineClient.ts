@@ -1,4 +1,6 @@
-export const lineClient = ({ lineBotApi, lineChannelAccessToken }) => {
+import { IMessagingClient } from './messagingClient'
+
+export const lineClient = ({ lineBotApi, lineChannelAccessToken }): IMessagingClient => {
   const request = require('request')
   const messageApiUrl = `${lineBotApi}/message/push`
   const profileApiUrl = `${lineBotApi}/profile`
@@ -95,6 +97,7 @@ export const lineClient = ({ lineBotApi, lineChannelAccessToken }) => {
     sendImage,
     sendMessage,
     sendCustomMessages,
-    getProfile
+    getProfile,
+    providerName: 'line'
   }
 }

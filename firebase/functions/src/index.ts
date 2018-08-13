@@ -1,15 +1,14 @@
 import { linkApi, ozApi } from './api'
-import { facebookClient, lineClient } from './messagingClient'
+import { initMessagingProvider } from './messaging'
 import { wrapApi } from './utils/wrapApi'
 import firebaseConfig from './firebaseConfig'
 
 console.log(`functions started: ${process.version}`)
 
-const line = lineClient(firebaseConfig)
-const facebook = facebookClient(firebaseConfig)
+const messagingProvider = initMessagingProvider(firebaseConfig)
 
 const link = wrapApi(linkApi(firebaseConfig))
-const oz = wrapApi(ozApi({ line, facebook }, firebaseConfig))
+const oz = wrapApi(ozApi(messagingProvider, firebaseConfig))
 
 export {
   link,
