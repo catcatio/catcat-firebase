@@ -1,7 +1,7 @@
 import { Request, Response, RequestHandler } from 'express'
 import * as request from 'request'
 
-export const apiPath = '/ticket/:eventId/:ticketId/:userProvider/:tx'
+export const apiPath = '/v1/ticket/:eventId/:ticketId/:userProvider/:tx'
 
 export default (ticketingSystem): RequestHandler => {
   return async (req: Request, res: Response) => {

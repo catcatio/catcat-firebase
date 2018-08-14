@@ -1,13 +1,15 @@
 import { IMessageingProvider } from '../messaging'
 import { IFirebaseConfig } from '../firebaseConfig'
+import { initMessageFormatterProvider } from './formatterProvider'
 
-export const ticketing = (messagingProvider: IMessageingProvider, { firestore, stellarUrl, stellarNetwork, masterAssetCode, masterIssuerKey, masterDistributorKey, ticketConfirmUrl, ticketQrUrl, imageResizeService }: IFirebaseConfig) => {
-  const { fbTemplate } = require('claudia-bot-builder')
+export const ticketing = (messagingProvider: IMessageingProvider, firebaseConfig: IFirebaseConfig) => {
+  const { firestore, stellarUrl, stellarNetwork, masterAssetCode, masterIssuerKey, masterDistributorKey, ticketConfirmUrl, ticketQrUrl } = firebaseConfig
   const StellarSdk = require('stellar-sdk')
   const firestoreRepoFactory = require('./firestoreRepository').default
   const eventStoreFactory = require('./eventStore').default
   const userStoreFactory = require('./userStore').default
   const stellarWrapperFactory = require('./stellarWrapper').default
+  const messageFormatterProvider = initMessageFormatterProvider(firebaseConfig)
 
   const masterDistributor = StellarSdk.Keypair.fromSecret(masterDistributorKey)
   const masterIssuer = StellarSdk.Keypair.fromSecret(masterIssuerKey)
@@ -25,367 +27,18 @@ export const ticketing = (messagingProvider: IMessageingProvider, { firestore, s
   const sessionsRepository = firestoreRepoFactory(firestore, 'sessions')
   const userStore = userStoreFactory(userRepository, tempUserRepository, providersRepository)
 
-  const limitChar = (str, limit) => {
-    return str.substr(0, limit)
-  }
-
-  const facebookEventListFormatter = (events) => {
-    const generic = new fbTemplate.Generic()
-    events.forEach(event => {
-      generic.addBubble(event.title, event.description)
-        .addImage(event.coverImage)
-        .addDefaultAction(event.link)
-        .addButton('See more detail', event.link)
-        .addButton(`Join ${event.title}`, `Join ${event.title}`)
-    })
-    return generic.get()
-  }
-
-  const lineEventListFormatter = (events) => {
-    console.log('number of events', events.length)
-    return {
-      'type': 'flex',
-      'altText': 'Event list',
-      'contents': {
-        'type': 'carousel',
-        'contents': events.map(event => ({
-          'type': 'bubble',
-          'hero': {
-            'type': 'image',
-            'size': 'full',
-            'aspectRatio': '20:13',
-            'aspectMode': 'cover',
-            'url': event.coverImage
-          },
-          'body': {
-            'type': 'box',
-            'layout': 'vertical',
-            'spacing': 'sm',
-            'contents': [
-              {
-                'type': 'text',
-                'text': event.title,
-                'wrap': true,
-                'weight': 'bold',
-                'size': 'xl'
-              },
-              {
-                'type': 'box',
-                'layout': 'baseline',
-                'contents': [
-                  {
-                    'type': 'text',
-                    'text': `${limitChar(event.description, 60)}`,
-                    'wrap': true,
-                    'size': 'md',
-                    'flex': 0
-                  }
-                ]
-              },
-              {
-                'type': 'text',
-                'text': `Remains ${40} from ${event.limit}`,
-                'wrap': true,
-                'weight': 'bold',
-                'size': 'xs',
-                'margin': 'md',
-                'color': '#222222',
-                'flex': 0
-              }
-            ]
-          },
-          'footer': {
-            'type': 'box',
-            'layout': 'vertical',
-            'spacing': 'sm',
-            'contents': [
-              {
-                'type': 'button',
-                'style': 'primary',
-                'action': {
-                  'type': 'message',
-                  'label': 'JOIN',
-                  'text': `Join ${event.title}`,
-                }
-              },
-              {
-                'type': 'button',
-                'action': {
-                  'type': 'uri',
-                  'label': 'MORE',
-                  'uri': event.link
-                }
-              }
-            ]
-          }
-        })),
-      }
-    }
-  }
-
-  const lineWelcomeMessageFormatter = (message, ...options) => {
-    return {
-      'type': 'text',
-      'text': message,
-      'quickReply': {
-        'items': options.map(op => ({
-          'type': 'action',
-          'action': {
-            'type': 'message',
-            'label': op,
-            'text': op
-          }
-        }))
-      }
-    }
-  }
-
-  const lineConfirmTemplateFormatter = (imageUrl, ownerDisplayName, ownerProvider, eventTitle, tx) => {
-    console.log(`${imageResizeService}${encodeURIComponent(imageUrl)}`)
-    return {
-      'type': 'flex',
-      'altText': `Confirm ticket ${eventTitle}`,
-      'contents': {
-        'type': 'bubble',
-        'hero': {
-          'type': 'image',
-          'url': `${imageResizeService}${encodeURIComponent(imageUrl)}`,
-          'size': 'full',
-          'aspectRatio': '20:13',
-          'aspectMode': 'cover'
-        },
-        'body': {
-          'type': 'box',
-          'layout': 'vertical',
-          'spacing': 'md',
-          'contents': [
-            {
-              'type': 'text',
-              'text': `${ownerDisplayName} (${ownerProvider})`,
-              'wrap': true,
-              'weight': 'bold',
-              'gravity': 'center',
-              'size': 'xl'
-            },
-            {
-              'type': 'text',
-              'text': eventTitle,
-              'wrap': true,
-              'weight': 'bold',
-              'gravity': 'center',
-              'size': 'md'
-            },
-            {
-              'type': 'button',
-              'style': 'primary',
-              'action': {
-                'type': 'message',
-                'label': 'CONFIRM',
-                'text': `use ticket ${tx}`,
-              }
-            },
-          ]
-        }
-      }
-    }
-  }
-
-  const lineTicketBubbleFormatter = (event, ticketUrl) => {
-    return {
-      'type': 'bubble',
-      'hero': {
-        'type': 'image',
-        'url': `${event.coverImage}`,
-        'size': 'full',
-        'aspectRatio': '20:13',
-        'aspectMode': 'cover',
-        'action': {
-          'type': 'uri',
-          'uri': event.link
-        }
-      },
-      'body': {
-        'type': 'box',
-        'layout': 'vertical',
-        'spacing': 'md',
-        'contents': [
-          {
-            'type': 'text',
-            'text': event.title,
-            'wrap': true,
-            'weight': 'bold',
-            'gravity': 'center',
-            'size': 'xl'
-          },
-          {
-            'type': 'box',
-            'layout': 'baseline',
-            'margin': 'md',
-            'contents': [
-              {
-                'type': 'icon',
-                'size': 'sm',
-                'url': 'https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png'
-              },
-              {
-                'type': 'icon',
-                'size': 'sm',
-                'url': 'https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png'
-              },
-              {
-                'type': 'icon',
-                'size': 'sm',
-                'url': 'https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png'
-              },
-              {
-                'type': 'icon',
-                'size': 'sm',
-                'url': 'https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png'
-              },
-              {
-                'type': 'icon',
-                'size': 'sm',
-                'url': 'https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gray_star_28.png'
-              },
-              {
-                'type': 'text',
-                'text': '4.0',
-                'size': 'sm',
-                'color': '#999999',
-                'margin': 'md',
-                'flex': 0
-              }
-            ]
-          },
-          {
-            'type': 'box',
-            'layout': 'vertical',
-            'margin': 'lg',
-            'spacing': 'sm',
-            'contents': [
-              {
-                'type': 'box',
-                'layout': 'baseline',
-                'spacing': 'sm',
-                'contents': [
-                  {
-                    'type': 'text',
-                    'text': 'Date',
-                    'color': '#aaaaaa',
-                    'size': 'sm',
-                    'flex': 1
-                  },
-                  {
-                    'type': 'text',
-                    'text': event.startDate,
-                    'wrap': true,
-                    'size': 'sm',
-                    'color': '#666666',
-                    'flex': 4
-                  }
-                ]
-              },
-              {
-                'type': 'box',
-                'layout': 'baseline',
-                'spacing': 'sm',
-                'contents': [
-                  {
-                    'type': 'text',
-                    'text': 'Place',
-                    'color': '#aaaaaa',
-                    'size': 'sm',
-                    'flex': 1
-                  },
-                  {
-                    'type': 'text',
-                    'text': '7 Floor, No.3',
-                    'wrap': true,
-                    'color': '#666666',
-                    'size': 'sm',
-                    'flex': 4
-                  }
-                ]
-              },
-              {
-                'type': 'box',
-                'layout': 'baseline',
-                'spacing': 'sm',
-                'contents': [
-                  {
-                    'type': 'text',
-                    'text': 'Seats',
-                    'color': '#aaaaaa',
-                    'size': 'sm',
-                    'flex': 1
-                  },
-                  {
-                    'type': 'text',
-                    'text': 'HUBBA',
-                    'wrap': true,
-                    'color': '#666666',
-                    'size': 'sm',
-                    'flex': 4
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            'type': 'box',
-            'layout': 'vertical',
-            'margin': 'xxl',
-            'contents': [
-              {
-                'type': 'spacer'
-              },
-              {
-                'type': 'image',
-                'url': ticketUrl,
-                'aspectMode': 'cover',
-                'size': 'xl'
-              },
-              {
-                'type': 'text',
-                'text': 'You can enter the event by using this code instead of a ticket',
-                'color': '#aaaaaa',
-                'wrap': true,
-                'margin': 'xxl',
-                'size': 'xs'
-              }
-            ]
-          }
-        ]
-      }
-    }
-  }
-
-  const lineTicketTemplateFormatter = (event, ticketUrl) => {
-    return {
-      'type': 'flex',
-      'altText': 'Here is your ticket',
-      'contents': lineTicketBubbleFormatter(event, ticketUrl)
-    }
-  }
-
-  // const facebookQuickReplyFormatter = (message, tx) => {
-  //   const text = new fbTemplate.Text(message);
-  //   return text
-  //     .addQuickReply('Confirm', `use ticket ${tx}`)
-  //     .addQuickReply('Cancel', `cancel`)
-  //     .get();
-  // }
-
   const listEvent = async ({ requestSource, from }) => {
     const events = await eventStore.getAllEvents()
-    const formatter = requestSource === 'LINE' ? lineEventListFormatter : facebookEventListFormatter
+    const formatter = messageFormatterProvider.get(requestSource)
+    console.log(messagingProvider)
     const messageSender = messagingProvider.get(requestSource)
-    return messageSender.sendCustomMessages(from, formatter(events))
+    return messageSender.sendCustomMessages(from, formatter.listEvents(events))
   }
 
   const bookEvent = async ({ requestSource, from }, eventTitle) => {
     console.log(`${requestSource}: ${from} start book event`)
     const messageSender = messagingProvider.get(requestSource)
+    const formatter = messageFormatterProvider.get(requestSource)
     // Get Event by title
     const atBeginning = Date.now()
     let startTime = atBeginning
@@ -420,7 +73,7 @@ export const ticketing = (messagingProvider: IMessageingProvider, { firestore, s
         const currTicketUrl = `${ticketQrUrl}/${event.id}/${ticket.id}/${requestSource.toLowerCase()}_${from}/${ticket.bought_tx}`
         retPromise = retPromise.then(() => messageSender.sendMessage(from, 'Here is your ticket'))
         retPromise = retPromise.then(() => messageSender.sendImage(from, currTicketUrl, currTicketUrl))
-        retPromise = retPromise.then(() => messageSender.sendCustomMessages(from, lineTicketTemplateFormatter(event, currTicketUrl)))
+        retPromise = retPromise.then(() => messageSender.sendCustomMessages(from, formatter.ticketTemplate(event, currTicketUrl)))
         console.log(currTicketUrl)
       }
 
@@ -454,14 +107,11 @@ export const ticketing = (messagingProvider: IMessageingProvider, { firestore, s
     await userStore.updateBoughtTicket(user.id, tmpEvent.id, unusedTicket.id)
     console.log(`updateBoughtTicket ${bought_tx}: ${Date.now() - startTime}`); startTime = Date.now()
 
-    // const confirmTicketUrl = `${ticketConfirmUrl}/${bought_tx}`
-    // const qrCodeUrl = `${qrcodeservice}${encodeURIComponent(confirmTicketUrl)}`
     const ticketUrl = `${ticketQrUrl}/${tmpEvent.id}/${unusedTicket.id}/${requestSource.toLowerCase()}_${from}/${bought_tx}`
     console.log(ticketUrl)
-
     await messageSender.sendImage(from, ticketUrl, ticketUrl)
       .then(() => messageSender.sendMessage(from, `See you at '${eventTitle}'! Do show this QR when attend`))
-    await messageSender.sendCustomMessages(from, lineTicketTemplateFormatter(event, ticketUrl))
+    await messageSender.sendCustomMessages(from, formatter.ticketTemplate(event, ticketUrl))
 
     console.log(`total book time: ${Date.now() - atBeginning}`); startTime = Date.now()
     console.info('EVENT_BOOK_OK')
@@ -489,9 +139,7 @@ export const ticketing = (messagingProvider: IMessageingProvider, { firestore, s
     }
 
     const orgAddress = event.providers.line || event.providers.facebook
-    // const provider = event.providers.line ? 'line' : 'facebook'
     const orgMessageSender = messagingProvider.get(event.providers)
-    // const formatter = event.providers.line ? lineQuickReplyFormatter : facebookQuickReplyFormatter
 
     const ticket = await eventStore.getTicketById(txAction.eventId, txAction.ticketId)
     console.log(`get ticket ${txAction.eventId} ${txAction.ticketId}: ${Date.now() - startTime}`); startTime = Date.now()
@@ -509,9 +157,6 @@ export const ticketing = (messagingProvider: IMessageingProvider, { firestore, s
       return Promise.reject('EVENT_OWNER_NOTFOUND')
     }
 
-    // const messageSender = owner.providers.line ? line : facebook
-    // const userAddress = owner.providers.line || owner.providers.facebook
-
     if (ticket.burnt_tx) {
       console.error('EVENT_TICKET_USED')
       await orgMessageSender.sendMessage(orgAddress, `Ticket has been used ${tx}`)
@@ -524,13 +169,10 @@ export const ticketing = (messagingProvider: IMessageingProvider, { firestore, s
     // post confirm options to organizer
     if (profile) {
       console.log(profile.pictureUrl)
-      const message = lineConfirmTemplateFormatter(profile.pictureUrl, profile.displayName, ownerProvider, event.title, tx)
+      const formatter = messageFormatterProvider.get(owner.providers)
+      const message = formatter.confirmTemplate(profile.pictureUrl, profile.displayName, ownerProvider, event.title, tx)
       await orgMessageSender.sendCustomMessages(orgAddress, message)
-      // await orgMessageSender.sendMessage(orgAddress, `Attendee (${provider}): ${profile.displayName}`)
-      // await orgMessageSender.sendImage(orgAddress, profile.pictureUrl, profile.pictureUrl)
     }
-
-    // await orgMessageSender.sendCustomMessages(orgAddress, formatter(`Confirm using ticket '${event.title}'?`, tx))
 
     console.log(`total ticket confirm time: ${Date.now() - atBeginning}`); startTime = Date.now()
     console.info('EVENT_TICKET_CONFIRMED')
@@ -622,10 +264,15 @@ export const ticketing = (messagingProvider: IMessageingProvider, { firestore, s
   const sendWelcomeMessage = async ({ requestSource, from }) => {
     console.log(`send greeting message tp ${from}`)
     const messageSender = messagingProvider.get(requestSource)
-    return messageSender && messageSender.sendCustomMessages(from, lineWelcomeMessageFormatter('Hi there, how can I help you?', 'Show Events', 'Nothing'))
+    const formatter = messageFormatterProvider.get(requestSource)
+    return messageSender && messageSender.sendCustomMessages(from, formatter.welcomeTemplate('Hi there, how can I help you?', 'Show Events', 'Nothing'))
   }
 
   const isNewSession = async ({ session, from }) => {
+    if (!session || !from) {
+      return false
+    }
+
     const lastSession = await sessionsRepository.get(from)
     if (!lastSession || lastSession.session !== session) {
       await sessionsRepository.put(from, { session })

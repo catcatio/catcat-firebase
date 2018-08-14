@@ -11,14 +11,20 @@ export const initMessagingProvider = (firebaseConfig): IMessageingProvider => {
     switch (lcProvider) {
       case line.providerName:
         return line
+
       case facebook.providerName:
         return facebook
+
       default:
         return null
     }
   }
 
   const fromObject = (ownerProviders: object): IMessagingClient => {
+    if (!ownerProviders) {
+      return null
+    }
+
     return ownerProviders.hasOwnProperty(line.providerName)
       ? line
       : ownerProviders.hasOwnProperty(facebook.providerName)
@@ -38,5 +44,5 @@ export const initMessagingProvider = (firebaseConfig): IMessageingProvider => {
 }
 
 export interface IMessageingProvider {
-  get(string): IMessagingClient
+  get: (string) => IMessagingClient
 }

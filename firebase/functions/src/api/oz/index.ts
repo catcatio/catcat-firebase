@@ -11,8 +11,9 @@ import { IMessageingProvider } from '../../messaging'
 import { IFirebaseConfig } from '../../firebaseConfig'
 
 export const ozApi = (messagingProvider: IMessageingProvider, config: IFirebaseConfig): Express => {
-  const api = express()
   const ticketingSystem = ticketing(messagingProvider, config)
+
+  const api = express()
   api.use(Cors({ origin: true }))
   api.use(require('./fbdummy').fbdummy) // use static response for facebook, until app review process complete
 

@@ -1,7 +1,7 @@
 import { Request, Response, RequestHandler } from 'express'
 import { sendDialogflowTextMessage } from './dialogflowHelper'
 
-export const apiPath = '/confirm/:bought_tx'
+export const apiPath = '/v1/confirm/:bought_tx'
 
 export default (ticketingSystem): RequestHandler => {
   return (req: Request, res: Response) => {
