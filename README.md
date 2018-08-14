@@ -36,6 +36,7 @@ npm run deploy
 # Deploy asia region
 npm run deploy:asia
 ```
+
 - - -
 
 ## TODO - Alpha
@@ -48,13 +49,13 @@ npm run deploy:asia
 
 #### List process
 
-- [ ] User will see `ticket_brought/ticket_max` beside `BOOK` button.
+- [x] User will see `ticket_brought/ticket_max` beside `BOOK` button.
 
   ```txt
   BOOK (10/100)
   ```
 
-- [ ] Event list cards to support desktop version
+- [x] Event list cards to support desktop version
 
 - - -
 

@@ -6,7 +6,6 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
   }
 
   const listEvents = (events: any[]) => {
-    console.log('number of events', events.length)
     return {
       'type': 'flex',
       'altText': 'Event list',
@@ -48,7 +47,7 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
               },
               {
                 'type': 'text',
-                'text': `Remains ${40} from ${event.limit}`,
+                'text': `BOOKED (${event.ticket_bought || 0}/${event.ticket_max})`,
                 'wrap': true,
                 'weight': 'bold',
                 'size': 'xs',

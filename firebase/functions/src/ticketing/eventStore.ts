@@ -8,7 +8,7 @@ const eventStoreFactory = (eventRepository) => {
   }
 
   const getOrCreate = async (event) => {
-    const createdEvent  = await eventRepository.get(event.code)
+    const createdEvent = await eventRepository.get(event.code)
     if (createdEvent) {
       return Event.fromJSON(createdEvent)
     }
@@ -67,7 +67,24 @@ const eventStoreFactory = (eventRepository) => {
       })
   }
 
+  const incrementTicketCount = async (eventId, fieldName, amount) => {
+    const currentBoughtTicketCount = (await getById(eventId))[fieldName] || 0
+    return eventRepository.update(eventId, {
+      [fieldName]: currentBoughtTicketCount + amount
+    })
+  }
+
+  const incrementBoughtTicketCount = async (eventId, amount = 1) => {
+    return incrementTicketCount(eventId, 'ticket_bought', amount)
+  }
+
+  const incrementBurntTicketCount = async (eventId, amount = 1) => {
+    return incrementTicketCount(eventId, 'ticket_burnt', amount)
+  }
+
   const updateBoughtTicket = async (user, event, ticket, bought_tx) => {
+    await incrementBoughtTicketCount(event.id)
+
     const ticketsCollection = eventRepository.collection.doc(event.id).collection('tickets')
     return await ticketsCollection.doc(ticket.id).update({
       bought_tx,
@@ -81,6 +98,8 @@ const eventStoreFactory = (eventRepository) => {
   }
 
   const updateBurntTicket = async (eventId, ticketId, burnt_tx) => {
+    await incrementBurntTicketCount(eventId)
+
     const ticketsCollection = eventRepository.collection.doc(eventId).collection('tickets')
     return await ticketsCollection.doc(ticketId).update({
       burnt_tx,
@@ -97,7 +116,7 @@ const eventStoreFactory = (eventRepository) => {
     getUnusedTicket,
     getTicketById,
     updateBoughtTicket,
-    updateBurntTicket
+    updateBurntTicket,
   }
 }
 
