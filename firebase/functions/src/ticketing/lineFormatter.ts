@@ -1,89 +1,69 @@
 import { IMessageFormatter } from './messageFormatter'
+import { FlexMessage, FlexImage } from '@line/bot-sdk'
+import { FlexMessageBuilder, FlexComponentBuilder } from './lineMessageBuilder'
 
 export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter => {
   const limitChar = (str, limit) => {
     return str.substr(0, limit)
   }
 
-  const listEvents = (events: any[]) => {
-    return {
-      'type': 'flex',
-      'altText': 'Event list',
-      'contents': {
-        'type': 'carousel',
-        'contents': events.map(event => ({
-          'type': 'bubble',
-          'hero': {
-            'type': 'image',
-            'size': 'full',
-            'aspectRatio': '20:13',
-            'aspectMode': 'cover',
-            'url': event.coverImage
-          },
-          'body': {
-            'type': 'box',
-            'layout': 'vertical',
-            'spacing': 'sm',
-            'contents': [
-              {
-                'type': 'text',
-                'text': event.title,
-                'wrap': true,
-                'weight': 'bold',
-                'size': 'xl'
-              },
-              {
-                'type': 'box',
-                'layout': 'baseline',
-                'contents': [
-                  {
-                    'type': 'text',
-                    'text': `${limitChar(event.description, 60)}`,
-                    'wrap': true,
-                    'size': 'md',
-                    'flex': 0
-                  }
-                ]
-              },
-              {
-                'type': 'text',
-                'text': `BOOKED (${event.ticket_bought || 0}/${event.ticket_max})`,
-                'wrap': true,
-                'weight': 'bold',
-                'size': 'xs',
-                'margin': 'md',
-                'color': '#222222',
-                'flex': 0
-              }
-            ]
-          },
-          'footer': {
-            'type': 'box',
-            'layout': 'vertical',
-            'spacing': 'sm',
-            'contents': [
-              {
-                'type': 'button',
-                'style': 'primary',
-                'action': {
-                  'type': 'message',
-                  'label': 'JOIN',
-                  'text': `Join ${event.title}`,
-                }
-              },
-              {
-                'type': 'button',
-                'action': {
-                  'type': 'uri',
-                  'label': 'MORE',
-                  'uri': event.link
-                }
-              }
-            ]
-          }
-        })),
-      }
-    }
+  const listEvents = (events: any[]): FlexMessage => {
+    const lineTemplate = new FlexMessageBuilder()
+    const template = lineTemplate.flexMessage('Event list')
+      .addCarousel()
+
+    events.forEach(event =>
+      template.addBubble()
+        .addHero(FlexComponentBuilder.flexImage()
+          .setUrl(`${imageResizeService}${encodeURIComponent(event.coverImage)}`)
+          .setSize('full')
+          .setAspectRatio('1.91:1')
+          .setAspectMode('cover')
+          .build() as FlexImage)
+        .addBody()
+        .setLayout('vertical')
+        .setSpacing('sm')
+        .addComponents(
+          FlexComponentBuilder.flexText()
+            .setText(event.title)
+            .setWrap(true)
+            .setWeight('bold')
+            .setSize('xl')
+            .build(),
+          FlexComponentBuilder.flexText()
+            .setText(`${limitChar(event.description, 60)}`)
+            .setWrap(true)
+            .setWeight('bold')
+            .setSize('md')
+            .build(),
+          FlexComponentBuilder.flexText()
+            .setText(`BOOKED (${event.ticket_bought || 0}/${event.ticket_max})`)
+            .setWrap(true)
+            .setWeight('bold')
+            .setSize('xs')
+            .setMargin('md')
+            .setColor('#222222')
+            .build())
+        .addFooter()
+        .setSpacing('sm')
+        .addComponents(FlexComponentBuilder.flexButton()
+          .setStyle('primary')
+          .setAction({
+            'type': 'message',
+            'label': 'JOIN',
+            'text': `Join ${event.title}`,
+          })
+          .build())
+        .addComponents(FlexComponentBuilder.flexButton()
+          .setAction({
+            'type': 'uri',
+            'label': 'MORE',
+            'uri': event.link
+          })
+          .build())
+    )
+
+    return template.build()
   }
 
   const welcomeTemplate = (message, ...options) => {
@@ -105,230 +85,134 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
 
   const confirmTemplate = (imageUrl, ownerDisplayName, ownerProvider, eventTitle, tx) => {
     console.log(`${imageResizeService}${encodeURIComponent(imageUrl)}`)
-    return {
-      'type': 'flex',
-      'altText': `Confirm ticket ${eventTitle}`,
-      'contents': {
-        'type': 'bubble',
-        'hero': {
-          'type': 'image',
-          'url': `${imageResizeService}${encodeURIComponent(imageUrl)}`,
-          'size': 'full',
-          'aspectRatio': '20:13',
-          'aspectMode': 'cover'
-        },
-        'body': {
-          'type': 'box',
-          'layout': 'vertical',
-          'spacing': 'md',
-          'contents': [
-            {
-              'type': 'text',
-              'text': `${ownerDisplayName} (${ownerProvider})`,
-              'wrap': true,
-              'weight': 'bold',
-              'gravity': 'center',
-              'size': 'xl'
-            },
-            {
-              'type': 'text',
-              'text': eventTitle,
-              'wrap': true,
-              'weight': 'bold',
-              'gravity': 'center',
-              'size': 'md'
-            },
-            {
-              'type': 'button',
-              'style': 'primary',
-              'action': {
-                'type': 'message',
-                'label': 'CONFIRM',
-                'text': `use ticket ${tx}`,
-              }
-            },
-          ]
-        }
-      }
-    }
-  }
 
-  const lineTicketBubbleFormatter = (event, ticketUrl) => {
-    return {
-      'type': 'bubble',
-      'hero': {
-        'type': 'image',
-        'url': `${event.coverImage}`,
-        'size': 'full',
-        'aspectRatio': '20:13',
-        'aspectMode': 'cover',
-        'action': {
-          'type': 'uri',
-          'uri': event.link
-        }
-      },
-      'body': {
-        'type': 'box',
-        'layout': 'vertical',
-        'spacing': 'md',
-        'contents': [
-          {
-            'type': 'text',
-            'text': event.title,
-            'wrap': true,
-            'weight': 'bold',
-            'gravity': 'center',
-            'size': 'xl'
-          },
-          {
-            'type': 'box',
-            'layout': 'baseline',
-            'margin': 'md',
-            'contents': [
-              {
-                'type': 'icon',
-                'size': 'sm',
-                'url': 'https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png'
-              },
-              {
-                'type': 'icon',
-                'size': 'sm',
-                'url': 'https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png'
-              },
-              {
-                'type': 'icon',
-                'size': 'sm',
-                'url': 'https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png'
-              },
-              {
-                'type': 'icon',
-                'size': 'sm',
-                'url': 'https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png'
-              },
-              {
-                'type': 'icon',
-                'size': 'sm',
-                'url': 'https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gray_star_28.png'
-              },
-              {
-                'type': 'text',
-                'text': '4.0',
-                'size': 'sm',
-                'color': '#999999',
-                'margin': 'md',
-                'flex': 0
-              }
-            ]
-          },
-          {
-            'type': 'box',
-            'layout': 'vertical',
-            'margin': 'lg',
-            'spacing': 'sm',
-            'contents': [
-              {
-                'type': 'box',
-                'layout': 'baseline',
-                'spacing': 'sm',
-                'contents': [
-                  {
-                    'type': 'text',
-                    'text': 'Date',
-                    'color': '#aaaaaa',
-                    'size': 'sm',
-                    'flex': 1
-                  },
-                  {
-                    'type': 'text',
-                    'text': event.startDate,
-                    'wrap': true,
-                    'size': 'sm',
-                    'color': '#666666',
-                    'flex': 4
-                  }
-                ]
-              },
-              {
-                'type': 'box',
-                'layout': 'baseline',
-                'spacing': 'sm',
-                'contents': [
-                  {
-                    'type': 'text',
-                    'text': 'Place',
-                    'color': '#aaaaaa',
-                    'size': 'sm',
-                    'flex': 1
-                  },
-                  {
-                    'type': 'text',
-                    'text': '7 Floor, No.3',
-                    'wrap': true,
-                    'color': '#666666',
-                    'size': 'sm',
-                    'flex': 4
-                  }
-                ]
-              },
-              {
-                'type': 'box',
-                'layout': 'baseline',
-                'spacing': 'sm',
-                'contents': [
-                  {
-                    'type': 'text',
-                    'text': 'Seats',
-                    'color': '#aaaaaa',
-                    'size': 'sm',
-                    'flex': 1
-                  },
-                  {
-                    'type': 'text',
-                    'text': 'HUBBA',
-                    'wrap': true,
-                    'color': '#666666',
-                    'size': 'sm',
-                    'flex': 4
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            'type': 'box',
-            'layout': 'vertical',
-            'margin': 'xxl',
-            'contents': [
-              {
-                'type': 'spacer'
-              },
-              {
-                'type': 'image',
-                'url': ticketUrl,
-                'aspectMode': 'cover',
-                'size': 'xl'
-              },
-              {
-                'type': 'text',
-                'text': 'You can enter the event by using this code instead of a ticket',
-                'color': '#aaaaaa',
-                'wrap': true,
-                'margin': 'xxl',
-                'size': 'xs'
-              }
-            ]
-          }
-        ]
-      }
-    }
+    const lineTemplate = new FlexMessageBuilder()
+    const template = lineTemplate.flexMessage(`Confirm ticket ${eventTitle}`)
+      .addBubble()
+      .addHero(FlexComponentBuilder.flexImage()
+        .setUrl(`${imageResizeService}${encodeURIComponent(imageUrl)}`)
+        .setSize('full')
+        .setAspectRatio('1:1')
+        .setAspectMode('cover')
+        .build() as FlexImage)
+      .addBody()
+      .setSpacing('md')
+      .addComponents(
+        FlexComponentBuilder.flexText()
+          .setText(`${ownerDisplayName} (${ownerProvider})`)
+          .setWrap(true)
+          .setWeight('bold')
+          .setGarvity('center')
+          .setSize('xl')
+          .build(),
+        FlexComponentBuilder.flexText()
+          .setText(eventTitle)
+          .setWrap(true)
+          .setWeight('bold')
+          .setGarvity('center')
+          .setSize('md')
+          .build(),
+        FlexComponentBuilder.flexButton()
+          .setStyle('primary')
+          .setAction({
+            'type': 'message',
+            'label': 'CONFIRM',
+            'text': `use ticket ${tx}`,
+          })
+          .build()
+      )
+
+    return template.build()
   }
 
   const ticketTemplate = (event, ticketUrl) => {
-    return {
-      'type': 'flex',
-      'altText': 'Here is your ticket',
-      'contents': lineTicketBubbleFormatter(event, ticketUrl)
-    }
+    console.log(`xx ${imageResizeService}${encodeURIComponent(event.coverImage)}`)
+    const lineTemplate = new FlexMessageBuilder()
+    const template = lineTemplate.flexMessage(`Your ticket: ${event.title}`)
+      .addBubble()
+      .addHero(FlexComponentBuilder.flexImage()
+        .setUrl(`${imageResizeService}${encodeURIComponent(event.coverImage)}`)
+        .setSize('full')
+        .setAspectRatio('1.91:1')
+        .setAspectMode('cover')
+        .setAction({
+          'type': 'uri',
+          'uri': event.link,
+          'label': event.title
+        })
+        .build() as FlexImage)
+      .addBody()
+      .setLayout('vertical')
+      .setSpacing('md')
+      .addComponents(
+        FlexComponentBuilder.flexText()
+          .setText(event.title)
+          .setWrap(true)
+          .setWeight('bold')
+          .setGravity('center')
+          .setSize('xl')
+          .build(),
+        FlexComponentBuilder.flexBox()
+          .setLayout('vertical')
+          .setMargin('lg')
+          .setSpacing('sm')
+          .addContents(
+            FlexComponentBuilder.flexBox()
+              .setLayout('baseline')
+              .setSpacing('sm')
+              .addContents(
+                FlexComponentBuilder.flexText()
+                  .setText('Info')
+                  .setColor('#aaaaaa')
+                  .setSize('sm')
+                  .setFlex(1)
+                  .build(),
+                FlexComponentBuilder.flexText()
+                  .setText(event.description)
+                  .setWrap(true)
+                  .setColor('#666666')
+                  .setSize('sm')
+                  .setFlex(4)
+                  .build()
+              )
+              .build(),
+            FlexComponentBuilder.flexBox()
+              .setLayout('baseline')
+              .setSpacing('sm')
+              .addContents(
+                FlexComponentBuilder.flexText()
+                  .setText('Date')
+                  .setColor('#aaaaaa')
+                  .setSize('sm')
+                  .setFlex(1)
+                  .build(),
+                FlexComponentBuilder.flexText()
+                  .setText(event.startDate)
+                  .setWrap(true)
+                  .setColor('#666666')
+                  .setSize('sm')
+                  .setFlex(4)
+                  .build()
+              )
+              .build()
+          )
+          .build(),
+          FlexComponentBuilder.flexImage()
+            .setUrl(ticketUrl)
+            .setAspectRatio('1:1')
+            .setAspectMode('cover')
+            .setSize('5xl')
+            .build(),
+          FlexComponentBuilder.flexText()
+            .setText('You can enter the event by using this code instead of a ticket')
+            .setColor('#aaaaaa')
+            .setWrap(true)
+            .setMargin('xxl')
+            .setSize('xs')
+            .build()
+      )
+
+    return template.build()
   }
 
   return {
