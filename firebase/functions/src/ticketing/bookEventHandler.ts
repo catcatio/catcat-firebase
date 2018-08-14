@@ -37,7 +37,7 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
       console.log(JSON.stringify(ticket, null, 2))
       const currTicketUrl = `${ticketQrUrl}/${event.id}/${ticket.id}/${requestSource.toLowerCase()}_${from}/${ticket.bought_tx}`
       retPromise = retPromise.then(() => messageSender.sendMessage(from, 'Here is your ticket'))
-      retPromise = retPromise.then(() => messageSender.sendImage(from, currTicketUrl, currTicketUrl))
+//      retPromise = retPromise.then(() => messageSender.sendImage(from, currTicketUrl, currTicketUrl))
       retPromise = retPromise.then(() => messageSender.sendCustomMessages(from, formatter.ticketTemplate(event, currTicketUrl)))
       console.log(currTicketUrl)
     }
@@ -59,7 +59,8 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
   tmpEvent.asset = new StellarSdk.Asset(event.id, event.issuer)
   tmpEvent.distributor = StellarSdk.Keypair.fromPublicKey(event.distributor)
 
-  const bought_tx = await stellarWrapper.doBookTicket(masterDistributor, masterAsset, userKey, tmpEvent, 1, `B:${tmpEvent.asset.getCode()}:${unusedTicket.id}`)
+  const boughtMemo = `B:${tmpEvent.asset.getCode()}:${unusedTicket.id}`
+  const bought_tx = await stellarWrapper.doBookTicket(masterDistributor, masterAsset, userKey, tmpEvent, 1, boughtMemo)
     .catch(() => null)
   console.log(`doBookTicket ${event.id}: ${Date.now() - startTime}`); startTime = Date.now()
 
@@ -69,14 +70,15 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
   }
 
   await eventStore.updateBoughtTicket(user, tmpEvent, unusedTicket, bought_tx)
+    .then(() => eventStore.saveMemo(bought_tx, boughtMemo))
   await userStore.updateBoughtTicket(user.id, tmpEvent.id, unusedTicket.id)
   console.log(`updateBoughtTicket ${bought_tx}: ${Date.now() - startTime}`); startTime = Date.now()
 
   const ticketUrl = `${ticketQrUrl}/${tmpEvent.id}/${unusedTicket.id}/${requestSource.toLowerCase()}_${from}/${bought_tx}`
   console.log(ticketUrl)
-  await messageSender.sendImage(from, ticketUrl, ticketUrl)
-    .then(() => messageSender.sendMessage(from, `See you at '${eventTitle}'! Do show this QR when attend`))
   await messageSender.sendCustomMessages(from, formatter.ticketTemplate(event, ticketUrl))
+    .then(() => messageSender.sendMessage(from, `See you at '${eventTitle}'! Do show this QR when attend`))
+  // await messageSender.sendCustomMessages(from, formatter.ticketTemplate(event, ticketUrl))
 
   console.log(`total book time: ${Date.now() - atBeginning}`); startTime = Date.now()
   console.info('EVENT_BOOK_OK')

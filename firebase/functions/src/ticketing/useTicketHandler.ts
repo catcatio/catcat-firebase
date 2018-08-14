@@ -1,10 +1,10 @@
 export default (eventStore, userStore, stellarWrapper, messagingProvider, messageFormatterProvider) => async (tx) => {
-  console.log('start confirm ticket')
+  console.log('start use ticket')
   const atBeginning = Date.now()
   let startTime = atBeginning
 
   // Validate the ticket
-  const txAction = await stellarWrapper.queryTransactionAction(tx)
+  const txAction = await eventStore.getMemo(tx)
   console.log(`get transaction by id: ${Date.now() - startTime}`); startTime = Date.now()
   if (!txAction || txAction.action !== 'B') {
     console.error('EVENT_TX_NOTFOUND')
@@ -54,7 +54,7 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
     await orgMessageSender.sendCustomMessages(orgAddress, message)
   }
 
-  console.log(`total ticket confirm time: ${Date.now() - atBeginning}`); startTime = Date.now()
-  console.info('EVENT_TICKET_CONFIRMED')
-  return 'EVENT_TICKET_CONFIRMED'
+  console.log(`total ticket use time: ${Date.now() - atBeginning}`); startTime = Date.now()
+  console.info('EVENT_TICKET_OK')
+  return 'EVENT_TICKET_OK'
 }

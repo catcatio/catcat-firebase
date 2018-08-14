@@ -126,7 +126,7 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
   }
 
   const ticketTemplate = (event, ticketUrl) => {
-    console.log(`xx ${imageResizeService}${encodeURIComponent(event.coverImage)}`)
+    console.log(`${imageResizeService}${encodeURIComponent(event.coverImage)}`)
     const lineTemplate = new FlexMessageBuilder()
     const template = lineTemplate.flexMessage(`Your ticket: ${event.title}`)
       .addBubble()

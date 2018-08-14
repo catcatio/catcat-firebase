@@ -1,6 +1,6 @@
 import { Event } from './Event'
 
-const eventStoreFactory = (eventRepository) => {
+const eventStoreFactory = (eventRepository, memosRepository) => {
   let stellarEventCreator = null
 
   const setEventCreator = (eventCreator) => {
@@ -106,6 +106,25 @@ const eventStoreFactory = (eventRepository) => {
     })
   }
 
+  const saveMemo = (tx: string, memo: string) => {
+    console.log('saveMemo', tx, memo)
+    return memosRepository.put(tx, { tx, memo })
+  }
+
+  const parseTxAction = (memoText) => {
+    if (!memoText) return null
+
+    const chunks = memoText.split(':')
+    if (chunks.length !== 3) return null
+
+    return { action: chunks[0], eventId: chunks[1], ticketId: chunks[2] }
+  }
+
+  const getMemo = async (tx: string) => {
+    const memo = await memosRepository.get(tx)
+    return memo ? parseTxAction(memo.memo) : null
+  }
+
   return {
     setEventCreator,
     getOrCreate,
@@ -117,6 +136,8 @@ const eventStoreFactory = (eventRepository) => {
     getTicketById,
     updateBoughtTicket,
     updateBurntTicket,
+    saveMemo,
+    getMemo
   }
 }
 

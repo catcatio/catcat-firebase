@@ -14,7 +14,7 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider) => asy
   orgMessageSender.sendMessage(orgRequestParams.from, `Burning ticket ${tx}`)
 
   // Validate the ticket
-  const txAction = await stellarWrapper.queryTransactionAction(tx)
+  const txAction = await eventStore.queryTransactionAction(tx)
   if (!txAction || txAction.action !== 'B') {
     console.error('EVENT_TX_NOTFOUND')
     return orgMessageSender.sendMessage(orgRequestParams.from, 'Tx not found')

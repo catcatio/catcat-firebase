@@ -20,11 +20,13 @@ export const ticketing = (messagingProvider: IMessageingProvider, firebaseConfig
 
   const stellarWrapper = stellarWrapperFactory(server, masterDistributor)
   const eventRepository = firestoreRepoFactory(firestore, 'events')
-  const eventStore = eventStoreFactory(eventRepository)
+  const memosRepository = firestoreRepoFactory(firestore, 'memos')
+  const eventStore = eventStoreFactory(eventRepository, memosRepository)
   const userRepository = firestoreRepoFactory(firestore, 'users')
   const tempUserRepository = firestoreRepoFactory(firestore, 'tmpusers')
   const providersRepository = firestoreRepoFactory(firestore, 'providers')
   const sessionsRepository = firestoreRepoFactory(firestore, 'sessions')
+
   const userStore = userStoreFactory(userRepository, tempUserRepository, providersRepository)
 
   const listEvent = require('./listEventsHandle').default(eventStore, messagingProvider, messageFormatterProvider)

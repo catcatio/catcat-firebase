@@ -39,7 +39,7 @@ export const lineClient = ({ lineBotApi, lineChannelAccessToken }): IMessagingCl
         console.log(err)
         return
       }
-      console.log(typeof body)
+
       if (typeof body === 'string') {
         resolve(JSON.parse(body))
       } else {
