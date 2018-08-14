@@ -19,7 +19,7 @@ const firebaseConfig: IFirebaseConfig = {
   fbAccessToken: ticketingConfig.fbaccesstoken,
   imageResizeService: ticketingConfig.imageresizeservice,
   fbUrl: ticketingConfig.fburl,
-  ticketConfirmUrl: ticketingConfig.ticketconfirmurl,
+  useTicketUrl: ticketingConfig.useticketurl,
   ticketQrUrl: ticketingConfig.ticketqrurl,
   lineBotApi: ticketingConfig.linebotapi,
   lineChannelAccessToken: ticketingConfig.linechannelaccesstoken
@@ -36,7 +36,7 @@ export interface IFirebaseConfig {
   fbAccessToken: string,
   imageResizeService: string,
   fbUrl: string,
-  ticketConfirmUrl: string,
+  useTicketUrl: string,
   ticketQrUrl: string,
   lineBotApi: string,
   lineChannelAccessToken: string

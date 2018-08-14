@@ -35,10 +35,10 @@ export default (ticketingSystem): RequestHandler => {
         return ticketingSystem.bookEvent(requestParams, title)
           .then(() => sendDialogflowTextMessage(res, ''))
 
-      case 'events.tickets.use-yes':
-        // use a ticket
+      case 'events.tickets.confirm-yes':
+        // confirm to burn a ticket
         const tx = req.body.parameters['tx']
-        return ticketingSystem.useTicket(tx, requestParams)
+        return ticketingSystem.confirmTicket(tx, requestParams)
           .then(() => sendDialogflowTextMessage(res, ''))
 
       case 'input.welcome':

@@ -117,7 +117,7 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
           .setAction({
             'type': 'message',
             'label': 'CONFIRM',
-            'text': `use ticket ${tx}`,
+            'text': `confirm ticket ${tx}`,
           })
           .build()
       )

@@ -5,7 +5,7 @@ import * as Cors from 'cors'
 
 import { ticketing } from '../../ticketing'
 import { default as apiHandler, apiPath } from './api'
-import { default as confirmApiHandler, apiPath as confirmApiPath } from './confirmApi'
+import { default as useTicketApiHandler, apiPath as useTicketApiPath } from './useTicketApi'
 import { default as qrApiHandler, apiPath as qrApiPath } from './qrApi'
 import { IMessageingProvider } from '../../messaging'
 import { IFirebaseConfig } from '../../firebaseConfig'
@@ -18,7 +18,7 @@ export const ozApi = (messagingProvider: IMessageingProvider, config: IFirebaseC
   api.use(require('./fbdummy').fbdummy) // use static response for facebook, until app review process complete
 
   api.post(apiPath, apiHandler(ticketingSystem))
-  api.get(confirmApiPath, confirmApiHandler(ticketingSystem))
+  api.get(useTicketApiPath, useTicketApiHandler(ticketingSystem))
   api.get(qrApiPath, qrApiHandler(ticketingSystem))
 
   return api

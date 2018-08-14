@@ -1,4 +1,4 @@
-export default (messagingProvider, { ticketConfirmUrl }) => async ({ eventId, ticketId, userProvider, tx }) => {
+export default (messagingProvider, { useTicketUrl }) => async ({ eventId, ticketId, userProvider, tx }) => {
   console.log('start get ticket params')
   const atBeginning = Date.now()
   let startTime = atBeginning
@@ -9,7 +9,7 @@ export default (messagingProvider, { ticketConfirmUrl }) => async ({ eventId, ti
   console.log(`get user profile: ${Date.now() - startTime}`); startTime = Date.now()
 
 
-  const confirmTicketUrl = `${ticketConfirmUrl}/${tx}`
+  const confirmTicketUrl = `${useTicketUrl}/${tx}`
   const params = {
     'text': confirmTicketUrl,
     'logoUrl': profile.pictureUrl || 'empty',

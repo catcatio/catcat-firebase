@@ -29,8 +29,8 @@ export const ticketing = (messagingProvider: IMessageingProvider, firebaseConfig
 
   const listEvent = require('./listEventsHandle').default(eventStore, messagingProvider, messageFormatterProvider)
   const bookEvent = require('./bookEventHandler').default(eventStore, userStore, stellarWrapper, messagingProvider, messageFormatterProvider, masterAsset, masterDistributor, firebaseConfig)
-  const confirmTicket = require('./confirmTicketHandler').default(eventStore, userStore, stellarWrapper, messagingProvider, messageFormatterProvider)
-  const useTicket = require('./useTicketHandler').default(eventStore, userStore, stellarWrapper, messagingProvider)
+  const useTicket = require('./useTicketHandler').default(eventStore, userStore, stellarWrapper, messagingProvider, messageFormatterProvider)
+  const confirmTicket = require('./confirmTicketHandler').default(eventStore, userStore, stellarWrapper, messagingProvider)
   const getTicketParams = require('./getTicketParams').default(messagingProvider, firebaseConfig)
   const sendWelcomeMessage = require('./sendWelcomeMessageHandler').default(messagingProvider, messageFormatterProvider)
   const isNewSession = require('./isNewSessionHander').default(sessionsRepository)
