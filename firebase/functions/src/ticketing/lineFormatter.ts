@@ -159,18 +159,35 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
           .addContents(
             FlexComponentBuilder.flexBox()
               .setLayout('baseline')
-              .setSpacing('sm')
+              .setSpacing('md')
               .addContents(
-                FlexComponentBuilder.flexText()
-                  .setText('Info')
-                  .setColor('#aaaaaa')
+                FlexComponentBuilder.flexIcon()
+                  .setUrl('https://raw.githubusercontent.com/catcatio/material-design-icons/master/action/2x_web/ic_info_outline_black_18dp.png')
                   .setSize('sm')
-                  .setFlex(1)
                   .build(),
                 FlexComponentBuilder.flexText()
                   .setText(event.description)
                   .setWrap(true)
                   .setColor('#666666')
+                  .setSize('sm')
+                  .setGarvity('top')
+                  .setFlex(1)
+                  .build()
+              )
+              .build(),
+            FlexComponentBuilder.flexBox()
+              .setLayout('baseline')
+              .setSpacing('md')
+              .addContents(
+                FlexComponentBuilder.flexIcon()
+                  .setUrl('https://raw.githubusercontent.com/catcatio/material-design-icons/master/device/2x_web/ic_access_time_black_18dp.png')
+                  .setSize('sm')
+                  .build(),
+                FlexComponentBuilder.flexText()
+                  .setText(event.startDate)
+                  .setWrap(true)
+                  .setColor('#666666')
+                  .setGarvity('center')
                   .setSize('sm')
                   .setFlex(4)
                   .build()
@@ -178,18 +195,17 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
               .build(),
             FlexComponentBuilder.flexBox()
               .setLayout('baseline')
-              .setSpacing('sm')
+              .setSpacing('md')
               .addContents(
-                FlexComponentBuilder.flexText()
-                  .setText('Date')
-                  .setColor('#aaaaaa')
+                FlexComponentBuilder.flexIcon()
+                  .setUrl('https://raw.githubusercontent.com/catcatio/material-design-icons/master/communication/2x_web/ic_location_on_black_18dp.png')
                   .setSize('sm')
-                  .setFlex(1)
                   .build(),
                 FlexComponentBuilder.flexText()
-                  .setText(event.startDate)
+                  .setText(event.venue)
                   .setWrap(true)
                   .setColor('#666666')
+                  .setGarvity('center')
                   .setSize('sm')
                   .setFlex(4)
                   .build()
@@ -204,15 +220,17 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
           .setSize('5xl')
           .build(),
         FlexComponentBuilder.flexText()
-          .setText('You can enter the event by using this code instead of a ticket')
+          .setText('You can use this ticket to enter the event')
           .setColor('#aaaaaa')
           .setWrap(true)
           .setMargin('xxl')
           .setSize('xs')
           .build()
       )
-
+console.log(JSON.stringify(template.build(), null, 2))
     return template.build()
+
+
   }
 
   return {

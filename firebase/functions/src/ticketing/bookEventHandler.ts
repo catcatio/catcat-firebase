@@ -77,7 +77,7 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
   const ticketUrl = `${ticketQrUrl}/${tmpEvent.id}/${unusedTicket.id}/${requestSource.toLowerCase()}_${from}/${bought_tx}`
   console.log(ticketUrl)
   await messageSender.sendCustomMessages(from, formatter.ticketTemplate(event, ticketUrl))
-    .then(() => messageSender.sendMessage(from, `See you at '${eventTitle}'! Do show this QR when attend`))
+    .then(() => messageSender.sendMessage(from, `See you at "${eventTitle}" event! Do show this ticket when attend`))
   // await messageSender.sendCustomMessages(from, formatter.ticketTemplate(event, ticketUrl))
 
   console.log(`total book time: ${Date.now() - atBeginning}`); startTime = Date.now()
