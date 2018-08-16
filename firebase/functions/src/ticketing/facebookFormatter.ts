@@ -27,11 +27,16 @@ export const facebookMessageFormatter = ({ }): IMessageFormatter => {
     return {}
   }
 
+  const confirmResultTemplate = (burnttx: string) => {
+    return {}
+  }
+
   return {
     listEvents,
     ticketTemplate,
     confirmTemplate,
     welcomeTemplate,
+    confirmResultTemplate,
     providerName: 'facebook'
   }
 }

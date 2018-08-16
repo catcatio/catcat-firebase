@@ -9,9 +9,10 @@ const parseEventToken = (eventToken) => {
   return new StellarSdk.Asset(chunks[0], chunks[1])
 }
 
-export default (eventStore, userStore, stellarWrapper, messagingProvider) => async (tx, orgRequestParams) => {
+export default (eventStore, userStore, stellarWrapper, messagingProvider, messageFormatterProvider) => async (tx, orgRequestParams) => {
   const orgMessageSender = messagingProvider.get(orgRequestParams.requestSource)
-  orgMessageSender.sendMessage(orgRequestParams.from, `Burning ticket ${tx}`)
+  const formatter = messageFormatterProvider.get(orgRequestParams.requestSource)
+  orgMessageSender.sendMessage(orgRequestParams.from, 'Confirming..., please wait')
 
   // Validate the ticket
   const txAction = await stellarWrapper.queryTransactionAction(tx)
@@ -43,7 +44,9 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider) => asy
 
   if (ticket.burnt_tx) {
     console.error('EVENT_TICKET_USED')
-    return orgMessageSender.sendMessage(orgRequestParams.from, 'This thicket has been used')
+
+    await orgMessageSender.sendMessage(orgRequestParams.from, 'This ticket has been used')
+    return orgMessageSender.sendCustomMessages(orgRequestParams.from, formatter.confirmResultTemplate(ticket.burnt_tx, true))
   }
 
   const asset = parseEventToken(ticket.event_token)
@@ -54,6 +57,6 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider) => asy
     .then(() => userStore.updateBurntTicket(owner.id, txAction.eventId, txAction.ticketId))
     .then(() => {
       userMessageSender.sendMessage(userAddress, `Welcome to '${event.title}'`)
-      orgMessageSender.sendMessage(orgRequestParams.from, `Ticket burnt ${tx}\n\n${burnt_tx}`)
+      orgMessageSender.sendCustomMessages(orgRequestParams.from, formatter.confirmResultTemplate(burnt_tx))
     })
 }

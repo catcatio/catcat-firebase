@@ -38,7 +38,7 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
             .setSize('md')
             .build(),
           FlexComponentBuilder.flexText()
-            .setText( dayjs(event.startDate).format('dddd, MMMM D, YYYY h:mm A'))
+            .setText(dayjs(event.startDate).format('dddd, MMMM D, YYYY h:mm A'))
             .setWrap(true)
             .setWeight('bold')
             .setSize('xs')
@@ -55,6 +55,7 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
         .setSpacing('sm')
         .addComponents(FlexComponentBuilder.flexButton()
           .setStyle('primary')
+          .setColor('#718792')
           .setAction({
             'type': 'message',
             'label': 'JOIN',
@@ -121,10 +122,12 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
           .build(),
         FlexComponentBuilder.flexButton()
           .setStyle('primary')
+          .setColor('#718792')
           .setAction({
-            'type': 'message',
+            'type': 'postback',
             'label': 'CONFIRM',
-            'text': `confirm ticket ${tx}`,
+            'displayText': 'Confirm',
+            'data': `confirm ticket ${tx}`,
           })
           .build()
       )
@@ -234,10 +237,79 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
           .setSize('xs')
           .build()
       )
-console.log(JSON.stringify(template.build(), null, 2))
     return template.build()
+  }
 
+  const confirmResultTemplate = (burntTx, isUsed = false) => {
+    const lineTemplate = new FlexMessageBuilder()
+    const template = lineTemplate.flexMessage('Confirmed ticket')
+      .addBubble()
+      .addHeader()
+      .addComponents(
+        FlexComponentBuilder.flexText()
+          .setText(`${isUsed? 'Confirmed' : 'Succeed!'}`)
+          .setWeight('bold')
+          .setSize('sm')
+          .setColor('#aaaaaa')
+          .build()
+      )
+      .addBody()
+      .setLayout('vertical')
+      .setSpacing('md')
+      .addComponents(
+        FlexComponentBuilder.flexText()
+          .setText(burntTx)
+          .setWrap(true)
+          .setSize('sm')
+          .build()
+      )
+      .addFooter()
+      .setLayout('vertical')
+      .setSpacing('md')
+      .addComponents(
+        FlexComponentBuilder.flexText()
+          .setText('View in:')
+          .setWeight('bold')
+          .setSize('md')
+          .build(),
+        FlexComponentBuilder.flexButton()
+          .setStyle('primary')
+          .setColor('#718792')
+          .setAction({
+            'type': 'uri',
+            'label': 'horizon',
+            'uri': `https://horizon-testnet.stellar.org/transactions/${burntTx}`
+          })
+          .build(),
+        FlexComponentBuilder.flexButton()
+          .setStyle('primary')
+          .setColor('#718792')
+          .setAction({
+            'type': 'uri',
+            'label': 'stellar.expert',
+            'uri': `https://stellar.expert/explorer/testnet/tx/${burntTx}`
+          })
+          .build(),
+      )
 
+      console.log(JSON.stringify(template.build(), null, 2))
+
+    const result = template.build() as any
+    result.contents.styles = {
+      header: {
+      },
+      body: {
+        backgroundColor: '#EEEEEE',
+        separator: true,
+        separatorColor: '#CCCCCC'
+      },
+      footer: {
+
+        separator: true,
+        separatorColor: '#CCCCCC'
+      }
+    }
+    return result
   }
 
   return {
@@ -245,6 +317,7 @@ console.log(JSON.stringify(template.build(), null, 2))
     ticketTemplate,
     confirmTemplate,
     welcomeTemplate,
-    providerName: 'line'
+    confirmResultTemplate,
+    providerName: 'line',
   }
 }
