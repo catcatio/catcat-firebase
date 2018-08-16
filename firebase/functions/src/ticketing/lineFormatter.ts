@@ -245,18 +245,27 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
     const template = lineTemplate.flexMessage('Confirmed ticket')
       .addBubble()
       .addHeader()
+      .setStyleBackgroundColor(isUsed ? '#FFC0CB' : '#FFFFFF')
       .addComponents(
         FlexComponentBuilder.flexText()
-          .setText(`${isUsed? 'Confirmed' : 'Succeed!'}`)
+          .setText(`${isUsed ? 'Confirmed' : 'Succeeded!'}`)
           .setWeight('bold')
           .setSize('sm')
-          .setColor('#aaaaaa')
           .build()
       )
       .addBody()
+      .setStyleBackgroundColor('#EEEEEE')
+      .setStyleSeparator(true)
+      .setStyleSeparatorColor('#CCCCCC')
       .setLayout('vertical')
       .setSpacing('md')
       .addComponents(
+        FlexComponentBuilder.flexText()
+          .setText('Tx Hash:')
+          .setWeight('bold')
+          .setWrap(true)
+          .setSize('sm')
+          .build(),
         FlexComponentBuilder.flexText()
           .setText(burntTx)
           .setWrap(true)
@@ -264,6 +273,9 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
           .build()
       )
       .addFooter()
+      .setStyleBackgroundColor(isUsed ? '#FFC0CB' : '#FFFFFF')
+      .setStyleSeparator(true)
+      .setStyleSeparatorColor('#CCCCCC')
       .setLayout('vertical')
       .setSpacing('md')
       .addComponents(
@@ -292,24 +304,7 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
           .build(),
       )
 
-      console.log(JSON.stringify(template.build(), null, 2))
-
-    const result = template.build() as any
-    result.contents.styles = {
-      header: {
-      },
-      body: {
-        backgroundColor: '#EEEEEE',
-        separator: true,
-        separatorColor: '#CCCCCC'
-      },
-      footer: {
-
-        separator: true,
-        separatorColor: '#CCCCCC'
-      }
-    }
-    return result
+    return template.build()
   }
 
   return {

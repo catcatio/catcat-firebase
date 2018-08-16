@@ -4,9 +4,10 @@ export class FlexMessageBuilder {
   private _templateType: 'bubble' | 'carousel'
   private _currentBubble: FlexBubble
   private _flexMessage: FlexMessage
-  private _currentFlexBox: FlexBox
+  private _currentBlock: FlexBox
+  private _currentBlockName: 'header' | 'hero' | 'body' | 'footer'
   private _currentFlexComponents: FlexComponent[]
-  private _currentFlexComponent: FlexComponent
+
 
   public flexMessage(altText: string): FlexMessageBuilder {
     this._flexMessage = {
@@ -14,6 +15,7 @@ export class FlexMessageBuilder {
       altText,
       contents: null
     }
+
     return this
   }
 
@@ -40,75 +42,108 @@ export class FlexMessageBuilder {
     return this
   }
 
+  public setDirection(directiion?: 'ltr' | 'rtl'): FlexMessageBuilder {
+    this._currentBubble.direction = directiion
+    return this
+  }
+
   public addHeader(): FlexMessageBuilder {
     this._currentFlexComponents = []
-    this._currentFlexBox = {
+    this._currentBlock = {
       type: 'box',
       layout: 'vertical',
       contents: this._currentFlexComponents
     }
 
-    this._currentBubble.header = this._currentFlexBox
+    this._currentBubble.header = this._currentBlock
+    this._currentBlockName = 'header'
     return this
   }
 
   public addHero(flexImage: FlexImage): FlexMessageBuilder {
     this._currentBubble.hero = flexImage
+    this._currentBlockName = 'hero'
     return this
   }
 
   public addBody(): FlexMessageBuilder {
     this._currentFlexComponents = []
-    this._currentFlexBox = {
+    this._currentBlock = {
       type: 'box',
       layout: 'vertical',
       contents: this._currentFlexComponents
     }
 
-    this._currentBubble.body = this._currentFlexBox
+    this._currentBubble.body = this._currentBlock
+    this._currentBlockName = 'body'
     return this
   }
 
   public addFooter(): FlexMessageBuilder {
     this._currentFlexComponents = []
-    this._currentFlexBox = {
+    this._currentBlock = {
       type: 'box',
       layout: 'vertical',
       contents: this._currentFlexComponents
     }
 
-    this._currentBubble.footer = this._currentFlexBox
+    this._currentBubble.footer = this._currentBlock
+    this._currentBlockName = 'footer'
     return this
   }
 
   public addComponents(...components: FlexComponent[]): FlexMessageBuilder {
-    this._currentFlexComponent = components[components.length - 1]
     this._currentFlexComponents.push(...components)
     return this
   }
 
   public setLayout(layout: 'horizontal' | 'vertical' | 'baseline'): FlexMessageBuilder {
-    this._currentFlexBox.layout = layout
+    this._currentBlock.layout = layout
     return this
   }
 
   public setSpacing(spacing: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl'): FlexMessageBuilder {
-    this._currentFlexBox.spacing = spacing
+    this._currentBlock.spacing = spacing
     return this
   }
 
   public setMargin(margin: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl'): FlexMessageBuilder {
-    this._currentFlexBox.margin = margin
+    this._currentBlock.margin = margin
     return this
   }
 
   public setActon(action: Action<{ label: string }>): FlexMessageBuilder {
-    this._currentFlexBox.action = action
+    this._currentBlock.action = action
     return this
   }
 
   public setFlex(flex: number): FlexMessageBuilder {
-    this._currentFlexBox.flex = flex
+    this._currentBlock.flex = flex
+    return this
+  }
+
+  private setBlockStyle(blockName: string, styleName: 'backgroundColor' | 'separator' | 'separatorColor', value?: string | boolean) {
+    this._currentBubble.styles = this._currentBubble.styles || {}
+
+    if (!this._currentBubble.styles[blockName]) {
+      this._currentBubble.styles[blockName] = {[styleName]: value}
+    } else {
+      this._currentBubble.styles[blockName][styleName] = value
+    }
+  }
+
+  public setStyleBackgroundColor(color?: string): FlexMessageBuilder {
+    this.setBlockStyle(this._currentBlockName, 'backgroundColor', color)
+    return this
+  }
+
+  public setStyleSeparator(hasSeparator?: boolean): FlexMessageBuilder {
+    this.setBlockStyle(this._currentBlockName, 'separator', hasSeparator)
+    return this
+  }
+
+  public setStyleSeparatorColor(color?: string): FlexMessageBuilder {
+    this.setBlockStyle(this._currentBlockName, 'separatorColor', color)
     return this
   }
 

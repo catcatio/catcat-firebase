@@ -39,8 +39,10 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
 
   if (ticket.burnt_tx) {
     console.error('EVENT_TICKET_USED')
-    await orgMessageSender.sendMessage(orgAddress, `Ticket has been used ${tx}`)
-    return Promise.reject('EVENT_TICKET_USED')
+    const eventFormatter = messageFormatterProvider.get(event.providers)
+    orgMessageSender.sendMessage(orgAddress, 'This ticket has already been used')
+    .then(() => orgMessageSender.sendCustomMessages(orgAddress, eventFormatter.confirmResultTemplate(ticket.burnt_tx, true)))
+    return Promise.reject('EVENT_OWNER_NOTFOUND')
   }
 
   const ownerMessageSender = messagingProvider.get(owner.providers)

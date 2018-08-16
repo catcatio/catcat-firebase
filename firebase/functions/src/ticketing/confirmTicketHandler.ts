@@ -12,7 +12,7 @@ const parseEventToken = (eventToken) => {
 export default (eventStore, userStore, stellarWrapper, messagingProvider, messageFormatterProvider) => async (tx, orgRequestParams) => {
   const orgMessageSender = messagingProvider.get(orgRequestParams.requestSource)
   const formatter = messageFormatterProvider.get(orgRequestParams.requestSource)
-  orgMessageSender.sendMessage(orgRequestParams.from, 'Confirming..., please wait')
+  orgMessageSender.sendMessage(orgRequestParams.from, 'Confirming, please wait...')
 
   // Validate the ticket
   const txAction = await stellarWrapper.queryTransactionAction(tx)
@@ -45,7 +45,7 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
   if (ticket.burnt_tx) {
     console.error('EVENT_TICKET_USED')
 
-    await orgMessageSender.sendMessage(orgRequestParams.from, 'This ticket has been used')
+    await orgMessageSender.sendMessage(orgRequestParams.from, 'This ticket has already been used')
     return orgMessageSender.sendCustomMessages(orgRequestParams.from, formatter.confirmResultTemplate(ticket.burnt_tx, true))
   }
 
