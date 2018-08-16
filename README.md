@@ -37,85 +37,60 @@ npm run deploy
 npm run deploy:asia
 ```
 
+- - - 
+
+States
+ - `[BEFORE.EVENTS.BOOK]`         : User booking before event occurs.
+ - `[BEFORE.EVENTS.BOOKED]`       : User has been booked before event occurs.
+ - `[AT.EVENTS.ATTENDED]`         : User has been attended at event period.
+ - `[AT.EVENTS.NOT_ATTENDED]`     : User has not been attended at event period.
+ - `[AFTER.EVENTS.ATTENDED]`      : User has been attended after event period.
+ - `[AFTER.EVENTS.NOT_ATTENDED]`  : User has not beed attended after event period.
+
 - - -
 
 ## TODO - Alpha
 
-### Before event
-
-#### Localization
-
-- [ ] Support Thai conversation
-
-#### List process
-
-- [x] User will see `ticket_brought/ticket_max` beside `BOOK` button.
-
-  ```txt
-  BOOK (10/100)
-  ```
-
-- [x] Event list cards to support desktop version
-
-- - -
+- [ ] `[BEFORE.EVENTS.BOOK]` User should get notify if QR has been scan.
+```txt
+Your QR has been scan, please wait for confirmation.
+```
+- [ ] `[AT.EVENTS]` User should get notify if QR has been scan.
+```txt
+Your QR has been scan, please wait for confirmation.
+```
 
 ## TODO - Beta
-
-#### Book process
-
-- [ ] User can use `LINE PAY` for purchase tickets.
-
-### At event
-
-- [ ] Attending user get notify when events has been start, additoin info e.g. slide link will provide at this state.
-
-#### Revisit process
-
-- [ ] User can reuse ticket for re-enter events.
-
-### After event
-
-- [ ] User will see `ending message` after events end.
-
+- [ ] `[BEFORE.EVENTS.BOOK]` Creator can submit event by post facebook event link.
+- [ ] `[AT.EVENTS]` User can reuse ticket with welcome message for re-enter events (re-scan will see `This ticket has been use`).
+- [ ] `[AFTER.EVENTS]` User will see `ending message` after events end.
   ```txt
-  Thank you for booked (and join) $event-title
+  Thank you for joining ${event-title}
   We hope to see you at our next event!
   ```
-
-  and `Your ticket has been expire`
-- [ ] User will see subscriptions offer (via [LINE Notify](https://notify-bot.line.me/doc/en/)?) after `ending message`
-- [ ] Creator will able to list last 10 subscribers by using `sub` command.
-- [ ] User will ask for `rating`.
-
+- [ ] `[AFTER.EVENTS.ATTENDED]` User will ask for `rating`.
   ```txt
   How much you enjoy this events?
   ```
-
   `😑 boring` `🤔 soso` `🙂 nice` `🤩 superb`
-- [ ] User will ask for `suggestions`.
-
+- [ ] User will ask for `suggestions` after `rating`.
   ```txt
   Any suggestions?
   ```
+- [ ] Creator will able to see re-playable real-time dashboard
 
 - - -
 
 ## TODO - v1
-
-### Before events
-
-- [ ] Creator can submit event by post facebook event link.
-
-### At event
-
+- [ ] `[AT.EVENTS.ATTENDED]` Attending user get notify when events has been start, addition info e.g. slide link will provide at this state.
 - [ ] Creator can ask poll.
-- [ ] Creator able to request poll results.
-
-### After event
-
+- [ ] Creator able to see poll results and stop.
 - [ ] Creator will able to export usage data (limited to 10) by using `export` command.
   `Free (first 10 records)` `Paid (5 THB/Record)`
 
   ```txt
   user_id | user_name | line_id | facebook_id | onboard_date | book_date | attend_date | subscribe_date | active_date | email | rating | suggestion
   ```
+
+## TODO - v2
+- [ ] `[BEFORE.EVENTS.BOOK]` User can use `LINE PAY` for purchase tickets.
