@@ -1,6 +1,7 @@
 import { IMessageFormatter } from './messageFormatter'
 import { FlexMessage, FlexImage } from '@line/bot-sdk'
 import { FlexMessageBuilder, FlexComponentBuilder } from './lineMessageBuilder'
+import * as dayjs from 'dayjs'
 
 export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter => {
   const limitChar = (str, limit) => {
@@ -37,11 +38,17 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
             .setSize('md')
             .build(),
           FlexComponentBuilder.flexText()
+            .setText( dayjs(event.startDate).format('dddd, MMMM D, YYYY h:mm A'))
+            .setWrap(true)
+            .setWeight('bold')
+            .setSize('xs')
+            .build(),
+          FlexComponentBuilder.flexText()
             .setText(`BOOKED (${event.ticket_bought || 0}/${event.ticket_max})`)
             .setWrap(true)
             .setWeight('bold')
             .setSize('xs')
-            .setMargin('md')
+            .setMargin('xs')
             .setColor('#222222')
             .build())
         .addFooter()
@@ -184,7 +191,7 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
                   .setSize('sm')
                   .build(),
                 FlexComponentBuilder.flexText()
-                  .setText(event.startDate)
+                  .setText(dayjs(event.startDate).format('dddd, MMMM D, YYYY h:mm A'))
                   .setWrap(true)
                   .setColor('#666666')
                   .setGarvity('center')

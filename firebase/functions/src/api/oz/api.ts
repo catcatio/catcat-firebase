@@ -18,7 +18,9 @@ export default (ticketingSystem): RequestHandler => {
       session
     }
 
-    if (!requestParams.requestSource || !requestParams.from) return sendDialogflowTextMessage(res, 'No invalid request...')
+    if (!requestParams.requestSource || !requestParams.from) {
+      return sendDialogflowTextMessage(res, 'Invalid request...')
+    }
 
     // check and store latest session
     const sessionTask = ticketingSystem.isNewSession(requestParams)
