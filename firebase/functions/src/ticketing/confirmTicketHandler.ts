@@ -46,7 +46,7 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
     console.error('EVENT_TICKET_USED')
 
     await orgMessageSender.sendMessage(orgRequestParams.from, 'This ticket has already been used')
-    return orgMessageSender.sendCustomMessages(orgRequestParams.from, formatter.confirmResultTemplate(ticket.burnt_tx, true))
+    return orgMessageSender.sendCustomMessages(orgRequestParams.from, formatter.confirmResultTemplate(ticket.burnt_tx, ticket.burnt_date))
   }
 
   const asset = parseEventToken(ticket.event_token)

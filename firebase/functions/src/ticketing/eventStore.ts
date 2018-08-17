@@ -103,6 +103,7 @@ const eventStoreFactory = (eventRepository, memosRepository) => {
     const ticketsCollection = eventRepository.collection.doc(eventId).collection('tickets')
     return await ticketsCollection.doc(ticketId).update({
       burnt_tx,
+      burnt_date: new Date().toISOString()
     })
   }
 

@@ -2,6 +2,12 @@ import { IMessageFormatter } from './messageFormatter'
 import { FlexMessage, FlexImage } from '@line/bot-sdk'
 import { FlexMessageBuilder, FlexComponentBuilder } from './lineMessageBuilder'
 import * as dayjs from 'dayjs'
+const relativeTime = require('dayjs/plugin/relativeTime')
+dayjs.extend(relativeTime)
+
+const dayAgo = (day: dayjs.Dayjs) => {
+  return (day as any).fromNow()
+}
 
 export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter => {
   const limitChar = (str, limit) => {
@@ -240,32 +246,26 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
     return template.build()
   }
 
-  const confirmResultTemplate = (burntTx, isUsed = false) => {
+  const confirmResultTemplate = (burntTx, burntDate = null) => {
     const lineTemplate = new FlexMessageBuilder()
     const template = lineTemplate.flexMessage('Confirmed ticket')
       .addBubble()
       .addHeader()
-      .setStyleBackgroundColor(isUsed ? '#FFC0CB' : '#FFFFFF')
       .addComponents(
         FlexComponentBuilder.flexText()
-          .setText(`${isUsed ? 'Confirmed' : 'Succeeded!'}`)
+          .setText(`${burntDate ? `Used (${dayAgo(dayjs(burntDate))})` : 'Succeeded!'}`)
           .setWeight('bold')
+          .setColor(burntDate ? '#ef5451' : null)
           .setSize('sm')
           .build()
       )
       .addBody()
-      .setStyleBackgroundColor('#EEEEEE')
+      .setStyleBackgroundColor('#EFEFEF')
       .setStyleSeparator(true)
-      .setStyleSeparatorColor('#CCCCCC')
+      .setStyleSeparatorColor('#DDDDDD')
       .setLayout('vertical')
       .setSpacing('md')
       .addComponents(
-        FlexComponentBuilder.flexText()
-          .setText('Tx Hash:')
-          .setWeight('bold')
-          .setWrap(true)
-          .setSize('sm')
-          .build(),
         FlexComponentBuilder.flexText()
           .setText(burntTx)
           .setWrap(true)
@@ -273,20 +273,14 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
           .build()
       )
       .addFooter()
-      .setStyleBackgroundColor(isUsed ? '#FFC0CB' : '#FFFFFF')
       .setStyleSeparator(true)
-      .setStyleSeparatorColor('#CCCCCC')
+      .setStyleSeparatorColor('#DDDDDD')
       .setLayout('vertical')
       .setSpacing('md')
       .addComponents(
-        FlexComponentBuilder.flexText()
-          .setText('View in:')
-          .setWeight('bold')
-          .setSize('md')
-          .build(),
         FlexComponentBuilder.flexButton()
-          .setStyle('primary')
-          .setColor('#718792')
+          .setStyle('secondary')
+          .setColor('#b0bec5')
           .setAction({
             'type': 'uri',
             'label': 'horizon',
@@ -294,8 +288,8 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
           })
           .build(),
         FlexComponentBuilder.flexButton()
-          .setStyle('primary')
-          .setColor('#718792')
+          .setStyle('secondary')
+          .setColor('#b0bec5')
           .setAction({
             'type': 'uri',
             'label': 'stellar.expert',

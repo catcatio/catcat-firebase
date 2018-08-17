@@ -8,7 +8,6 @@ export class FlexMessageBuilder {
   private _currentBlockName: 'header' | 'hero' | 'body' | 'footer'
   private _currentFlexComponents: FlexComponent[]
 
-
   public flexMessage(altText: string): FlexMessageBuilder {
     this._flexMessage = {
       type: 'flex',
@@ -97,32 +96,37 @@ export class FlexMessageBuilder {
     return this
   }
 
-  public setLayout(layout: 'horizontal' | 'vertical' | 'baseline'): FlexMessageBuilder {
-    this._currentBlock.layout = layout
+  private setAttribute(name: string, value?: any): FlexMessageBuilder {
+    if (value === null) {
+      delete this._currentBlock[name]
+    } else {
+      this._currentBlock[name] = value
+    }
+
     return this
+  }
+
+  public setLayout(layout: 'horizontal' | 'vertical' | 'baseline'): FlexMessageBuilder {
+    return this.setAttribute('layout', layout)
   }
 
   public setSpacing(spacing: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl'): FlexMessageBuilder {
-    this._currentBlock.spacing = spacing
-    return this
+    return this.setAttribute('spacing', spacing)
   }
 
   public setMargin(margin: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl'): FlexMessageBuilder {
-    this._currentBlock.margin = margin
-    return this
+    return this.setAttribute('margin', margin)
   }
 
   public setActon(action: Action<{ label: string }>): FlexMessageBuilder {
-    this._currentBlock.action = action
-    return this
+    return this.setAttribute('action', action)
   }
 
   public setFlex(flex: number): FlexMessageBuilder {
-    this._currentBlock.flex = flex
-    return this
+    return this.setAttribute('flex', flex)
   }
 
-  private setBlockStyle(blockName: string, styleName: 'backgroundColor' | 'separator' | 'separatorColor', value?: string | boolean) {
+  private setBlockStyle(blockName: string, styleName: 'backgroundColor' | 'separator' | 'separatorColor', value?: string | boolean): FlexMessageBuilder{
     this._currentBubble.styles = this._currentBubble.styles || {}
 
     if (!this._currentBubble.styles[blockName]) {
@@ -130,21 +134,20 @@ export class FlexMessageBuilder {
     } else {
       this._currentBubble.styles[blockName][styleName] = value
     }
+
+    return this
   }
 
   public setStyleBackgroundColor(color?: string): FlexMessageBuilder {
-    this.setBlockStyle(this._currentBlockName, 'backgroundColor', color)
-    return this
+    return this.setBlockStyle(this._currentBlockName, 'backgroundColor', color)
   }
 
   public setStyleSeparator(hasSeparator?: boolean): FlexMessageBuilder {
-    this.setBlockStyle(this._currentBlockName, 'separator', hasSeparator)
-    return this
+    return this.setBlockStyle(this._currentBlockName, 'separator', hasSeparator)
   }
 
   public setStyleSeparatorColor(color?: string): FlexMessageBuilder {
-    this.setBlockStyle(this._currentBlockName, 'separatorColor', color)
-    return this
+    return this.setBlockStyle(this._currentBlockName, 'separatorColor', color)
   }
 
   public build(): FlexMessage {
@@ -163,124 +166,94 @@ export class FlexComponentBuilder {
     return this
   }
 
-  public setLayout(layout?: 'horizontal' | 'vertical' | 'baseline'): FlexComponentBuilder {
-    this._flexComponent['layout'] = layout
+  private setAttribute(name: string, value?: any): FlexComponentBuilder {
+    if (value === null) {
+      delete this._flexComponent[name]
+    } else {
+      this._flexComponent[name] = value
+    }
 
     return this
+  }
+
+  public setLayout(layout?: 'horizontal' | 'vertical' | 'baseline'): FlexComponentBuilder {
+    return this.setAttribute('layout', layout)
   }
 
   public setFlex(flex?: number): FlexComponentBuilder {
-    this._flexComponent['flex'] = flex
-
-    return this
+    return this.setAttribute('flex', flex)
   }
 
   public setSpacing(spacing?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl'): FlexComponentBuilder {
-    this._flexComponent['spacing'] = spacing
-
-    return this
+    return this.setAttribute('spacing', spacing)
   }
 
   public setMargin(margin?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl'): FlexComponentBuilder {
-    this._flexComponent['margin'] = margin
-
-    return this
+    return this.setAttribute('margin', margin)
   }
 
   public setAction(action?: Action): FlexComponentBuilder {
-    this._flexComponent['action'] = action
-
-    return this
+    return this.setAttribute('action', action)
   }
 
   public setHeight(height?: 'sm' | 'md'): FlexComponentBuilder {
-    this._flexComponent['height'] = height
-
-    return this
+    return this.setAttribute('height', height)
   }
 
   public setStyle(style?: 'link' | 'primary' | 'secondary'): FlexComponentBuilder {
-    this._flexComponent['style'] = style
-
-    return this
+    return this.setAttribute('style', style)
   }
 
   public setColor(color?: string): FlexComponentBuilder {
-    this._flexComponent['color'] = color
-
-    return this
+    return this.setAttribute('color', color)
   }
 
   public setGravity(gravity?: 'top' | 'bottom' | 'center'): FlexComponentBuilder {
-    this._flexComponent['gravity'] = gravity
-
-    return this
+    return this.setAttribute('gravity', gravity)
   }
 
   public setSize(size?: 'xxs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | '3xl' | '4xl' | '5xl' | 'full'): FlexComponentBuilder {
-    this._flexComponent['size'] = size
-
-    return this
+    return this.setAttribute('size', size)
   }
 
   public setUrl(url: string): FlexComponentBuilder {
-    this._flexComponent['url'] = url
-
-    return this
+    return this.setAttribute('url', url)
   }
 
   public setAspectRatio(aspectRatio: '1:1' | '1.51:1' | '1.91:1' | '4:3' | '16:9' | '20:13' | '2:1' | '3:1' | '3:4' | '9:16' | '1:2' | '1:3'): FlexComponentBuilder {
-    this._flexComponent['aspectRatio'] = aspectRatio
-
-    return this
+    return this.setAttribute('aspectRatio', aspectRatio)
   }
 
   public setAlign(align?: 'start' | 'end' | 'center'): FlexComponentBuilder {
-    this._flexComponent['align'] = align
-
-    return this
+    return this.setAttribute('align', align)
   }
 
   public setAspectMode(aspectMode?: 'cover' | 'fit'): FlexComponentBuilder {
-    this._flexComponent['aspectMode'] = aspectMode
-
-    return this
+    return this.setAttribute('aspectMode', aspectMode)
   }
 
   public setBackgroundColor(backgroundColor?: string): FlexComponentBuilder {
-    this._flexComponent['backgroundColor'] = backgroundColor
-
-    return this
+    return this.setAttribute('backgroundColor', backgroundColor)
   }
 
   public setWrap(wrap?: boolean): FlexComponentBuilder {
-    this._flexComponent['wrap'] = wrap
-
-    return this
+    return this.setAttribute('wrap', wrap)
   }
 
   public setMaxLines(maxLines?: number): FlexComponentBuilder {
-    this._flexComponent['maxLines'] = maxLines
-
-    return this
+    return this.setAttribute('maxLines', maxLines)
   }
 
   public setWeight(weight?: 'regular' | 'bold'): FlexComponentBuilder {
-    this._flexComponent['weight'] = weight
-
-    return this
+    return this.setAttribute('weight', weight)
   }
 
   public setGarvity(gravity?: 'top' | 'bottom' | 'center'): FlexComponentBuilder {
-    this._flexComponent['gravity'] = gravity
-
-    return this
+    return this.setAttribute('gravity', gravity)
   }
 
   public setText(text?: string): FlexComponentBuilder {
-    this._flexComponent['text'] = text
-
-    return this
+    return this.setAttribute('text', text)
   }
 
   public addContents(...flexComponents: FlexComponent[]): FlexComponentBuilder {

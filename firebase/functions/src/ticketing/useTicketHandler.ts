@@ -25,7 +25,7 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
   console.log(`get ticket ${txAction.eventId} ${txAction.ticketId}: ${Date.now() - startTime}`); startTime = Date.now()
   if (!ticket) {
     console.error('EVENT_TICKET_NOTFOUND')
-    await orgMessageSender.sendMessage(orgAddress, `Ticket not found ${tx}`)
+    orgMessageSender.sendMessage(orgAddress, `Ticket not found ${tx}`)
     return Promise.reject('EVENT_TICKET_NOTFOUND')
   }
 
@@ -33,7 +33,7 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
   console.log(`get owner ${ticket.owner_id}: ${Date.now() - startTime}`); startTime = Date.now()
   if (!owner) {
     console.error('EVENT_OWNER_NOTFOUND')
-    await orgMessageSender.sendMessage(orgAddress, `Owner not found ${tx}`)
+    orgMessageSender.sendMessage(orgAddress, `Owner not found ${tx}`)
     return Promise.reject('EVENT_OWNER_NOTFOUND')
   }
 
@@ -41,11 +41,14 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
     console.error('EVENT_TICKET_USED')
     const eventFormatter = messageFormatterProvider.get(event.providers)
     orgMessageSender.sendMessage(orgAddress, 'This ticket has already been used')
-    .then(() => orgMessageSender.sendCustomMessages(orgAddress, eventFormatter.confirmResultTemplate(ticket.burnt_tx, true)))
+      .then(() => orgMessageSender.sendCustomMessages(orgAddress, eventFormatter.confirmResultTemplate(ticket.burnt_tx, true)))
     return Promise.reject('EVENT_OWNER_NOTFOUND')
   }
 
   const ownerMessageSender = messagingProvider.get(owner.providers)
+  const ownerAddress = owner.providers.line || owner.providers.facebook
+  // ownerMessageSender.sendMessage(ownerAddress, 'Your QR has been scan, please wait for confirmation.')
+
   const profile = owner.providers.line ? await ownerMessageSender.getProfile(owner.providers.line) : null
   const ownerProvider = owner.providers.line ? 'line' : 'facebook'
   // post confirm options to organizer
@@ -53,7 +56,7 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
     console.log(profile.pictureUrl)
     const formatter = messageFormatterProvider.get(owner.providers)
     const message = formatter.confirmTemplate(profile.pictureUrl, profile.displayName, ownerProvider, event.title, tx)
-    await orgMessageSender.sendCustomMessages(orgAddress, message)
+    orgMessageSender.sendCustomMessages(orgAddress, message)
   }
 
   console.log(`total ticket use time: ${Date.now() - atBeginning}`); startTime = Date.now()
