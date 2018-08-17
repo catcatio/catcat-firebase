@@ -1,7 +1,7 @@
 export default (eventStore, userStore, stellarWrapper, messagingProvider, messageFormatterProvider) => async (tx) => {
   console.log('start use ticket')
-  const atBeginning = Date.now()
-  let startTime = atBeginning
+  let atBeginning = Date.now(),
+    startTime = atBeginning
 
   // Validate the ticket
   const txAction = await eventStore.getMemo(tx)

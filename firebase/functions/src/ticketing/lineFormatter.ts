@@ -237,6 +237,7 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
           .build(),
         FlexComponentBuilder.flexText()
           .setText('You can use this ticket to enter the event')
+          .setAlign('center')
           .setColor('#aaaaaa')
           .setWrap(true)
           .setMargin('xxl')
@@ -246,17 +247,20 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
     return template.build()
   }
 
-  const confirmResultTemplate = (burntTx, burntDate = null) => {
+  const confirmResultTemplate = (burntTx, firebaseTime, stellarTime, burntDate = null) => {
     const lineTemplate = new FlexMessageBuilder()
     const template = lineTemplate.flexMessage('Confirmed ticket')
       .addBubble()
       .addHeader()
       .addComponents(
-        FlexComponentBuilder.flexText()
-          .setText(`${burntDate ? `Used (${dayAgo(dayjs(burntDate))})` : 'Succeeded!'}`)
-          .setWeight('bold')
-          .setColor(burntDate ? '#ef5451' : null)
-          .setSize('sm')
+        FlexComponentBuilder.flexBox()
+          .setLayout('horizontal')
+          .addContents(FlexComponentBuilder.flexText()
+            .setText(`${burntDate ? `Used (${dayAgo(dayjs(burntDate))})` : 'Succeeded!'}`)
+            .setWeight('bold')
+            .setColor(burntDate ? '#ef5451' : null)
+            .setSize('sm')
+            .build())
           .build()
       )
       .addBody()
@@ -278,6 +282,10 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
       .setLayout('vertical')
       .setSpacing('md')
       .addComponents(
+        FlexComponentBuilder.flexText()
+            .setText(`🔥  ${firebaseTime} ms    🚀  ${stellarTime} ms`)
+            .setSize('sm')
+            .build(),
         FlexComponentBuilder.flexButton()
           .setStyle('secondary')
           .setColor('#b0bec5')

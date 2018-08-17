@@ -27,7 +27,7 @@ export const facebookMessageFormatter = ({ }): IMessageFormatter => {
     return {}
   }
 
-  const confirmResultTemplate = (burnttx: string) => {
+  const confirmResultTemplate = (burnttx: string, firebaseTime: number, stellarTime: number) => {
     return {}
   }
 
