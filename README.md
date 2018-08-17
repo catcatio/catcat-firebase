@@ -37,28 +37,48 @@ npm run deploy
 npm run deploy:asia
 ```
 
-- - - 
+- - -
 
-States
+## States
+### Events
  - `[BEFORE.EVENTS.BOOK]`         : User booking before event occurs.
  - `[BEFORE.EVENTS.BOOKED]`       : User has been booked before event occurs.
  - `[AT.EVENTS.ATTENDED]`         : User has been attended at event period.
- - `[AT.EVENTS.NOT_ATTENDED]`     : User has not been attended at event period.
+ - `[AT.EVENTS.NOT_ATTENDED]`     : User has not attended at event period.
  - `[AFTER.EVENTS.ATTENDED]`      : User has been attended after event period.
- - `[AFTER.EVENTS.NOT_ATTENDED]`  : User has not beed attended after event period.
+ - `[AFTER.EVENTS.NOT_ATTENDED]`  : User has not attended after event period.
+
+### Tickets
+ - `[UNUSED]` : Ticket has not been used.
+ - `[BOOKED]` : Ticket has been booked.
+ - `[USED]` : Ticket has been used.
 
 - - -
 
 ## TODO - Alpha
-
 - [ ] `[BEFORE.EVENTS.BOOK]` User should get notify if QR has been scan.
+> `[UNUSED]`
 ```txt
-Your QR has been scan, please wait for confirmation.
+Your ticket has been scanned, but it seem to be invalid.
+```
+> `[BOOKED]`
+```txt
+Your ticket has been scanned, please wait for validation.
+```
+> `[BOOKED.VALID]`
+```txt
+Welcome to "Hyperledger 101" event! Enjoy!
+```
+> `[BOOKED.INVALID]`
+```txt
+Your ticket seem to be invalid, please contact admin.
 ```
 - [ ] `[AT.EVENTS]` User should get notify if QR has been scan.
+> `[USED]`
 ```txt
-Your QR has been scan, please wait for confirmation.
+Your ticket has been scanned, this ticket has been using for 3 times.
 ```
+- - -
 
 ## TODO - Beta
 - [ ] `[BEFORE.EVENTS.BOOK]` Creator can submit event by post facebook event link.
