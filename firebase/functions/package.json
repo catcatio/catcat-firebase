@@ -19,6 +19,7 @@
     "claudia-bot-builder": "^4.2.0",
     "cors": "^2.8.4",
     "dayjs": "^1.7.5",
+    "debug": "^3.1.0",
     "express": "^4.16.3",
     "firebase-admin": "^6.0.0",
     "firebase-functions": "^2.0.4",

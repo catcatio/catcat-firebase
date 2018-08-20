@@ -1,9 +1,14 @@
+import firebaseConfig from './firebaseConfig'
+import { StopWatch } from './utils/StopWatch'
+
+const debug = require('debug')('catcat:default')
+debug(`functions started: ${process.version}`)
+
+let stopWatch = StopWatch.create('Bootstraping').start()
+
 import { linkApi, ozApi } from './api'
 import { initMessagingProvider } from './messaging'
 import { wrapApi } from './utils/wrapApi'
-import firebaseConfig from './firebaseConfig'
-
-console.log(`functions started: ${process.version}`)
 
 const messagingProvider = initMessagingProvider(firebaseConfig)
 
@@ -14,3 +19,6 @@ export {
   link,
   oz
 }
+
+stopWatch.end().clear()
+stopWatch = null
