@@ -1,15 +1,11 @@
 import { config } from 'firebase-functions'
 import * as admin from 'firebase-admin'
-import * as debug from 'debug'
 
 admin.initializeApp(config().firebase)
 const database = admin.database()
 const firestore = admin.firestore()
 firestore.settings({ timestampsInSnapshots: true })
 const envConfig = config()
-
-// enable logs
-debug.enable(envConfig.debugging.debug)
 
 const ticketingConfig = envConfig.ticketing
 

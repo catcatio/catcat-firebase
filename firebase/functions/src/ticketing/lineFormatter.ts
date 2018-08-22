@@ -283,7 +283,7 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
       .setSpacing('md')
       .addComponents(
         FlexComponentBuilder.flexText()
-            .setText(`🔥  ${firebaseTime} ms    🚀  ${stellarTime} ms`)
+            .setText(`🔥  ${firebaseTime.toFixed(2)} ms    🚀  ${stellarTime.toFixed(2)} ms`)
             .setSize('sm')
             .build(),
         FlexComponentBuilder.flexButton()

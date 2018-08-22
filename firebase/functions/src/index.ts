@@ -1,10 +1,10 @@
+require('@rabbotio/noconsole')
+
 import firebaseConfig from './firebaseConfig'
-import { StopWatch } from './utils/StopWatch'
+import { HrtimeMarker } from './utils/hrtimeMarker'
 
-const debug = require('debug')('catcat:default')
-debug(`functions started: ${process.version}`)
-
-let stopWatch = StopWatch.create('Bootstraping').start()
+let hrMarker = HrtimeMarker.create('bootstraping')
+console.log(`functions started: ${process.version}`)
 
 import { linkApi, ozApi } from './api'
 import { initMessagingProvider } from './messaging'
@@ -15,10 +15,10 @@ const messagingProvider = initMessagingProvider(firebaseConfig)
 const link = wrapApi(linkApi(firebaseConfig))
 const oz = wrapApi(ozApi(messagingProvider, firebaseConfig))
 
+hrMarker.end()
+hrMarker = null
+
 export {
   link,
   oz
 }
-
-stopWatch.end().clear()
-stopWatch = null
