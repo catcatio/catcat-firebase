@@ -26,7 +26,7 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
     marker = hrMarker.mark('getUserByRequestSource')
     console.log(`event: ${event.id}`)
     msg = languageCode === 'th'
-      ? `รอแป๊บนะ กำลังทำการจอง ${eventTitle} ให้...`
+      ? `รอแป๊บนะ กำลังจอง ${eventTitle} ให้...`
       : `Hold on, we're now booking ${eventTitle} for you...`
     messageSender.sendMessage(from, msg)
 
