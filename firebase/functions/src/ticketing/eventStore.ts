@@ -1,41 +1,10 @@
-import { Event } from './Event'
-
 const eventStoreFactory = (eventRepository, memosRepository) => {
-  let stellarEventCreator = null
-
-  const setEventCreator = (eventCreator) => {
-    stellarEventCreator = eventCreator
-  }
-
-  const getOrCreate = async (event) => {
-    const createdEvent = await eventRepository.get(event.code)
-    if (createdEvent) {
-      return Event.fromJSON(createdEvent)
-    }
-
-    return stellarEventCreator(event.code, event.limit)
-      .then(async stellarEvent => {
-        console.log(`new event created: ${stellarEvent.code}`)
-        const newEvent = Object.assign({}, stellarEvent, event)
-        await eventRepository.put(event.code, newEvent)
-        return Event.fromJSON(newEvent)
-      })
-  }
-
   const getAllEvents = () => {
     return eventRepository.all()
   }
 
-  const get = async (eventCode) => {
-    const event = await eventRepository.get(eventCode)
-    if (event) {
-      return Event.fromJSON(event)
-    }
-    return null
-  }
-
-  const getById = async (eventCode) => {
-    return await eventRepository.get(eventCode)
+  const getById = async (eventId) => {
+    return await eventRepository.get(eventId)
   }
 
   const getByTitle = async (title) => {
@@ -127,11 +96,8 @@ const eventStoreFactory = (eventRepository, memosRepository) => {
   }
 
   return {
-    setEventCreator,
-    getOrCreate,
     getAllEvents,
     getByTitle,
-    get,
     getById,
     getUnusedTicket,
     getTicketById,

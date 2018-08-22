@@ -1,13 +1,14 @@
+import { HrtimeMarker } from '../utils/hrtimeMarker'
+
 export default (messagingProvider, { useTicketUrl }) => async ({ eventId, ticketId, userProvider, tx }) => {
+  const hrMarker = HrtimeMarker.create('getTicketParams')
   console.log('start get ticket params')
-  const atBeginning = Date.now()
-  let startTime = atBeginning
   const [provider, provierId] = userProvider.split('_')
   console.log(userProvider, provider, provierId)
+  const marker = hrMarker.mark('get')
   const messageSender = messagingProvider.get(provider)
   const profile = provider === 'line' ? (await messageSender.getProfile(provierId)) : {}
-  console.log(`get user profile: ${Date.now() - startTime}`); startTime = Date.now()
-
+  marker.end().log()
 
   const confirmTicketUrl = `${useTicketUrl}/${tx}`
   const params = {
@@ -18,6 +19,6 @@ export default (messagingProvider, { useTicketUrl }) => async ({ eventId, ticket
     'maskTextLine2': eventId.substr(5, 10)
   }
   console.log(params)
-  console.log(`total getTicketParams time: ${Date.now() - atBeginning}`)
+  hrMarker.end().log()
   return params
 }
