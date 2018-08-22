@@ -53,6 +53,10 @@ npm run deploy:asia
  - `[BOOKED]` : Ticket has been booked.
  - `[USED]` : Ticket has been used.
 
+### beta
+- [ ] Consumer can have physical card.
+- [ ] Consumer can scan `QR` for public key and get balance [#8](https://github.com/catcatio/catcat-firebase/issues/8)
+
 ### v1
 - [x] Consumer can `list` events with `used/available` information.
 - [x] Consumer can `book` tickets if `available`.
