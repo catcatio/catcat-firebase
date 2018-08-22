@@ -9,12 +9,13 @@ export default (ticketingSystem): RequestHandler => {
     console.log(`start of oz request \n ${JSON.stringify(req.body)}`)
     if (!req.body) return sendDialogflowTextMessage(res, 'No body...')
 
-    const { action, requestSource, userId, senderId, session } = req.body
+    const { action, requestSource, userId, senderId, session, languageCode } = req.body
     if (!action) return sendDialogflowTextMessage(res, 'No action...')
 
     const requestParams = {
       requestSource,
       from: requestSource === 'LINE' ? userId : senderId,
+      languageCode,
       session
     }
 
