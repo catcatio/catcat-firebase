@@ -32,7 +32,7 @@ export default (ticketingSystem): RequestHandler => {
           .then(() => sendDialogflowTextMessage(res, ''))
 
       case 'events.tickets.book-yes':
-        // join an event
+        // book an event
         const title = req.body.parameters['event-title']
         return ticketingSystem.bookEvent(requestParams, title)
           .then(() => sendDialogflowTextMessage(res, ''))

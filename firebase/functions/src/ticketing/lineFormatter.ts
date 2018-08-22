@@ -64,8 +64,8 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
           .setColor('#718792')
           .setAction({
             'type': 'message',
-            'label': 'JOIN',
-            'text': `Join ${event.title}`,
+            'label': 'BOOK',
+            'text': `Book ${event.title}`,
           })
           .build())
         .addComponents(FlexComponentBuilder.flexButton()

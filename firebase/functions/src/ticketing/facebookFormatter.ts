@@ -10,7 +10,7 @@ export const facebookMessageFormatter = ({ }): IMessageFormatter => {
         .addImage(event.coverImage)
         .addDefaultAction(event.link)
         .addButton('See more detail', event.link)
-        .addButton(`Join ${event.title}`, `Join ${event.title}`)
+        .addButton(`Book ${event.title}`, `Book ${event.title}`)
     })
     return generic.get()
   }

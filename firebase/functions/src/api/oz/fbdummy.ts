@@ -28,8 +28,8 @@ const apiHandler = (request: Request, response: Response) => {
                   },
                   {
                     type: 'postback',
-                    title: 'Join Hyperledger 101',
-                    payload: 'Join Hyperledger 101'
+                    title: 'Book Hyperledger 101',
+                    payload: 'Book Hyperledger 101'
                   }
                 ]
               },
@@ -49,8 +49,8 @@ const apiHandler = (request: Request, response: Response) => {
                   },
                   {
                     type: 'postback',
-                    title: 'Join Stellar 101',
-                    payload: 'Join Stellar 101'
+                    title: 'Book Stellar 101',
+                    payload: 'Book Stellar 101'
                   }
                 ]
               }
