@@ -155,7 +155,7 @@ const stellarWrapperFactory = (server: StellarSdk.Server, masterSigner: StellarS
           .map(balance => {
             return {
               code: balance.asset_type === 'native' ? 'XLM' : balance.asset_code,
-              balance: balance.balance,
+              balance: parseFloat(balance.balance),
               issuer: balance.asset_type === 'native' ? '' : balance.asset_issuer,
             }
           }))

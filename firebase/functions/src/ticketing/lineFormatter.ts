@@ -283,9 +283,9 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
       .setSpacing('md')
       .addComponents(
         FlexComponentBuilder.flexText()
-            .setText(`🔥  ${firebaseTime.toFixed(2)} ms    🚀  ${stellarTime.toFixed(2)} ms`)
-            .setSize('sm')
-            .build(),
+          .setText(`🔥  ${firebaseTime.toFixed(2)} ms    🚀  ${stellarTime.toFixed(2)} ms`)
+          .setSize('sm')
+          .build(),
         FlexComponentBuilder.flexButton()
           .setStyle('secondary')
           .setColor('#b0bec5')
@@ -310,14 +310,16 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
   }
 
   const balanceInfoTemplate = (balanceInfo) => {
-    console.log(balanceInfo)
-      return {
-        'type': 'text',
-        'text': !balanceInfo || balanceInfo.length <= 0
+    return {
+      'type': 'text',
+      'text': !balanceInfo || balanceInfo.length <= 0
         ? 'Account not found'
-        : balanceInfo.map(balance => `${balance.balance} ${balance.code}`).join('\n')
-      }
+        : balanceInfo.map(balance => `${balance.balance.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        })} ${balance.code}`).join('\n')
     }
+  }
 
   return {
     listEvents,
