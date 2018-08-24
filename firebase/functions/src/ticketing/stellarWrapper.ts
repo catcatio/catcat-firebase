@@ -142,20 +142,34 @@ const stellarWrapperFactory = (server: StellarSdk.Server, masterSigner: StellarS
         // console.log(`Success! Results (transfer): ${result._links.transaction.href}`)
         return result.hash
       })
-      .catch((error) => {
-        const errMsg = `Something went wrong! (transfer): ${getErrorCode(error)}`
-        console.warn(errMsg)
-        throw new Error(errMsg)
-      })
+          .catch((error) => {
+            const errMsg = `Something went wrong! (transfer): ${getErrorCode(error)}`
+            console.warn(errMsg)
+            throw new Error(errMsg)
+          })
+      }
+
+  const getBalanceInfo = (publickeyStr) => {
+      return server.loadAccount(publickeyStr)
+        .then(account => account.balances
+          .map(balance => {
+            return {
+              code: balance.asset_type === 'native' ? 'XLM' : balance.asset_code,
+              balance: balance.balance,
+              issuer: balance.asset_type === 'native' ? '' : balance.asset_issuer,
+            }
+          }))
+        .catch(err => console.log(err) || null)
+    }
+
+    return {
+      makeOffer,
+      doBookTicket,
+      queryTransactionAction,
+      transfer,
+      getBalanceInfo
+    }
+
   }
 
-  return {
-    makeOffer,
-    doBookTicket,
-    queryTransactionAction,
-    transfer
-  }
-
-}
-
-export default stellarWrapperFactory
+  export default stellarWrapperFactory

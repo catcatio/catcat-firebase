@@ -309,6 +309,16 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
     return template.build()
   }
 
+  const balanceInfoTemplate = (balanceInfo) => {
+    console.log(balanceInfo)
+      return {
+        'type': 'text',
+        'text': !balanceInfo || balanceInfo.length <= 0
+        ? 'Account not found'
+        : balanceInfo.map(balance => `${balance.balance} ${balance.code}`).join('\n')
+      }
+    }
+
   return {
     listEvents,
     ticketTemplate,
@@ -316,5 +326,6 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
     welcomeTemplate,
     confirmResultTemplate,
     providerName: 'line',
+    balanceInfoTemplate
   }
 }

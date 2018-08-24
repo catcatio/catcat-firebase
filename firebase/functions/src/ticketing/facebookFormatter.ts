@@ -31,12 +31,17 @@ export const facebookMessageFormatter = ({ }): IMessageFormatter => {
     return {}
   }
 
+  const balanceInfoTemplate = (balanceInfo: any[]) => {
+    return {}
+  }
+
   return {
     listEvents,
     ticketTemplate,
     confirmTemplate,
     welcomeTemplate,
     confirmResultTemplate,
+    balanceInfoTemplate,
     providerName: 'facebook'
   }
 }

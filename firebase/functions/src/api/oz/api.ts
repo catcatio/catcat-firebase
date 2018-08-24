@@ -9,14 +9,15 @@ export default (ticketingSystem): RequestHandler => {
     console.log(`start of oz request \n ${JSON.stringify(req.body)}`)
     if (!req.body) return sendDialogflowTextMessage(res, 'No body...')
 
-    const { action, requestSource, userId, senderId, session, languageCode } = req.body
+    const { action, requestSource, userId, senderId, session, languageCode, queryText } = req.body
     if (!action) return sendDialogflowTextMessage(res, 'No action...')
 
     const requestParams = {
       requestSource,
       from: requestSource === 'LINE' ? userId : senderId,
       languageCode,
-      session
+      session,
+      queryText
     }
 
     if (!requestParams.requestSource || !requestParams.from) {
@@ -50,13 +51,10 @@ export default (ticketingSystem): RequestHandler => {
           .then(() => sendDialogflowTextMessage(res, ''))
 
       default:
-        return sessionTask.then(isNew => {
-          // send greetig message if the session is new
-          isNew && ticketingSystem.sendWelcomeMessage(requestParams)
-          return isNew
+        return sessionTask.then(isNewSession => {
+          return ticketingSystem.handleUnknownEvent(isNewSession, requestParams)
         })
-          // otherwise, don't know how to handle the message
-          .then(isNew => sendDialogflowTextMessage(res, !isNew ? 'hmm...?' : ''))
+          .then(handled => sendDialogflowTextMessage(res, !handled ? 'hmm...?' : ''))
     }
   }
 }
