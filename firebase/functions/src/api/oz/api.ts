@@ -4,7 +4,7 @@ import { sendDialogflowTextMessage } from './dialogflowHelper'
 
 export const apiPath = '/'
 
-export default (ticketingSystem): RequestHandler => {
+export default (ticketingSystem, botsSystem): RequestHandler => {
   return (req: Request, res: Response) => {
     console.log(`start of oz request \n ${JSON.stringify(req.body)}`)
     if (!req.body) return sendDialogflowTextMessage(res, 'No body...')
@@ -48,6 +48,10 @@ export default (ticketingSystem): RequestHandler => {
       case 'input.welcome':
         // greeting
         return ticketingSystem.sendWelcomeMessage(requestParams)
+          .then(() => sendDialogflowTextMessage(res, ''))
+
+      case 'bots.share':
+        return botsSystem.share(requestParams)
           .then(() => sendDialogflowTextMessage(res, ''))
 
       default:

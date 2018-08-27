@@ -23,7 +23,8 @@ const firebaseConfig: IFirebaseConfig = {
   useTicketUrl: ticketingConfig.useticketurl,
   ticketQrUrl: ticketingConfig.ticketqrurl,
   lineBotApi: ticketingConfig.linebotapi,
-  lineChannelAccessToken: ticketingConfig.linechannelaccesstoken
+  lineChannelAccessToken: ticketingConfig.linechannelaccesstoken,
+  botLineId: ticketingConfig.botlineid
 }
 
 export interface IFirebaseConfig {
@@ -40,7 +41,8 @@ export interface IFirebaseConfig {
   useTicketUrl: string,
   ticketQrUrl: string,
   lineBotApi: string,
-  lineChannelAccessToken: string
+  lineChannelAccessToken: string,
+  botLineId: string,
 }
 
 export default firebaseConfig
