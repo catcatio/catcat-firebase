@@ -11,12 +11,14 @@ export default (messagingProvider, { useTicketUrl }) => async ({ eventId, ticket
   marker.end().log()
 
   const confirmTicketUrl = `${useTicketUrl}/${tx}`
+  const firstZeroIndex = eventId.indexOf('0')
+  const spliterIndex = firstZeroIndex < 0 || firstZeroIndex > 4 ? 4 : firstZeroIndex
   const params = {
     'text': confirmTicketUrl,
     'logoUrl': profile.pictureUrl || 'empty',
     'logoText': profile.displayName || 'anonymous',
-    'maskTextLine1': eventId.substr(0, 4),
-    'maskTextLine2': eventId.substr(5, 10)
+    'maskTextLine1': eventId.substr(0, spliterIndex),
+    'maskTextLine2': eventId.substr(spliterIndex + 1, 10)
   }
   console.log(params)
   hrMarker.end().log()
