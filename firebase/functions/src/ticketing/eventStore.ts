@@ -51,6 +51,10 @@ const eventStoreFactory = (eventRepository, memosRepository) => {
     return incrementTicketCount(eventId, 'ticket_burnt', amount)
   }
 
+  const incrementUsedTicketCount = async (eventId, amount = 1) => {
+    return incrementTicketCount(eventId, 'used_times', amount)
+  }
+
   const updateBoughtTicket = async (user, event, ticket, bought_tx, languageCode) => {
     await incrementBoughtTicketCount(event.id)
 
@@ -96,6 +100,14 @@ const eventStoreFactory = (eventRepository, memosRepository) => {
     return memo ? parseTxAction(memo.memo) : null
   }
 
+  const updateUsedTicketCount = async (eventId, ticketId, count) => {
+    const ticketsCollection = eventRepository.collection.doc(eventId).collection('tickets')
+    return await ticketsCollection.doc(ticketId).update({
+      used_times: count,
+      last_used_time: new Date().toISOString()
+    })
+  }
+
   return {
     getAllEvents,
     getByTitle,
@@ -104,6 +116,7 @@ const eventStoreFactory = (eventRepository, memosRepository) => {
     getTicketById,
     updateBoughtTicket,
     updateBurntTicket,
+    updateUsedTicketCount,
     saveMemo,
     getMemo
   }

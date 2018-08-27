@@ -1,4 +1,13 @@
 import { HrtimeMarker } from '../utils/hrtimeMarker'
+import * as dayjs from 'dayjs'
+const relativeTime = require('dayjs/plugin/relativeTime')
+const th = require('dayjs/locale/th')
+dayjs.extend(relativeTime)
+
+const dayAgo = (day: string, languageCode) => {
+  const opt: any = languageCode === 'th' ? { locale: th } : {}
+  return (dayjs(day, opt) as any).fromNow()
+}
 
 export default (eventStore, userStore, stellarWrapper, messagingProvider, messageFormatterProvider) => async (tx) => {
   const hrMarker = HrtimeMarker.create('useTicket')
@@ -36,6 +45,8 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
       return Promise.reject('EVENT_TICKET_NOTFOUND')
     }
 
+    const userLanguageCode = ticket.language_code
+
     marker = hrMarker.mark('getUserById')
     const owner = await userStore.getUserById(ticket.owner_id)
     firebaseTime += marker.end().log().duration
@@ -46,17 +57,28 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
     }
 
     marker = hrMarker.mark('sendResponse')
-    if (ticket.burnt_tx) {
-      console.error('EVENT_TICKET_USED')
-      const eventFormatter = messageFormatterProvider.get(event.providers)
-      orgMessageSender.sendMessage(orgAddress, 'This ticket has already been used')
-        .then(() => orgMessageSender.sendCustomMessages(orgAddress, eventFormatter.confirmResultTemplate(ticket.burnt_tx, true)))
-      return Promise.reject('EVENT_OWNER_NOTFOUND')
-    }
-
     const ownerMessageSender = messagingProvider.get(owner.providers)
     const ownerAddress = owner.providers.line || owner.providers.facebook
-    // ownerMessageSender.sendMessage(ownerAddress, 'Your QR has been scan, please wait for confirmation.')
+
+    if (ticket.burnt_tx) {
+      console.error('EVENT_TICKET_USED')
+      const usedTime = (ticket.used_times || 1) + 1
+      const lastUsed = ticket.last_used_time || ticket.burnt_date
+      eventStore.updateUsedTicketCount(event.id, ticket.id, usedTime)
+      ownerMessageSender.sendMessage(ownerAddress, userLanguageCode === 'th'
+        ? `ตั๋ว "${event.title}" ถูกสแกน มาแล้ว ${usedTime} ครั้ง ล่าสุดเมื่อ ${dayAgo(lastUsed, userLanguageCode)}`
+        : `Your "${event.title}" ticket has been scanned for ${usedTime} times, last time around ${dayAgo(lastUsed, userLanguageCode)}`)
+
+      const eventFormatter = messageFormatterProvider.get(event.providers)
+      orgMessageSender.sendMessage(orgAddress, 'This ticket has already been used')
+        .then(() => orgMessageSender.sendCustomMessages(orgAddress, eventFormatter.confirmResultTemplate(ticket.burnt_tx, firebaseTime, stellarTime)))
+      return Promise.reject('EVENT_TICKET_USED')
+    } else {
+      await ownerMessageSender.sendMessage(ownerAddress, userLanguageCode === 'th'
+        ? `ตั๋ว "${event.title}" ถูกสแกน กรุณารอการตรวจสอบ`
+        : `Your "${event.title}" ticket has been scanned, please wait for validation.`)
+    }
+
 
     const profile = owner.providers.line ? await ownerMessageSender.getProfile(owner.providers.line) : null
     const ownerProvider = owner.providers.line ? 'line' : 'facebook'
