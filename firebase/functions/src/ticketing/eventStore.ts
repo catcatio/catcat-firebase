@@ -51,10 +51,6 @@ const eventStoreFactory = (eventRepository, memosRepository) => {
     return incrementTicketCount(eventId, 'ticket_burnt', amount)
   }
 
-  const incrementUsedTicketCount = async (eventId, amount = 1) => {
-    return incrementTicketCount(eventId, 'used_times', amount)
-  }
-
   const updateBoughtTicket = async (user, event, ticket, bought_tx, languageCode) => {
     await incrementBoughtTicketCount(event.id)
 
