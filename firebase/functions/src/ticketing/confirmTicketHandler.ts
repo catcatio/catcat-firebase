@@ -28,6 +28,7 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
       console.error('EVENT_TX_NOTFOUND')
       return orgMessageSender.sendMessage(orgRequestParams.from, 'Tx not found')
     }
+    console.log(txAction)
 
     marker = hrMarker.mark('getEventById')
     const event = await eventStore.getById(txAction.eventId)
@@ -44,6 +45,8 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
       console.error('EVENT_TICKET_NOTFOUND')
       return orgMessageSender.sendMessage(orgRequestParams.from, 'Ticket not found')
     }
+
+    const userLanguageCode = ticket.language_code || 'en'
 
     marker = hrMarker.mark('getUserById')
     const owner = await userStore.getUserById(ticket.owner_id)
@@ -75,7 +78,9 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
 
     return await userStore.updateBurntTicket(owner.id, txAction.eventId, txAction.ticketId)
       .then(() => {
-        userMessageSender.sendMessage(userAddress, `Welcome to '${event.title}'`)
+        userMessageSender.sendMessage(userAddress,
+          userLanguageCode === 'th' ? 'ยืนยันตั๋วเรียบร้อย~' : 'Ticket seem to be valid :)',
+          userLanguageCode === 'th' ? `เชิญเข้างาน "${event.title}" ได้เลยจ้า!` : `Welcome to "${event.title}" event!`)
         orgMessageSender.sendCustomMessages(orgRequestParams.from, formatter.confirmResultTemplate(burnt_tx, firebaseTime, stellarTime))
       }).then(() => stellarTime += marker.end().log().duration)
   } finally {

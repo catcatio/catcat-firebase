@@ -51,7 +51,7 @@ const eventStoreFactory = (eventRepository, memosRepository) => {
     return incrementTicketCount(eventId, 'ticket_burnt', amount)
   }
 
-  const updateBoughtTicket = async (user, event, ticket, bought_tx) => {
+  const updateBoughtTicket = async (user, event, ticket, bought_tx, languageCode) => {
     await incrementBoughtTicketCount(event.id)
 
     const ticketsCollection = eventRepository.collection.doc(event.id).collection('tickets')
@@ -59,7 +59,8 @@ const eventStoreFactory = (eventRepository, memosRepository) => {
       bought_tx,
       owner_token: `${event.asset.getCode()}:${event.asset.getIssuer()}`,
       owner_id: user.id,
-      owned_date: new Date().toISOString()
+      owned_date: new Date().toISOString(),
+      language_code: languageCode
     }).then(() => ({
       ticket_id: ticket.id,
       event_id: event.id

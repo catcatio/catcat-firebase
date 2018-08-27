@@ -76,13 +76,13 @@ export const lineClient = ({ lineBotApi, lineChannelAccessToken }): IMessagingCl
     return sendMessages(recipientId, ...messages).catch(err => console.log(err))
   }
 
-  const sendMessage = (recipientId, text) => {
-    const message = {
+  const sendMessage = (recipientId, ...text) => {
+    const messages = text.map(t => ({
       'type': 'text',
-      'text': text
-    }
+      'text': t
+    }))
 
-    return sendMessages(recipientId, message).catch(err => console.log(err))
+    return sendMessages(recipientId, ...messages).catch(err => console.log(err))
   }
 
   const sendCustomMessages = (recipientId, ...messages) => {

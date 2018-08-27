@@ -35,6 +35,7 @@ export const ticketing = (messagingProvider: IMessageingProvider, firebaseConfig
   const confirmTicket = require('./confirmTicketHandler').default(eventStore, userStore, stellarWrapper, messagingProvider, messageFormatterProvider)
   const getTicketParams = require('./getTicketParams').default(messagingProvider, firebaseConfig)
   const handleUnknownEvent = require('./unknowEventHandler').default(stellarWrapper, messagingProvider, messageFormatterProvider)
+  const sendWelcomeMessage = require('./sendWelcomeMessageHandler').default(messagingProvider, messageFormatterProvider)
   const isNewSession = require('./isNewSessionHander').default(sessionsRepository)
 
   return {
@@ -45,5 +46,6 @@ export const ticketing = (messagingProvider: IMessageingProvider, firebaseConfig
     getTicketParams,
     handleUnknownEvent,
     isNewSession,
+    sendWelcomeMessage
   }
 }

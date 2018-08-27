@@ -100,7 +100,7 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
     }
 
     marker = hrMarker.mark('updateBoughtTicket')
-    await eventStore.updateBoughtTicket(user, tmpEvent, unusedTicket, bought_tx)
+    await eventStore.updateBoughtTicket(user, tmpEvent, unusedTicket, bought_tx, languageCode)
       .then(() => eventStore.saveMemo(bought_tx, boughtMemo))
     await userStore.updateBoughtTicket(user.id, tmpEvent.id, unusedTicket.id)
     firebaseTime += marker.end().duration
