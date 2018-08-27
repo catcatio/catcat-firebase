@@ -1,15 +1,19 @@
 import { IFirebaseConfig } from '../firebaseConfig'
 import { IMessageingProvider } from '../messaging'
+import lineMessageFormatter from './lineMessageFormatter'
 
 export const bots = (messagingProvider: IMessageingProvider, firebaseConfig: IFirebaseConfig) => {
 
-  const shareIdUrl = `line://nv/recommendOA/${firebaseConfig.botLineId}`
-  const shareMessageHandler = ({ requestSource, from }) => {
+  const { recommendTemplate } = lineMessageFormatter()
+
+  const recommendMessageHandler = ({ requestSource, from, languageCode }) => {
+    const recommendObj = recommendTemplate(firebaseConfig.botLineId, languageCode)
     const messageSender = messagingProvider.get(requestSource)
-    return messageSender.sendMessage(from, shareIdUrl)
+    console.log(JSON.stringify(recommendObj))
+    return messageSender.sendCustomMessages(from, recommendObj)
   }
 
   return {
-    share: shareMessageHandler
+    recommend: recommendMessageHandler
   }
 }

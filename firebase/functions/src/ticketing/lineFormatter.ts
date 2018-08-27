@@ -1,6 +1,6 @@
 import { IMessageFormatter } from './messageFormatter'
 import { FlexMessage, FlexImage } from '@line/bot-sdk'
-import { FlexMessageBuilder, FlexComponentBuilder } from './lineMessageBuilder'
+import { FlexMessageBuilder, FlexComponentBuilder } from '../messaging/lineMessageBuilder'
 import * as dayjs from 'dayjs'
 const relativeTime = require('dayjs/plugin/relativeTime')
 dayjs.extend(relativeTime)

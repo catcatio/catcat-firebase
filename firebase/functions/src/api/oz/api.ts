@@ -50,8 +50,8 @@ export default (ticketingSystem, botsSystem): RequestHandler => {
         return ticketingSystem.sendWelcomeMessage(requestParams)
           .then(() => sendDialogflowTextMessage(res, ''))
 
-      case 'bots.share':
-        return botsSystem.share(requestParams)
+      case 'bots.recommend':
+        return botsSystem.recommend(requestParams)
           .then(() => sendDialogflowTextMessage(res, ''))
 
       default:
