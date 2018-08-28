@@ -15,12 +15,18 @@ export const lineClient = ({ lineBotApi, lineChannelAccessToken }): IMessagingCl
     }, (err, response, body) => {
       if (err) {
         reject(err)
-        console.log(err)
+        console.error(err)
         return
       }
 
       if (typeof body === 'string') {
         resolve(JSON.parse(body))
+
+        if (body !== '{}') {
+          console.error('Error occured while sending request to line')
+          console.error(JSON.stringify(data))
+          console.error(body)
+        } // means some error occured
       } else {
         resolve(body)
       }

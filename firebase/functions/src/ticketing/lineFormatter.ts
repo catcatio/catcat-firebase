@@ -38,23 +38,22 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
             .setSize('xl')
             .build(),
           FlexComponentBuilder.flexText()
-            .setText(`${limitChar(event.description, 60)}`)
+            .setText(`${event.description}`)
             .setWrap(true)
-            .setWeight('bold')
             .setSize('md')
             .build(),
           FlexComponentBuilder.flexText()
             .setText(dayjs(event.startDate).format('dddd, MMMM D, YYYY h:mm A'))
             .setWrap(true)
-            .setWeight('bold')
+            .setColor('#999999')
             .setSize('xs')
             .build(),
           FlexComponentBuilder.flexText()
-            .setText(`BOOKED (${event.ticket_bought || 0}/${event.ticket_max})`)
+            .setText(`🎫 AVAILABLE (${event.ticket_max - (event.ticket_bought || 0)})`)
             .setWrap(true)
             .setWeight('bold')
             .setSize('xs')
-            .setMargin('xs')
+            .setMargin('md')
             .setColor('#222222')
             .build())
         .addFooter()
@@ -64,8 +63,8 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
           .setColor('#718792')
           .setAction({
             'type': 'message',
-            'label': languageCode === 'th' ? 'จอง' : 'BOOK',
-            'text': `${languageCode === 'th' ? 'จอง' : 'Book'} ${event.title}`,
+            'label': (languageCode === 'th' ? 'จอง' : 'BOOK') + ` (${event.ticket_bought || 0}/${event.ticket_max})`,
+            'text': `${languageCode === 'th' ? 'จองตั๋ว' : 'Book'} ${event.title}`,
           })
           .build())
         .addComponents(FlexComponentBuilder.flexButton()
@@ -154,7 +153,7 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
         .setAction({
           'type': 'uri',
           'uri': event.link,
-          'label': event.title
+          'label': limitChar(event.title, 40)
         })
         .build() as FlexImage)
       .addBody()
