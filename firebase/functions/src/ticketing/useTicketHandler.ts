@@ -75,7 +75,7 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
       return Promise.reject('EVENT_TICKET_USED')
     } else {
       await ownerMessageSender.sendMessage(ownerAddress, userLanguageCode === 'th'
-        ? `ตั๋ว "${event.title}" ถูกสแกน กรุณารอการตรวจสอบ`
+        ? `QR ตั๋ว "${event.title}" ถูกสแกน ขอเราแอบดูแป๊บนึงนะ...`
         : `Your "${event.title}" ticket has been scanned, please wait for validation.`)
     }
 
