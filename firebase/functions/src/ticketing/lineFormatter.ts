@@ -14,7 +14,7 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
     return str.substr(0, limit)
   }
 
-  const listEvents = (events: any[], languageCode: string): FlexMessage => {
+  const listEvents = (events: any[], bookedEvent: any[], languageCode: string): FlexMessage => {
     const lineTemplate = new FlexMessageBuilder()
     const template = lineTemplate.flexMessage(languageCode === 'th' ? 'รายการอีเว้นท์' : 'Event list')
       .addCarousel()
@@ -63,8 +63,8 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
           .setColor('#718792')
           .setAction({
             'type': 'message',
-            'label': (languageCode === 'th' ? 'จอง' : 'BOOK') + ` (${event.ticket_bought || 0}/${event.ticket_max})`,
-            'text': `${languageCode === 'th' ? 'จองตั๋ว' : 'Book'} ${event.title}`,
+            'label': bookedEvent && bookedEvent.indexOf(event.id) >= 0 ? `${languageCode === 'th' ? 'ยกเลิก' : 'CANCEL'}` : `${languageCode === 'th' ? 'จอง' : 'BOOK'} (${event.ticket_bought || 0}/${event.ticket_max})`,
+            'text': bookedEvent && bookedEvent.indexOf(event.id) >= 0 ? `${languageCode === 'th' ? 'ยกเลิก' : 'CANCEL'}` : `${languageCode === 'th' ? 'จองตั๋ว' : 'Book'} ${event.title}`,
           })
           .build())
         .addComponents(FlexComponentBuilder.flexButton()

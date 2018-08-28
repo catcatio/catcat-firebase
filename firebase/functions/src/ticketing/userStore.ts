@@ -48,11 +48,11 @@ const userStoreFactory = (userRepository, tmpUserRepository, providersRepository
   }
 
   const addMemo = async (userId, memo) => {
-    return userRepository.update(userId, {memo})
+    return userRepository.update(userId, { memo })
   }
 
   const markAsUsed = async (userId) => {
-    return userRepository.update(userId, {used: true})
+    return userRepository.update(userId, { used: true })
   }
 
   const updateBoughtTicket = async (userId, event_id, ticket_id) => {

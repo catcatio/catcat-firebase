@@ -29,7 +29,7 @@ export const ticketing = (messagingProvider: IMessageingProvider, firebaseConfig
 
   const userStore = userStoreFactory(userRepository, tempUserRepository, providersRepository)
 
-  const listEvent = require('./listEventsHandle').default(eventStore, messagingProvider, messageFormatterProvider)
+  const listEvent = require('./listEventsHandle').default(eventStore, userStore, messagingProvider, messageFormatterProvider)
   const bookEvent = require('./bookEventHandler').default(eventStore, userStore, stellarWrapper, messagingProvider, messageFormatterProvider, masterAsset, masterDistributor, firebaseConfig)
   const useTicket = require('./useTicketHandler').default(eventStore, userStore, stellarWrapper, messagingProvider, messageFormatterProvider)
   const confirmTicket = require('./confirmTicketHandler').default(eventStore, userStore, stellarWrapper, messagingProvider, messageFormatterProvider)
