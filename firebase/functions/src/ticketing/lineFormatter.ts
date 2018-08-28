@@ -22,7 +22,7 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
     events.forEach(event =>
       template.addBubble()
         .addHero(FlexComponentBuilder.flexImage()
-          .setUrl(`${imageResizeService}${encodeURIComponent(event.coverImage)}&size=240&seed=${Date.now()}`)
+          .setUrl(`${imageResizeService}${encodeURIComponent(event.coverImage)}&size=800&seed=${Date.now()}`)
           .setSize('full')
           .setAspectRatio('1.91:1')
           .setAspectMode('cover')
@@ -146,7 +146,7 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
     const template = lineTemplate.flexMessage(`Your ticket: ${event.title}`)
       .addBubble()
       .addHero(FlexComponentBuilder.flexImage()
-        .setUrl(`${imageResizeService}${encodeURIComponent(event.coverImage)}&size=240&seed=${Date.now()}`)
+        .setUrl(`${imageResizeService}${encodeURIComponent(event.coverImage)}&size=800&seed=${Date.now()}`)
         .setSize('full')
         .setAspectRatio('1.91:1')
         .setAspectMode('cover')
