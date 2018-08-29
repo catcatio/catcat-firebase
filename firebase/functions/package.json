@@ -5,12 +5,14 @@
     "build": "tsc",
     "dev": "tsc -w",
     "serve": "npm run build && firebase serve --only functions",
+    "serve:ci": "npm run build && firebase serve --token \"$FIREBASE_TOKEN\" -o 0.0.0.0 --only functions",
     "shell": "npm run build && firebase experimental:functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
     "deploy:asia": "gcloud beta functions deploy oz --trigger-http --region asia-northeast1",
     "logs": "firebase functions:log",
-    "initToken": "mocha test/initToken.test.ts"
+    "initToken": "mocha test/initToken.test.ts",
+    "init": "npm i && nodemon --exec \"npm run serve:ci\""
   },
   "main": "lib/index.js",
   "dependencies": {

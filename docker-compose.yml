@@ -1,0 +1,19 @@
+version: "3"
+
+services:
+  catcat-firebase:
+    container_name: catcat-firebase
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    environment:
+      - PORT=${PORT:-9095}
+      - FIREBASE_TOKEN=${FIREBASE_TOKEN}
+    image: catcatio/firebase
+    working_dir: /usr/app
+    ports:
+      - "${PORT:-9095}:5000"
+    volumes:
+      - .:/usr/app
+    command: sh scripts/startup.sh
