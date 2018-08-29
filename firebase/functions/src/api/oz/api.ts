@@ -45,6 +45,12 @@ export default (ticketingSystem, botsSystem): RequestHandler => {
         return ticketingSystem.confirmTicket(tx, requestParams)
           .then(() => sendDialogflowTextMessage(res, ''))
 
+      case 'events.tickets.view':
+          //  view a ticket
+          return ticketingSystem.viewTicket(requestParams)
+            .then(() => sendDialogflowTextMessage(res, ''))
+
+
       case 'input.welcome':
         // greeting
         return ticketingSystem.sendWelcomeMessage(requestParams)
