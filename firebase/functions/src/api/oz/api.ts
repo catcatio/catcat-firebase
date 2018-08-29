@@ -50,7 +50,6 @@ export default (ticketingSystem, botsSystem): RequestHandler => {
           return ticketingSystem.viewTicket(requestParams)
             .then(() => sendDialogflowTextMessage(res, ''))
 
-
       case 'input.welcome':
         // greeting
         return ticketingSystem.sendWelcomeMessage(requestParams)
