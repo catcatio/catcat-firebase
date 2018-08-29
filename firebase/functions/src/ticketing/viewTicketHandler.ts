@@ -7,7 +7,7 @@ export default (eventStore, userStore, messagingProvider, messageFormatterProvid
     const messageSender = messagingProvider.get(requestSource)
     const formatter = messageFormatterProvider.get(requestSource)
     messageSender.sendMessage(from, languageCode === 'th'
-      ? 'รอแปร็บนะ...'
+      ? 'รอแปร๊บนะ...'
       : 'Checking...')
 
     if (!user || !user.bought_tickets || (Object.keys(user.bought_tickets).length <= 0)) {
