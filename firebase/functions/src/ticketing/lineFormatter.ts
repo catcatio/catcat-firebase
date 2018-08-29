@@ -43,6 +43,12 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
             .setSize('md')
             .build(),
           FlexComponentBuilder.flexText()
+            .setText(event.venue)
+            .setWrap(true)
+            .setColor('#999999')
+            .setSize('xs')
+            .build(),
+          FlexComponentBuilder.flexText()
             .setText(dayjs(event.startDate).format('dddd, MMMM D, YYYY h:mm A'))
             .setWrap(true)
             .setColor('#999999')
@@ -67,12 +73,25 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
             'text': bookedEvent && bookedEvent.indexOf(event.id) >= 0 ? `${languageCode === 'th' ? 'ยกเลิก' : 'CANCEL'}` : `${languageCode === 'th' ? 'จองตั๋ว' : 'Book'} ${event.title}`,
           })
           .build())
-        .addComponents(FlexComponentBuilder.flexButton()
-          .setAction({
-            'type': 'uri',
-            'label': languageCode === 'th' ? 'รายละเอียด' : 'MORE',
-            'uri': event.link
-          })
+        .addComponents(FlexComponentBuilder.flexBox()
+          .setLayout('horizontal')
+          .setSpacing('md')
+          .addContents(
+            FlexComponentBuilder.flexButton()
+              .setAction({
+                'type': 'uri',
+                'label': languageCode === 'th' ? 'แผนที่' : 'MAP',
+                'uri': event.venuelink
+              })
+              .build(),
+            FlexComponentBuilder.flexButton()
+              .setAction({
+                'type': 'uri',
+                'label': languageCode === 'th' ? 'รายละเอียด' : 'MORE',
+                'uri': event.link
+              })
+              .build()
+          )
           .build())
     )
 
