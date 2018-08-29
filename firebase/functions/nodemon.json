@@ -3,6 +3,7 @@
     "colours": true,
     "ignore": [
       ".git",
+      "node_modules",
       "node_modules/**/node_modules"
     ],
     "verbose": true,
@@ -12,9 +13,7 @@
     "events": {
       "restart": "echo \"App restarted due to: '$FILENAME'\""
     },
-    "watch":[],
-    "env": {
-      "NODE_ENV": "production"
-    },
-    "ext": "js,json"
+    "watch":["src/**/*.ts"],
+    "ext": "ts",
+    "delay": "1500"
   }

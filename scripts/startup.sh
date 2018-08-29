@@ -2,4 +2,4 @@
 cd firebase/functions
 echo $PWD
 npm i && \
-npm run serve:ci
+nodemon --exec "npm run serve:ci"
