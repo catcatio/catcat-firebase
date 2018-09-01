@@ -48,18 +48,18 @@ npm run deploy:asia
  - `[AFTER.EVENTS.ATTENDED]`      : User has been attended after event period.
  - `[AFTER.EVENTS.NOT_ATTENDED]`  : User has not attended after event period.
 
+### Tickets Period
+- `[INITIAL]` : Ticket that sale between presale period, aim for co-founder.
+- `[INTERNAL]` : Ticket that sale between presale period, aim for friends.
+- `[PRIVATE]` : Ticket that sale between private round period, aim for investor.
+- `[PRE]` : Ticket that sale between early round period, aim for early-brid
+- `[PUBLIC]` : Ticket that sale between public round period, aim for brid.
+
 ### Tickets States
  - `[UNUSED]` : Ticket has not been used.
  - `[BOOKED]` : Ticket has been booked.
  - `[USED]` : Ticket has been used.
-
-### Tickets Types
-- `[INITIAL_SALE]` : Ticket that sale between presale period, aim for co-founder.
-- `[INTERNAL_SALE]` : Ticket that sale between presale period, aim for friends.
-- `[PRIVATE_SALE]` : Ticket that sale between private round period, aim for investor.
-- `[PRE_SALE]` : Ticket that sale between early round period, aim for early-brid
-- `[PUBLIC_SALE]` : Ticket that sale between public round period, aim for brid.
-- `[AUCTION_SALE]` : Ticket that sale after public round period has been fulfil, aim for late brid.
+ - `[AUCTIONED]` : The `[PUBLIC]` ticket that auciton after public round period has been fulfil, aim for late brid.
 
 ### beta
 - [ ] Consumer can have physical card.
