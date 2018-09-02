@@ -16,4 +16,9 @@ services:
       - "${PORT:-9095}:5000"
     volumes:
       - .:/usr/app
+    logging:
+      driver: gelf
+      options:
+        gelf-address: udp://localhost:${LS_PORT:-12201}
+        tag: "catcat-firebase"
     command: sh scripts/startup.sh
