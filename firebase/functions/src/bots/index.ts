@@ -1,19 +1,18 @@
 import { IFirebaseConfig } from '../firebaseConfig'
 import { IMessageingProvider } from '../messaging'
-import lineMessageFormatter from './lineMessageFormatter'
+import recommendMessageHandler from './recommendMessageHandler'
+import suggestionMessageHandler from './suggestionMessageHandler'
 
 export const bots = (messagingProvider: IMessageingProvider, firebaseConfig: IFirebaseConfig) => {
+  const firestoreRepoFactory = require('../ticketing/firestoreRepository').default
+  const suggestionStoreFactory = require('./suggestionStore').default
 
-  const { recommendTemplate } = lineMessageFormatter()
-
-  const recommendMessageHandler = ({ requestSource, from, languageCode }) => {
-    const recommendObj = recommendTemplate(firebaseConfig.botLineId, languageCode)
-    const messageSender = messagingProvider.get(requestSource)
-    console.log(JSON.stringify(recommendObj))
-    return messageSender.sendCustomMessages(from, recommendObj)
-  }
+  const { firestore } = firebaseConfig
+  const suggestionsRepository = firestoreRepoFactory(firestore, 'suggestions')
+  const suggestionStore = suggestionStoreFactory(suggestionsRepository)
 
   return {
-    recommend: recommendMessageHandler
+    recommend: recommendMessageHandler(messagingProvider, firebaseConfig),
+    suggest: suggestionMessageHandler(suggestionStore, messagingProvider, firebaseConfig)
   }
 }

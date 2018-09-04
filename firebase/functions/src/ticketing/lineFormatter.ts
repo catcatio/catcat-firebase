@@ -327,11 +327,11 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
     return template.build()
   }
 
-  const balanceInfoTemplate = (balanceInfo) => {
+  const balanceInfoTemplate = (balanceInfo, languageCode) => {
     return {
       'type': 'text',
       'text': !balanceInfo || balanceInfo.length <= 0
-        ? 'Account not found'
+        ? languageCode === 'th' ? 'ไม่พบข้อมูล' : 'Account not found'
         : balanceInfo.map(balance => `${balance.balance.toLocaleString(undefined, {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2

@@ -46,17 +46,29 @@ export default (ticketingSystem, botsSystem): RequestHandler => {
           .then(() => sendDialogflowTextMessage(res, ''))
 
       case 'events.tickets.view':
-          //  view a ticket
-          return ticketingSystem.viewTicket(requestParams)
-            .then(() => sendDialogflowTextMessage(res, ''))
+        //  view a ticket
+        return ticketingSystem.viewTicket(requestParams)
+          .then(() => sendDialogflowTextMessage(res, ''))
 
       case 'input.welcome':
         // greeting
         return ticketingSystem.sendWelcomeMessage(requestParams)
           .then(() => sendDialogflowTextMessage(res, ''))
 
+      case 'wallet.balance':
+          // greeting
+          return ticketingSystem.walletBalance(requestParams)
+            .then(() => sendDialogflowTextMessage(res, ''))
+
       case 'bots.recommend':
+        // recommend to friend
         return botsSystem.recommend(requestParams)
+          .then(() => sendDialogflowTextMessage(res, ''))
+
+      case 'botssuggestion.botssuggestion-context':
+        // suggestion flow
+        const suggestion = req.body.parameters['suggestion']
+        return botsSystem.suggest(suggestion, requestParams)
           .then(() => sendDialogflowTextMessage(res, ''))
 
       default:
