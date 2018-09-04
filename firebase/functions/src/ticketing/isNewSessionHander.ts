@@ -3,10 +3,9 @@ export default (sessionsRepository) => async ({ session, from }) => {
     return false
   }
 
+  const expiredTime = 86400000 // 24 hrs
   const lastSession = await sessionsRepository.get(from)
-  if (!lastSession || lastSession.session !== session) {
-    await sessionsRepository.put(from, { session })
-    return true
-  }
-  return false
+  const isNew = !lastSession || !lastSession.lastAccess || ((Date.now() - lastSession.lastAccess) > expiredTime)
+  sessionsRepository.put(from, { session, lastAccess: Date.now() })
+  return isNew
 }

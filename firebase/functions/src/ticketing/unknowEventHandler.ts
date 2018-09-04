@@ -24,7 +24,7 @@ export default (stellarWrapper, messagingProvider, messageFormatterProvider) => 
         messageSender.sendCustomMessages(from, formatter.balanceInfoTemplate(accountInfo))
         return true
       } else if (isNewSession) {
-        sendWelcomeMessage({ requestSource, from, languageCode })
+        sendWelcomeMessage({ requestSource, from, languageCode }, isNewSession)
         return true
       }
 
