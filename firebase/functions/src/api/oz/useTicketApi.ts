@@ -7,7 +7,7 @@ export default (ticketingSystem): RequestHandler => {
   return (req: Request, res: Response) => {
     const bought_tx = req.params.bought_tx
     return ticketingSystem.useTicket(bought_tx)
-      .then(ret => sendDialogflowTextMessage(res, ret))
-      .catch(err => sendDialogflowTextMessage(res, err))
+      .catch(err => console.log(err))
+      .then(() => res.sendStatus(200))
   }
 }

@@ -6,7 +6,7 @@ export default (eventStore, userStore, messagingProvider, messageFormatterProvid
     const user = await userStore.getByRequstSource(requestSource, from)
     const messageSender = messagingProvider.get(requestSource)
     const formatter = messageFormatterProvider.get(requestSource)
-    messageSender.sendMessage(from, languageCode === 'th'
+    await messageSender.sendMessage(from, languageCode === 'th'
       ? 'รอแปร๊บนะ...'
       : 'Checking...')
 

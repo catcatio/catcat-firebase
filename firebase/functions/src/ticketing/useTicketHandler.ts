@@ -11,7 +11,7 @@ const dayAgo = (day: string, languageCode) => {
 
 export default (eventStore, userStore, stellarWrapper, messagingProvider, messageFormatterProvider) => async (tx) => {
   const hrMarker = HrtimeMarker.create('useTicket')
-  console.log('start use ticket')
+  console.log(`start use ticket: ${tx}`)
   let firebaseTime = 0, stellarTime = 0
   try {
 
@@ -91,7 +91,7 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
     }
 
     firebaseTime += marker.end().log().duration
-
+    console.log('EVENT_TICKET_OK')
     return 'EVENT_TICKET_OK'
   } finally {
     console.log(`🔥  ${firebaseTime.toFixed(2)} ms    🚀  ${stellarTime.toFixed(2)} ms`)
