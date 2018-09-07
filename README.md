@@ -52,8 +52,8 @@ npm run deploy:asia
 - `[INITIAL]` : Ticket that sale between presale period, aim for co-founder.
 - `[INTERNAL]` : Ticket that sale between presale period, aim for friends.
 - `[PRIVATE]` : Ticket that sale between private round period, aim for investor.
-- `[PRE]` : Ticket that sale between early round period, aim for early-brid
-- `[PUBLIC]` : Ticket that sale between public round period, aim for brid.
+- `[PRE]` : Ticket that sale between early round period, aim for early-bird
+- `[PUBLIC]` : Ticket that sale between public round period, aim for bird.
 
 ### Tickets States
  - `[UNUSED]` : Ticket has not been used.
