@@ -30,6 +30,20 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
       : `Hold on, we're now booking ${eventTitle} for you...`
     messageSender.sendMessage(from, msg)
 
+    // check if there is any available ticket
+    marker = hrMarker.mark('getUnusedTicket')
+    const unusedTicket = await eventStore.getUnusedTicket(event.id)
+    firebaseTime += marker.end().log().duration
+
+    if (!unusedTicket) {
+      console.error('EVENT_BOOK_FULL')
+      msg = languageCode === 'th'
+        ? `ขอโทษทีนะ "${eventTitle}" เต็มแล้ว`
+        : `Sorry, the "${eventTitle}" event is fully booked out`
+      return messageSender.sendMessage(from, msg)
+    }
+
+    // get user by requestSource, or create new one if necessary
     let user = await userStore.getByRequstSource(requestSource, from)
     user = user || await userStore.createUserFromTemp(requestSource, from, masterAsset)
     firebaseTime += marker.end().log().duration
@@ -41,6 +55,7 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
         : `Sorry, the "${eventTitle}" event is fully booked out`
       return messageSender.sendMessage(from, msg)
     }
+    console.log(`user: ${user.id} ${user.publicKey}`)
 
     if (user.bought_tickets && user.bought_tickets[event.id] && (Object.keys(user.bought_tickets[event.id]).length > 0)) {
       console.error('EVENT_ALREADY_BOOK')
@@ -65,19 +80,6 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
       }
 
       return retPromise
-    }
-
-    marker = hrMarker.mark('getUnusedTicket')
-    console.log(`user: ${user.id} ${user.publicKey}`)
-    const unusedTicket = await eventStore.getUnusedTicket(event.id)
-    firebaseTime += marker.end().log().duration
-
-    if (!unusedTicket) {
-      console.error('EVENT_BOOK_FULL')
-      msg = languageCode === 'th'
-        ? `ขอโทษทีนะ "${eventTitle}" เต็มแล้ว`
-        : `Sorry, the "${eventTitle}" event is fully booked out`
-      return messageSender.sendMessage(from, msg)
     }
 
     marker = hrMarker.mark('doBookTicket')
