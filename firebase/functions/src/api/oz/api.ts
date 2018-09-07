@@ -83,7 +83,7 @@ export default (ticketingSystem, botsSystem): RequestHandler => {
         })
           .then(handled => handled
             ? res.sendStatus(200)
-            : sendDialogflowTextMessage(res, 'hmm...?'))
+            : sendDialogflowTextMessage(res, languageCode === 'th' ? 'เมียว~' : 'meow~'))
     }
   }
 }

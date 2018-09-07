@@ -1,5 +1,4 @@
 import { Request, Response, RequestHandler } from 'express'
-import { sendDialogflowTextMessage } from './dialogflowHelper'
 
 export const apiPath = '/v1/use/:bought_tx'
 
