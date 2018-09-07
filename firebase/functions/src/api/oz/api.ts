@@ -31,11 +31,11 @@ export default (ticketingSystem, botsSystem): RequestHandler => {
       case 'list.events':
         // list events
         return ticketingSystem.listEvent(requestParams)
-          .then(() => sendDialogflowTextMessage(res, ''))
+          .then(() => res.sendStatus(200))
 
       case 'events.tickets.book':
         const preBookTitle = req.body.parameters['event-title']
-        if (preBookTitle) return sendDialogflowTextMessage(res, '')
+        if (preBookTitle) return res.sendStatus(200)
         sendDialogflowTextMessage(res, languageCode === 'th' ? 'ลองดูรายการนี้นะ...' : 'Here is what we have...')
         return ticketingSystem.listEvent(requestParams)
 
@@ -43,45 +43,47 @@ export default (ticketingSystem, botsSystem): RequestHandler => {
         // book an event
         const title = req.body.parameters['event-title']
         return ticketingSystem.bookEvent(requestParams, title)
-          .then(() => sendDialogflowTextMessage(res, ''))
+          .then(() => res.sendStatus(200))
 
       case 'events.tickets.confirm-yes':
         // confirm to burn a ticket
         const tx = req.body.parameters['tx']
         return ticketingSystem.confirmTicket(tx, requestParams)
-          .then(() => sendDialogflowTextMessage(res, ''))
+          .then(() => res.sendStatus(200))
 
       case 'events.tickets.view':
         //  view a ticket
         return ticketingSystem.viewTicket(requestParams)
-          .then(() => sendDialogflowTextMessage(res, ''))
+          .then(() => res.sendStatus(200))
 
       case 'input.welcome':
         // greeting
         return ticketingSystem.sendWelcomeMessage(requestParams)
-          .then(() => sendDialogflowTextMessage(res, ''))
+          .then(() => res.sendStatus(200))
 
       case 'wallet.balance':
-          // greeting
-          return ticketingSystem.walletBalance(requestParams)
-            .then(() => sendDialogflowTextMessage(res, ''))
+        // greeting
+        return ticketingSystem.walletBalance(requestParams)
+          .then(() => res.sendStatus(200))
 
       case 'bots.recommend':
         // recommend to friend
         return botsSystem.recommend(requestParams)
-          .then(() => sendDialogflowTextMessage(res, ''))
+          .then(() => res.sendStatus(200))
 
       case 'botssuggestion.botssuggestion-context':
         // suggestion flow
         const suggestion = req.body.parameters['suggestion']
         return botsSystem.suggest(suggestion, requestParams)
-          .then(() => sendDialogflowTextMessage(res, ''))
+          .then(() => res.sendStatus(200))
 
       default:
         return sessionTask.then(isNewSession => {
           return ticketingSystem.handleUnknownEvent(isNewSession, requestParams)
         })
-          .then(handled => sendDialogflowTextMessage(res, !handled ? 'hmm...?' : ''))
+          .then(handled => handled
+            ? res.sendStatus(200)
+            : sendDialogflowTextMessage(res, 'hmm...?'))
     }
   }
 }
