@@ -339,6 +339,39 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
     }
   }
 
+  const inviteTemplate = (eventId, userId, languageCode) => {
+    const lineTemplate = new FlexMessageBuilder()
+    const template = lineTemplate.flexMessage('Invite friend')
+      .addBubble()
+      .addHeader()
+      .addComponents(
+        FlexComponentBuilder.flexBox()
+          .setLayout('horizontal')
+          .addContents(FlexComponentBuilder.flexText()
+            .setText(languageCode === 'th' ? 'การแบ่งปันคือความห่วงใย' : 'Sharing is caring ;)')
+            .setWeight('bold')
+            .setSize('sm')
+            .build())
+          .build()
+      )
+      .addFooter()
+      .setLayout('horizontal')
+      .setSpacing('md')
+      .addComponents(
+        FlexComponentBuilder.flexButton()
+          .setStyle('secondary')
+          .setColor('#b0bec5')
+          .setAction({
+            'type': 'uri',
+            'label': languageCode === 'th' ? 'ส่งให้เพื่อน': 'invite',
+            'uri': `line://msg/text/?https://t.catcat.io/?ref=${userId}_${eventId}`
+          })
+          .build(),
+      )
+
+    return template.build()
+  }
+
   return {
     listEvents,
     ticketTemplate,
@@ -346,6 +379,7 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
     welcomeTemplate,
     confirmResultTemplate,
     providerName: 'line',
-    balanceInfoTemplate
+    balanceInfoTemplate,
+    inviteTemplate
   }
 }

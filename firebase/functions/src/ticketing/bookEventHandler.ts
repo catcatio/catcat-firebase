@@ -115,6 +115,14 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
     await messageSender.sendCustomMessages(from, formatter.ticketTemplate(event, ticketUrl))
       .then(() => messageSender.sendMessage(from, msg))
 
+
+    // send sharing link
+    msg = languageCode === 'th'
+      ? 'อ้อ อยากชวนเพื่อนมางานนี้ด้วยกันมั๊ย?'
+      : 'Oh BTW, Do you want to invite your friend to this event?'
+    await messageSender.sendMessage(from, msg)
+      .then(() => messageSender.sendCustomMessages(from, formatter.inviteTemplate(event.id, user.id, languageCode)))
+
     console.info('EVENT_BOOK_OK')
     return 'EVENT_BOOK_OK'
   } finally {

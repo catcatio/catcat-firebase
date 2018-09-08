@@ -35,6 +35,10 @@ export const facebookMessageFormatter = ({ }): IMessageFormatter => {
     return {}
   }
 
+  const inviteTemplate = (eventId, userId, languageCode) => {
+    return {}
+  }
+
   return {
     listEvents,
     ticketTemplate,
@@ -42,6 +46,7 @@ export const facebookMessageFormatter = ({ }): IMessageFormatter => {
     welcomeTemplate,
     confirmResultTemplate,
     balanceInfoTemplate,
+    inviteTemplate,
     providerName: 'facebook'
   }
 }
