@@ -40,6 +40,14 @@ export const ticketing = (messagingProvider: IMessageingProvider, firebaseConfig
   const viewTicket = require('./viewTicketHandler').default(eventStore, userStore, messagingProvider, messageFormatterProvider, firebaseConfig)
   const walletBalance = require('./walletBalanceHandler').default(userStore, stellarWrapper, messagingProvider, messageFormatterProvider)
 
+  const setupAfterEvent = async ({eventId}) => {
+    console.log(`setupAfterEvent for ${eventId}`)
+  }
+
+  const processAfterEvent = async ({eventId, userId}) => {
+    console.log(`processAfterEvent for ${eventId} ${userId}`)
+  }
+
   return {
     listEvent,
     bookEvent,
@@ -50,6 +58,8 @@ export const ticketing = (messagingProvider: IMessageingProvider, firebaseConfig
     isNewSession,
     sendWelcomeMessage,
     viewTicket,
-    walletBalance
+    walletBalance,
+    setupAfterEvent,
+    processAfterEvent
   }
 }
