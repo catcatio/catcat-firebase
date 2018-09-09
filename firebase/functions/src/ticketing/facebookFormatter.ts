@@ -35,7 +35,7 @@ export const facebookMessageFormatter = ({ }): IMessageFormatter => {
     return {}
   }
 
-  const inviteTemplate = (eventId, userId, languageCode) => {
+  const inviteTemplate = (eventId, userId, eventTitle, ticketRemaing, languageCode) => {
     return {}
   }
 

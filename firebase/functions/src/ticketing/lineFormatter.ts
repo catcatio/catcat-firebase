@@ -339,7 +339,7 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
     }
   }
 
-  const inviteTemplate = (eventId, userId, languageCode) => {
+  const inviteTemplate = (eventId, userId, eventTitle, ticketRemaing, languageCode) => {
     const lineTemplate = new FlexMessageBuilder()
     const template = lineTemplate.flexMessage('Invite friend')
       .addBubble()
@@ -348,13 +348,28 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
         FlexComponentBuilder.flexBox()
           .setLayout('horizontal')
           .addContents(FlexComponentBuilder.flexText()
-            .setText(languageCode === 'th' ? 'การแบ่งปันคือความห่วงใย' : 'Sharing is caring ;)')
+            .setText(eventTitle)
             .setWeight('bold')
             .setSize('sm')
             .build())
           .build()
       )
+      .addBody()
+      .setStyleBackgroundColor('#EFEFEF')
+      .setStyleSeparator(true)
+      .setStyleSeparatorColor('#DDDDDD')
+      .setLayout('vertical')
+      .setSpacing('md')
+      .addComponents(
+        FlexComponentBuilder.flexText()
+          .setText(languageCode === 'th' ? `🎫  เหลือ ${ticketRemaing} ใบ` : `🎫  available ${ticketRemaing} tickets`)
+          .setWrap(true)
+          .setSize('sm')
+          .build()
+      )
       .addFooter()
+      .setStyleSeparator(true)
+      .setStyleSeparatorColor('#DDDDDD')
       .setLayout('horizontal')
       .setSpacing('md')
       .addComponents(
@@ -363,7 +378,7 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
           .setColor('#b0bec5')
           .setAction({
             'type': 'uri',
-            'label': languageCode === 'th' ? 'ส่งให้เพื่อน': 'invite',
+            'label': languageCode === 'th' ? 'ชวนเพื่อน': 'invite',
             'uri': `line://msg/text/?https://t.catcat.io/?ref=${userId}_${eventId}`
           })
           .build(),

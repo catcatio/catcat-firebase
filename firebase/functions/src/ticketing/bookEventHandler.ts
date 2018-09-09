@@ -117,11 +117,12 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
 
 
     // send sharing link
+    const remaining = event.ticket_max - (event.ticket_bought || 0) - 1
     msg = languageCode === 'th'
-      ? 'อ้อ อยากชวนเพื่อนมางานนี้ด้วยกันมั๊ย?'
-      : 'Oh BTW, Do you want to invite your friend to this event?'
+      ? 'รีบชวนเพื่อนก่อนตั๋วหมด กด "ชวนเพื่อน" ได้เลยจ้า'
+      : 'Want to invite someone? Click "invite" before tickets running out!'
     await messageSender.sendMessage(from, msg)
-      .then(() => messageSender.sendCustomMessages(from, formatter.inviteTemplate(event.id, user.id, languageCode)))
+      .then(() => messageSender.sendCustomMessages(from, formatter.inviteTemplate(event.id, user.id, event.title, remaining <= 0 ? 0 : remaining, languageCode)))
 
     console.info('EVENT_BOOK_OK')
     return 'EVENT_BOOK_OK'
