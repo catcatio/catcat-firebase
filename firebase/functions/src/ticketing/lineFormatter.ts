@@ -98,7 +98,7 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
     return template.build()
   }
 
-  const welcomeTemplate = (message, ...options) => {
+  const quickReplyTemplate = (message, ...options) => {
     return {
       'type': 'text',
       'text': message,
@@ -391,7 +391,7 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
     listEvents,
     ticketTemplate,
     confirmTemplate,
-    welcomeTemplate,
+    quickReplyTemplate,
     confirmResultTemplate,
     providerName: 'line',
     balanceInfoTemplate,

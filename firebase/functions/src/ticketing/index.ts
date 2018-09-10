@@ -39,6 +39,7 @@ export const ticketing = (messagingProvider: IMessageingProvider, firebaseConfig
   const isNewSession = require('./isNewSessionHander').default(sessionsRepository)
   const viewTicket = require('./viewTicketHandler').default(eventStore, userStore, messagingProvider, messageFormatterProvider, firebaseConfig)
   const walletBalance = require('./walletBalanceHandler').default(userStore, stellarWrapper, messagingProvider, messageFormatterProvider)
+  const sendIcs = require('./sendIcsHandler').default(eventStore, userStore, messagingProvider, messageFormatterProvider, firebaseConfig)
 
   const setupAfterEvent = async ({eventId}) => {
     console.log(`setupAfterEvent for ${eventId}`)
@@ -60,6 +61,7 @@ export const ticketing = (messagingProvider: IMessageingProvider, firebaseConfig
     viewTicket,
     walletBalance,
     setupAfterEvent,
-    processAfterEvent
+    processAfterEvent,
+    sendIcs
   }
 }

@@ -25,9 +25,13 @@
     "express": "^4.16.3",
     "firebase-admin": "^6.0.0",
     "firebase-functions": "^2.0.4",
+    "ics": "^2.7.2",
     "imagemagick-stream": "^4.1.1",
+    "mailgun-js": "^0.20.0",
+    "moment": "^2.22.2",
     "pretty-hrtime": "^1.0.3",
     "request": "^2.87.0",
+    "sanitize-filename": "^1.6.1",
     "stellar-sdk": "^0.9.2"
   },
   "devDependencies": {

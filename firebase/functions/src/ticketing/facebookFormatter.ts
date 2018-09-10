@@ -19,7 +19,7 @@ export const facebookMessageFormatter = ({ }): IMessageFormatter => {
     return {}
   }
 
-  const welcomeTemplate = (message: string, ...options: string[]) => {
+  const quickReplyTemplate = (message: string, ...options: string[]) => {
     return {}
   }
 
@@ -43,7 +43,7 @@ export const facebookMessageFormatter = ({ }): IMessageFormatter => {
     listEvents,
     ticketTemplate,
     confirmTemplate,
-    welcomeTemplate,
+    quickReplyTemplate,
     confirmResultTemplate,
     balanceInfoTemplate,
     inviteTemplate,

@@ -115,7 +115,6 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
     await messageSender.sendCustomMessages(from, formatter.ticketTemplate(event, ticketUrl))
       .then(() => messageSender.sendMessage(from, msg))
 
-
     // send sharing link
     const remaining = event.ticket_max - (event.ticket_bought || 0) - 1
     msg = languageCode === 'th'
@@ -123,6 +122,10 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
       : 'Want to invite someone? Click "invite" before tickets running out!'
     await messageSender.sendMessage(from, msg)
       .then(() => messageSender.sendCustomMessages(from, formatter.inviteTemplate(event.id, user.id, event.title, remaining <= 0 ? 0 : remaining, languageCode)))
+
+    // Offer adding event to calendar
+    msg = languageCode === 'th' ?  '[TH] Do you want to add this event on calendar?' : 'Do you want to add this event on calendar?'
+    await messageSender.sendCustomMessages(from, formatter.quickReplyTemplate(msg, 'No', 'Gimme ICS'))
 
     console.info('EVENT_BOOK_OK')
     return 'EVENT_BOOK_OK'

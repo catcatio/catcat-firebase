@@ -77,6 +77,14 @@ export default (ticketingSystem, botsSystem): RequestHandler => {
         return botsSystem.suggest(suggestion, requestParams)
           .then(() => res.sendStatus(200))
 
+      case 'events.ics':
+        // ics flow
+        const icsParams = {
+          title: req.body.parameters['event-title'],
+          email: req.body.parameters['email']
+        }
+        return ticketingSystem.sendIcs(icsParams.title, icsParams.email, requestParams)
+
       default:
         return sessionTask.then(isNewSession => {
           return ticketingSystem.handleUnknownEvent(isNewSession, requestParams)
