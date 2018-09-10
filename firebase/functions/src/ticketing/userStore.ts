@@ -68,6 +68,11 @@ const userStoreFactory = (userRepository, tmpUserRepository, providersRepository
     })
   }
 
+  const updateUserEmail = async (userId, email) => {
+    await userRepository.update(userId, {
+      ['providers.email']: email
+    })
+  }
 
   return {
     getUserById,
@@ -76,7 +81,8 @@ const userStoreFactory = (userRepository, tmpUserRepository, providersRepository
     markAsUsed,
     createUserFromTemp,
     updateBoughtTicket,
-    updateBurntTicket
+    updateBurntTicket,
+    updateUserEmail
   }
 }
 

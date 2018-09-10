@@ -40,7 +40,7 @@ export default (eventStore, userStore, messagingProvider, messageFormatterProvid
 
   return async (eventTitle, email, { requestSource, from, languageCode }) => {
     const hrMarker = HrtimeMarker.create('sendIcs')
-    console.log(`${requestSource}: ${from} start send ics`)
+    console.log(`${requestSource}: ${from}, ${email} start send ics`)
     let firebaseTime = 0, stellarTime = 0, msg = ''
     try {
       const marker = hrMarker.mark('getEventByTitle')
@@ -106,6 +106,7 @@ export default (eventStore, userStore, messagingProvider, messageFormatterProvid
       const user = await userStore.getByRequstSource(requestSource, from)
       if (user) {
         // send sharing link
+        userStore.updateUserEmail(user.id, email)
         const remaining = event.ticket_max - (event.ticket_bought || 0) - 1
         msg = languageCode === 'th'
           ? 'รีบชวนเพื่อนก่อนตั๋วหมด กด "ชวนเพื่อน" ได้เลยจ้า'
