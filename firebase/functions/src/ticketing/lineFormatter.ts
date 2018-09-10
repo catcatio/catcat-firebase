@@ -120,286 +120,347 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
     }
   }
 
-    const confirmTemplate = (imageUrl, ownerDisplayName, ownerProvider, eventTitle, tx) => {
-      console.log(`${imageResizeService}${encodeURIComponent(imageUrl)}`)
+  const confirmTemplate = (imageUrl, ownerDisplayName, ownerProvider, eventTitle, tx) => {
+    console.log(`${imageResizeService}${encodeURIComponent(imageUrl)}`)
 
-      const lineTemplate = new FlexMessageBuilder()
-      const template = lineTemplate.flexMessage(`Confirm ticket ${eventTitle}`)
-        .addBubble()
-        .addHero(FlexComponentBuilder.flexImage()
-          .setUrl(`${imageResizeService}${encodeURIComponent(imageUrl)}&size=240&seed=${Date.now()}`)
-          .setSize('full')
+    const lineTemplate = new FlexMessageBuilder()
+    const template = lineTemplate.flexMessage(`Confirm ticket ${eventTitle}`)
+      .addBubble()
+      .addHero(FlexComponentBuilder.flexImage()
+        .setUrl(`${imageResizeService}${encodeURIComponent(imageUrl)}&size=240&seed=${Date.now()}`)
+        .setSize('full')
+        .setAspectRatio('1:1')
+        .setAspectMode('cover')
+        .build() as FlexImage)
+      .addBody()
+      .setSpacing('md')
+      .addComponents(
+        FlexComponentBuilder.flexText()
+          .setText(`${ownerDisplayName} (${ownerProvider})`)
+          .setWrap(true)
+          .setWeight('bold')
+          .setGarvity('center')
+          .setSize('xl')
+          .build(),
+        FlexComponentBuilder.flexText()
+          .setText(eventTitle)
+          .setWrap(true)
+          .setWeight('bold')
+          .setGarvity('center')
+          .setSize('md')
+          .build(),
+        FlexComponentBuilder.flexButton()
+          .setStyle('primary')
+          .setColor('#718792')
+          .setAction({
+            'type': 'postback',
+            'label': 'CONFIRM',
+            'displayText': 'Confirm',
+            'data': `confirm ticket ${tx}`,
+          })
+          .build()
+      )
+
+    return template.build()
+  }
+
+  const ticketTemplate = (event, ticketUrl) => {
+    console.log(`${imageResizeService}${encodeURIComponent(event.coverImage)}`)
+    const lineTemplate = new FlexMessageBuilder()
+    const template = lineTemplate.flexMessage(`Your ticket: ${event.title}`)
+      .addBubble()
+      .addHero(FlexComponentBuilder.flexImage()
+        .setUrl(`${imageResizeService}${encodeURIComponent(event.coverImage)}&size=800&seed=${Date.now()}`)
+        .setSize('full')
+        .setAspectRatio('1.91:1')
+        .setAspectMode('cover')
+        .setAction({
+          'type': 'uri',
+          'uri': event.link,
+          'label': limitChar(event.title, 40)
+        })
+        .build() as FlexImage)
+      .addBody()
+      .setLayout('vertical')
+      .setSpacing('md')
+      .addComponents(
+        FlexComponentBuilder.flexText()
+          .setText(event.title)
+          .setWrap(true)
+          .setWeight('bold')
+          .setGravity('center')
+          .setSize('xl')
+          .build(),
+        FlexComponentBuilder.flexBox()
+          .setLayout('vertical')
+          .setMargin('lg')
+          .setSpacing('sm')
+          .addContents(
+            FlexComponentBuilder.flexBox()
+              .setLayout('baseline')
+              .setSpacing('md')
+              .addContents(
+                FlexComponentBuilder.flexIcon()
+                  .setUrl('https://raw.githubusercontent.com/catcatio/material-design-icons/master/action/2x_web/ic_info_outline_black_18dp.png')
+                  .setSize('sm')
+                  .build(),
+                FlexComponentBuilder.flexText()
+                  .setText(event.description)
+                  .setWrap(true)
+                  .setColor('#666666')
+                  .setSize('sm')
+                  .setGarvity('top')
+                  .setFlex(1)
+                  .build()
+              )
+              .build(),
+            FlexComponentBuilder.flexBox()
+              .setLayout('baseline')
+              .setSpacing('md')
+              .addContents(
+                FlexComponentBuilder.flexIcon()
+                  .setUrl('https://raw.githubusercontent.com/catcatio/material-design-icons/master/device/2x_web/ic_access_time_black_18dp.png')
+                  .setSize('sm')
+                  .build(),
+                FlexComponentBuilder.flexText()
+                  .setText(dayjs(event.startDate).format('dddd, MMMM D, YYYY h:mm A'))
+                  .setWrap(true)
+                  .setColor('#666666')
+                  .setGarvity('center')
+                  .setSize('sm')
+                  .setFlex(4)
+                  .build()
+              )
+              .build(),
+            FlexComponentBuilder.flexBox()
+              .setLayout('baseline')
+              .setSpacing('md')
+              .addContents(
+                FlexComponentBuilder.flexIcon()
+                  .setUrl('https://raw.githubusercontent.com/catcatio/material-design-icons/master/communication/2x_web/ic_location_on_black_18dp.png')
+                  .setSize('sm')
+                  .build(),
+                FlexComponentBuilder.flexText()
+                  .setText(event.venue)
+                  .setWrap(true)
+                  .setColor('#666666')
+                  .setGarvity('center')
+                  .setSize('sm')
+                  .setFlex(4)
+                  .build()
+              )
+              .build()
+          )
+          .build(),
+        FlexComponentBuilder.flexImage()
+          .setUrl(`${ticketUrl}?seed=${Date.now()}`)
           .setAspectRatio('1:1')
           .setAspectMode('cover')
-          .build() as FlexImage)
-        .addBody()
-        .setSpacing('md')
-        .addComponents(
-          FlexComponentBuilder.flexText()
-            .setText(`${ownerDisplayName} (${ownerProvider})`)
-            .setWrap(true)
-            .setWeight('bold')
-            .setGarvity('center')
-            .setSize('xl')
-            .build(),
-          FlexComponentBuilder.flexText()
-            .setText(eventTitle)
-            .setWrap(true)
-            .setWeight('bold')
-            .setGarvity('center')
-            .setSize('md')
-            .build(),
-          FlexComponentBuilder.flexButton()
-            .setStyle('primary')
-            .setColor('#718792')
-            .setAction({
-              'type': 'postback',
-              'label': 'CONFIRM',
-              'displayText': 'Confirm',
-              'data': `confirm ticket ${tx}`,
-            })
-            .build()
-        )
+          .setSize('5xl')
+          .build(),
+        FlexComponentBuilder.flexText()
+          .setText('You can use this ticket to enter the event')
+          .setAlign('center')
+          .setColor('#aaaaaa')
+          .setWrap(true)
+          .setMargin('xxl')
+          .setSize('xs')
+          .build()
+      )
+    return template.build()
+  }
 
-      return template.build()
-    }
-
-    const ticketTemplate = (event, ticketUrl) => {
-      console.log(`${imageResizeService}${encodeURIComponent(event.coverImage)}`)
-      const lineTemplate = new FlexMessageBuilder()
-      const template = lineTemplate.flexMessage(`Your ticket: ${event.title}`)
-        .addBubble()
-        .addHero(FlexComponentBuilder.flexImage()
-          .setUrl(`${imageResizeService}${encodeURIComponent(event.coverImage)}&size=800&seed=${Date.now()}`)
-          .setSize('full')
-          .setAspectRatio('1.91:1')
-          .setAspectMode('cover')
+  const confirmResultTemplate = (burntTx, firebaseTime, stellarTime, burntDate = null) => {
+    const lineTemplate = new FlexMessageBuilder()
+    const template = lineTemplate.flexMessage('Confirmed ticket')
+      .addBubble()
+      .addHeader()
+      .addComponents(
+        FlexComponentBuilder.flexBox()
+          .setLayout('horizontal')
+          .addContents(FlexComponentBuilder.flexText()
+            .setText(`${burntDate ? `Used (${dayAgo(dayjs(burntDate))})` : 'Succeeded!'}`)
+            .setWeight('bold')
+            .setColor(burntDate ? '#ef5451' : null)
+            .setSize('sm')
+            .build())
+          .build()
+      )
+      .addBody()
+      .setStyleBackgroundColor('#EFEFEF')
+      .setStyleSeparator(true)
+      .setStyleSeparatorColor('#DDDDDD')
+      .setLayout('vertical')
+      .setSpacing('md')
+      .addComponents(
+        FlexComponentBuilder.flexText()
+          .setText(burntTx)
+          .setWrap(true)
+          .setSize('sm')
+          .build()
+      )
+      .addFooter()
+      .setStyleSeparator(true)
+      .setStyleSeparatorColor('#DDDDDD')
+      .setLayout('vertical')
+      .setSpacing('md')
+      .addComponents(
+        FlexComponentBuilder.flexText()
+          .setText(`🔥  ${firebaseTime.toFixed(2)} ms    🚀  ${stellarTime.toFixed(2)} ms`)
+          .setSize('sm')
+          .build(),
+        FlexComponentBuilder.flexButton()
+          .setStyle('secondary')
+          .setColor('#b0bec5')
           .setAction({
             'type': 'uri',
-            'uri': event.link,
-            'label': limitChar(event.title, 40)
+            'label': 'horizon',
+            'uri': `https://horizon-testnet.stellar.org/transactions/${burntTx}`
           })
-          .build() as FlexImage)
-        .addBody()
-        .setLayout('vertical')
-        .setSpacing('md')
-        .addComponents(
-          FlexComponentBuilder.flexText()
-            .setText(event.title)
-            .setWrap(true)
-            .setWeight('bold')
-            .setGravity('center')
-            .setSize('xl')
-            .build(),
-          FlexComponentBuilder.flexBox()
-            .setLayout('vertical')
-            .setMargin('lg')
-            .setSpacing('sm')
-            .addContents(
-              FlexComponentBuilder.flexBox()
-                .setLayout('baseline')
-                .setSpacing('md')
-                .addContents(
-                  FlexComponentBuilder.flexIcon()
-                    .setUrl('https://raw.githubusercontent.com/catcatio/material-design-icons/master/action/2x_web/ic_info_outline_black_18dp.png')
-                    .setSize('sm')
-                    .build(),
-                  FlexComponentBuilder.flexText()
-                    .setText(event.description)
-                    .setWrap(true)
-                    .setColor('#666666')
-                    .setSize('sm')
-                    .setGarvity('top')
-                    .setFlex(1)
-                    .build()
-                )
-                .build(),
-              FlexComponentBuilder.flexBox()
-                .setLayout('baseline')
-                .setSpacing('md')
-                .addContents(
-                  FlexComponentBuilder.flexIcon()
-                    .setUrl('https://raw.githubusercontent.com/catcatio/material-design-icons/master/device/2x_web/ic_access_time_black_18dp.png')
-                    .setSize('sm')
-                    .build(),
-                  FlexComponentBuilder.flexText()
-                    .setText(dayjs(event.startDate).format('dddd, MMMM D, YYYY h:mm A'))
-                    .setWrap(true)
-                    .setColor('#666666')
-                    .setGarvity('center')
-                    .setSize('sm')
-                    .setFlex(4)
-                    .build()
-                )
-                .build(),
-              FlexComponentBuilder.flexBox()
-                .setLayout('baseline')
-                .setSpacing('md')
-                .addContents(
-                  FlexComponentBuilder.flexIcon()
-                    .setUrl('https://raw.githubusercontent.com/catcatio/material-design-icons/master/communication/2x_web/ic_location_on_black_18dp.png')
-                    .setSize('sm')
-                    .build(),
-                  FlexComponentBuilder.flexText()
-                    .setText(event.venue)
-                    .setWrap(true)
-                    .setColor('#666666')
-                    .setGarvity('center')
-                    .setSize('sm')
-                    .setFlex(4)
-                    .build()
-                )
-                .build()
-            )
-            .build(),
-          FlexComponentBuilder.flexImage()
-            .setUrl(`${ticketUrl}?seed=${Date.now()}`)
-            .setAspectRatio('1:1')
-            .setAspectMode('cover')
-            .setSize('5xl')
-            .build(),
-          FlexComponentBuilder.flexText()
-            .setText('You can use this ticket to enter the event')
-            .setAlign('center')
-            .setColor('#aaaaaa')
-            .setWrap(true)
-            .setMargin('xxl')
-            .setSize('xs')
-            .build()
-        )
-      return template.build()
-    }
+          .build(),
+        FlexComponentBuilder.flexButton()
+          .setStyle('secondary')
+          .setColor('#b0bec5')
+          .setAction({
+            'type': 'uri',
+            'label': 'stellar.expert',
+            'uri': `https://stellar.expert/explorer/testnet/tx/${burntTx}`
+          })
+          .build(),
+      )
 
-    const confirmResultTemplate = (burntTx, firebaseTime, stellarTime, burntDate = null) => {
-      const lineTemplate = new FlexMessageBuilder()
-      const template = lineTemplate.flexMessage('Confirmed ticket')
-        .addBubble()
-        .addHeader()
-        .addComponents(
-          FlexComponentBuilder.flexBox()
-            .setLayout('horizontal')
-            .addContents(FlexComponentBuilder.flexText()
-              .setText(`${burntDate ? `Used (${dayAgo(dayjs(burntDate))})` : 'Succeeded!'}`)
-              .setWeight('bold')
-              .setColor(burntDate ? '#ef5451' : null)
-              .setSize('sm')
-              .build())
-            .build()
-        )
-        .addBody()
-        .setStyleBackgroundColor('#EFEFEF')
-        .setStyleSeparator(true)
-        .setStyleSeparatorColor('#DDDDDD')
-        .setLayout('vertical')
-        .setSpacing('md')
-        .addComponents(
-          FlexComponentBuilder.flexText()
-            .setText(burntTx)
-            .setWrap(true)
-            .setSize('sm')
-            .build()
-        )
-        .addFooter()
-        .setStyleSeparator(true)
-        .setStyleSeparatorColor('#DDDDDD')
-        .setLayout('vertical')
-        .setSpacing('md')
-        .addComponents(
-          FlexComponentBuilder.flexText()
-            .setText(`🔥  ${firebaseTime.toFixed(2)} ms    🚀  ${stellarTime.toFixed(2)} ms`)
-            .setSize('sm')
-            .build(),
-          FlexComponentBuilder.flexButton()
-            .setStyle('secondary')
-            .setColor('#b0bec5')
-            .setAction({
-              'type': 'uri',
-              'label': 'horizon',
-              'uri': `https://horizon-testnet.stellar.org/transactions/${burntTx}`
-            })
-            .build(),
-          FlexComponentBuilder.flexButton()
-            .setStyle('secondary')
-            .setColor('#b0bec5')
-            .setAction({
-              'type': 'uri',
-              'label': 'stellar.expert',
-              'uri': `https://stellar.expert/explorer/testnet/tx/${burntTx}`
-            })
-            .build(),
-        )
-
-      return template.build()
-    }
-
-    const balanceInfoTemplate = (balanceInfo, languageCode) => {
-      return {
-        'type': 'text',
-        'text': !balanceInfo || balanceInfo.length <= 0
-          ? languageCode === 'th' ? 'ไม่พบข้อมูล' : 'Account not found'
-          : balanceInfo.map(balance => `${balance.balance.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-          })} ${balance.code}`).join('\n')
-      }
-    }
-
-    const inviteTemplate = (eventId, userId, eventTitle, ticketRemaing, languageCode) => {
-      const lineTemplate = new FlexMessageBuilder()
-      const template = lineTemplate.flexMessage('Invite friend')
-        .addBubble()
-        .addHeader()
-        .addComponents(
-          FlexComponentBuilder.flexBox()
-            .setLayout('horizontal')
-            .addContents(FlexComponentBuilder.flexText()
-              .setText(eventTitle)
-              .setWeight('bold')
-              .setSize('sm')
-              .build())
-            .build()
-        )
-        .addBody()
-        .setStyleBackgroundColor('#EFEFEF')
-        .setStyleSeparator(true)
-        .setStyleSeparatorColor('#DDDDDD')
-        .setLayout('vertical')
-        .setSpacing('md')
-        .addComponents(
-          FlexComponentBuilder.flexText()
-            .setText(languageCode === 'th' ? `🎫  เหลือ ${ticketRemaing} ใบ` : `🎫  available ${ticketRemaing} tickets`)
-            .setWrap(true)
-            .setSize('sm')
-            .build()
-        )
-        .addFooter()
-        .setStyleSeparator(true)
-        .setStyleSeparatorColor('#DDDDDD')
-        .setLayout('horizontal')
-        .setSpacing('md')
-        .addComponents(
-          FlexComponentBuilder.flexButton()
-            .setStyle('secondary')
-            .setColor('#b0bec5')
-            .setAction({
-              'type': 'uri',
-              'label': languageCode === 'th' ? 'ชวนเพื่อน' : 'invite',
-              'uri': `line://msg/text/?https://t.catcat.io/?ref=${userId}_${eventId}`
-            })
-            .build(),
-        )
-
-      return template.build()
-    }
-
-    return {
-      listEvents,
-      ticketTemplate,
-      confirmTemplate,
-      quickReplyTemplate,
-      confirmResultTemplate,
-      providerName: 'line',
-      balanceInfoTemplate,
-      inviteTemplate
-    }
+    return template.build()
   }
+
+  const balanceInfoTemplate = (balanceInfo, languageCode) => {
+    const lineTemplate = new FlexMessageBuilder()
+    const template = lineTemplate.flexMessage('wallet info')
+      .addBubble()
+      .addHeader()
+      .addComponents(
+        FlexComponentBuilder.flexBox()
+          .setLayout('horizontal')
+          .addContents(FlexComponentBuilder.flexText()
+            .setText(languageCode === 'th' ? 'เหรียญ' : 'Balance')
+            .setWeight('bold')
+            .setSize('sm')
+            .build())
+          .build()
+      )
+      .addBody()
+      .setStyleBackgroundColor('#EFEFEF')
+      .setStyleSeparator(true)
+      .setStyleSeparatorColor('#DDDDDD')
+      .setLayout('vertical')
+      .setSpacing('md')
+      .addComponents(
+        ...balanceInfo.map(balance => FlexComponentBuilder.flexBox()
+          .setLayout('horizontal')
+          .addContents(
+            FlexComponentBuilder.flexText()
+              .setText(balance.balance.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              }))
+              .setWrap(true)
+              .setSize('sm')
+              .build(),
+            FlexComponentBuilder.flexText()
+              .setText(balance.code)
+              .setWrap(true)
+              .setSize('sm')
+              .build()
+          )
+          .build()
+        )
+      )
+      .addFooter()
+      .setStyleSeparator(true)
+      .setStyleSeparatorColor('#DDDDDD')
+      .setLayout('horizontal')
+      .setSpacing('md')
+      .addComponents(
+        FlexComponentBuilder.flexButton()
+          .setStyle('secondary')
+          .setColor('#b0bec5')
+          .setAction({
+            'type': 'postback',
+            'label': languageCode === 'th' ? 'ขอดูอีกรอบ' : 'Refresh',
+            'displayText': languageCode === 'th' ? 'ขอดูอีกรอบ' : 'Refresh',
+            'data': languageCode === 'th' ? 'ขอดูกระเป๋า' : 'balance',
+          })
+          .build(),
+        FlexComponentBuilder.flexButton()
+          .setStyle('secondary')
+          .setColor('#b0bec5')
+          .setAction({
+            'type': 'postback',
+            'label': languageCode === 'th' ? 'ส่งให้เพื่อน' : 'Transfer',
+            'displayText': languageCode === 'th' ? 'ส่งให้เพื่อน' : 'Transfer',
+            'data': languageCode === 'th' ? 'ส่งเหรียญ' : 'transfer',
+          })
+          .build(),
+      )
+
+    return template.build()
+  }
+
+  const inviteTemplate = (eventId, userId, eventTitle, ticketRemaing, languageCode) => {
+    const lineTemplate = new FlexMessageBuilder()
+    const template = lineTemplate.flexMessage('Invite friend')
+      .addBubble()
+      .addHeader()
+      .addComponents(
+        FlexComponentBuilder.flexBox()
+          .setLayout('horizontal')
+          .addContents(FlexComponentBuilder.flexText()
+            .setText(eventTitle)
+            .setWeight('bold')
+            .setSize('sm')
+            .build())
+          .build()
+      )
+      .addBody()
+      .setStyleBackgroundColor('#EFEFEF')
+      .setStyleSeparator(true)
+      .setStyleSeparatorColor('#DDDDDD')
+      .setLayout('vertical')
+      .setSpacing('md')
+      .addComponents(
+        FlexComponentBuilder.flexText()
+          .setText(languageCode === 'th' ? `🎫  เหลือ ${ticketRemaing} ใบ` : `🎫  available ${ticketRemaing} tickets`)
+          .setWrap(true)
+          .setSize('sm')
+          .build()
+      )
+      .addFooter()
+      .setStyleSeparator(true)
+      .setStyleSeparatorColor('#DDDDDD')
+      .setLayout('horizontal')
+      .setSpacing('md')
+      .addComponents(
+        FlexComponentBuilder.flexButton()
+          .setStyle('secondary')
+          .setColor('#b0bec5')
+          .setAction({
+            'type': 'uri',
+            'label': languageCode === 'th' ? 'ชวนเพื่อน' : 'invite',
+            'uri': `line://msg/text/?https://t.catcat.io/?ref=${userId}_${eventId}`
+          })
+          .build(),
+      )
+
+    return template.build()
+  }
+
+  return {
+    listEvents,
+    ticketTemplate,
+    confirmTemplate,
+    quickReplyTemplate,
+    confirmResultTemplate,
+    providerName: 'line',
+    balanceInfoTemplate,
+    inviteTemplate
+  }
+}

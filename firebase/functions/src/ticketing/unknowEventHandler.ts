@@ -21,7 +21,7 @@ export default (stellarWrapper, messagingProvider, messageFormatterProvider) => 
 
       if (isValidStellarPublicKey(queryText)) {
         const accountInfo = await stellarWrapper.getBalanceInfo(queryText)
-        messageSender.sendCustomMessages(from, formatter.balanceInfoTemplate(accountInfo))
+        messageSender.sendCustomMessages(from, formatter.balanceInfoTemplate(accountInfo, languageCode))
         return true
       } else if (isNewSession) {
         sendWelcomeMessage({ requestSource, from, languageCode }, isNewSession)
