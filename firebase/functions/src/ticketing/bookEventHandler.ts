@@ -26,7 +26,7 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
     marker = hrMarker.mark('getUserByRequestSource')
     console.log(`event: ${event.id}`)
     msg = languageCode === 'th'
-      ? `รอแปร๊บนะ กำลังจอง ${eventTitle} ให้...`
+      ? `รอแปร๊บนะ กำลังจอง "${eventTitle}" ให้...`
       : `Hold on, we're now booking ${eventTitle} for you...`
     messageSender.sendMessage(from, msg)
 
@@ -110,22 +110,25 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
     const ticketUrl = `${ticketQrUrl}/${tmpEvent.id}/${unusedTicket.id}/${requestSource.toLowerCase()}_${from}/${bought_tx}`
     console.log(ticketUrl)
     msg = languageCode === 'th'
-        ? `เจอกันที่งาน "${eventTitle}" นะ โชว์ตั๋วนี่เพื่อเข้างานได้เลย`
-        : `See you at "${eventTitle}" event! Do show this ticket when attend`
+      ? `เจอกันที่งาน "${eventTitle}" นะ โชว์ตั๋วนี่เพื่อเข้างานได้เลย`
+      : `See you at "${eventTitle}" event! Do show this ticket when attend`
     await messageSender.sendCustomMessages(from, formatter.ticketTemplate(event, ticketUrl))
       .then(() => messageSender.sendMessage(from, msg))
 
-    // send sharing link
-    const remaining = event.ticket_max - (event.ticket_bought || 0) - 1
-    msg = languageCode === 'th'
-      ? 'รีบชวนเพื่อนก่อนตั๋วหมด กด "ชวนเพื่อน" ได้เลยจ้า'
-      : 'Want to invite someone? Click "invite" before tickets running out!'
-    await messageSender.sendMessage(from, msg)
-      .then(() => messageSender.sendCustomMessages(from, formatter.inviteTemplate(event.id, user.id, event.title, remaining <= 0 ? 0 : remaining, languageCode)))
-
     // Offer adding event to calendar
-    msg = languageCode === 'th' ?  '[TH] Do you want to add this event on calendar?' : 'Do you want to add this event on calendar?'
-    await messageSender.sendCustomMessages(from, formatter.quickReplyTemplate(msg, 'No', 'Gimme ICS'))
+    msg = languageCode === 'th'
+      ? 'อยากเพิ่มนัดในปฏิทินด้วยมั๊ยเมี๊ยว~'
+      : 'Do you want to add this event on calendar?'
+    await messageSender.sendCustomMessages(from,
+      languageCode === 'th'
+        ? formatter.quickReplyTemplate(msg, 'มะ', {
+          'type': 'postback',
+          'label': 'เอาเอา',
+          'displayText': 'เอาเอา',
+          'data': 'ขอไอซีเอส',
+        })
+        : formatter.quickReplyTemplate(msg, 'No', 'gimme ics')
+    )
 
     console.info('EVENT_BOOK_OK')
     return 'EVENT_BOOK_OK'

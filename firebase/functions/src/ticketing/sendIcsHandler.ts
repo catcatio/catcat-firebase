@@ -16,6 +16,17 @@ export default (eventStore, userStore, messagingProvider, messageFormatterProvid
     })
   })
 
+  const sendMailAsync = (mailOption) => new Promise((resolve, reject) => {
+    mailgun.messages().send(mailOption, (error, body) => {
+      console.log(JSON.stringify(error || body))
+      if (error) {
+        reject(error)
+      } else {
+        resolve(body)
+      }
+    })
+  })
+
   const html = `<html>
 <div style="text-align: center;">
   <p style="margin: 2px;">See you at <b>Chatbots & Blockchain</b> event!</p>
@@ -78,18 +89,30 @@ export default (eventStore, userStore, messagingProvider, messageFormatterProvid
         attachment
       }
 
-      mailgun.messages().send(mailOption, (error, body) => {
-        console.log(JSON.stringify(error || body))
-        if (error) {
-          return messageSender.sendMessage(from, languageCode === 'th'
+      try {
+        await sendMailAsync(mailOption)
+        await messageSender.sendMessage(from, languageCode === 'th'
+          ? 'ส่ง ICS ไปแล้ว ลองไปดูอีเมล์นะเมี๊ยว'
+          : 'An ICS has been sent, please check your email.')
+          .then(() => messageSender.sendMessage(from, languageCode === 'th'
+            ? 'คราวหน้าถ้าจะขออีกก็พิมพ์ "ics" ได้นะเมี๊ยว'
+            : 'You can ask me to do this again by type "ics"'))
+      } catch (error) {
+        await messageSender.sendMessage(from, languageCode === 'th'
           ? 'ขอโทษทีนะ เจอปัญหานิดหน่อยกับการส่งอีเมล จะเร่งแก้ไขให้นะ'
           : 'Sorry, something went wrong. We will get back to you asap.')
-        } else {
-          return messageSender.sendMessage(from, languageCode === 'th'
-            ? `เราส่งคาเลนดาร์ให้คุณแล้ว ลองดูในอีเมล์ ${email} ของคุณนะ`
-            : `Calendar has been sent to your email ${email}`)
-        }
-      })
+      }
+
+      const user = await userStore.getByRequstSource(requestSource, from)
+      if (user) {
+        // send sharing link
+        const remaining = event.ticket_max - (event.ticket_bought || 0) - 1
+        msg = languageCode === 'th'
+          ? 'รีบชวนเพื่อนก่อนตั๋วหมด กด "ชวนเพื่อน" ได้เลยจ้า'
+          : 'Want to invite someone? Click "invite" before tickets running out!'
+        await messageSender.sendMessage(from, msg)
+          .then(() => messageSender.sendCustomMessages(from, formatter.inviteTemplate(event.id, user.id, event.title, remaining <= 0 ? 0 : remaining, languageCode)))
+      }
     } finally {
       console.log(`🔥  ${firebaseTime.toFixed(2)} ms    🚀  ${stellarTime.toFixed(2)} ms`)
       hrMarker.end().log()

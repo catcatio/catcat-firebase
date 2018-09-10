@@ -77,7 +77,7 @@ export default (ticketingSystem, botsSystem): RequestHandler => {
         return botsSystem.suggest(suggestion, requestParams)
           .then(() => res.sendStatus(200))
 
-      case 'events.ics':
+      case 'eventsics.eventsics-yes':
         // ics flow
         const icsParams = {
           title: req.body.parameters['event-title'],
@@ -91,7 +91,7 @@ export default (ticketingSystem, botsSystem): RequestHandler => {
         })
           .then(handled => handled
             ? res.sendStatus(200)
-            : sendDialogflowTextMessage(res, languageCode === 'th' ? 'เมียว~' : 'meow~'))
+            : sendDialogflowTextMessage(res, languageCode === 'th' ? 'เมี๊ยว~' : 'meow~'))
     }
   }
 }
