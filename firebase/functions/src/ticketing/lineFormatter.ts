@@ -9,6 +9,8 @@ const dayAgo = (day: dayjs.Dayjs) => {
   return (day as any).fromNow()
 }
 
+const niceIssuer = (issuer) => `${issuer.substr(0, 2)}...${issuer.substr(issuer.length - 4, issuer.length)}`
+
 export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter => {
   const limitChar = (str, limit) => {
     return str.substr(0, limit)
@@ -332,7 +334,7 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
     return template.build()
   }
 
-  const balanceInfoTemplate = (balanceInfo, languageCode) => {
+  const balanceInfoTemplate = (walletAddress, balanceInfo, languageCode) => {
     const lineTemplate = new FlexMessageBuilder()
     const template = lineTemplate.flexMessage('wallet info')
       .addBubble()
@@ -341,7 +343,7 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
         FlexComponentBuilder.flexBox()
           .setLayout('horizontal')
           .addContents(FlexComponentBuilder.flexText()
-            .setText(languageCode === 'th' ? 'เหรียญ' : 'Balance')
+            .setText(`👛 ${languageCode === 'th' ? 'กระเป๋า' : 'Wallet'} (${niceIssuer(walletAddress)})`)
             .setWeight('bold')
             .setSize('sm')
             .build())
@@ -354,25 +356,35 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
       .setLayout('vertical')
       .setSpacing('md')
       .addComponents(
-        ...balanceInfo.map(balance => FlexComponentBuilder.flexBox()
-          .setLayout('horizontal')
-          .addContents(
-            FlexComponentBuilder.flexText()
-              .setText(balance.balance.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-              }))
-              .setWrap(true)
-              .setSize('sm')
-              .build(),
-            FlexComponentBuilder.flexText()
-              .setText(balance.code)
-              .setWrap(true)
-              .setSize('sm')
-              .build()
+        ...balanceInfo
+          .sort((a, b) => (a.code < b.code) ? -1 : (a.code > b.code ? 1 : 0))
+          .map(balance => FlexComponentBuilder.flexBox()
+            .setLayout('horizontal')
+            .addContents(
+              FlexComponentBuilder.flexText()
+                .setText(balance.balance.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                }))
+                .setWrap(true)
+                .setSize('sm')
+                .build(),
+              FlexComponentBuilder.flexText()
+                .setText(balance.code)
+                .setWrap(true)
+                .setSize('sm')
+                .build(),
+              // TODO: compare known issuer
+              FlexComponentBuilder.flexText()
+                .setText(balance.issuer
+                  ? (balance.code === 'CAT' ? '🐈' : `(${niceIssuer(balance.issuer)})`)
+                  : '🚀')
+                .setWrap(true)
+                .setSize('sm')
+                .build()
+            )
+            .build()
           )
-          .build()
-        )
       )
       .addFooter()
       .setStyleSeparator(true)
@@ -386,8 +398,8 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
           .setAction({
             'type': 'postback',
             'label': languageCode === 'th' ? 'ขอดูอีกรอบ' : 'Refresh',
-            'displayText': languageCode === 'th' ? 'ขอดูอีกรอบ' : 'Refresh',
-            'data': languageCode === 'th' ? 'ขอดูกระเป๋า' : 'balance',
+            'displayText': languageCode === 'th' ? 'กระเป๋า' : 'wallet',
+            'data': languageCode === 'th' ? 'กระเป๋า' : 'wallet',
           })
           .build(),
         FlexComponentBuilder.flexButton()

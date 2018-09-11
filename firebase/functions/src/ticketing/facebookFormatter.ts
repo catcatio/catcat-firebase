@@ -31,7 +31,7 @@ export const facebookMessageFormatter = ({ }): IMessageFormatter => {
     return {}
   }
 
-  const balanceInfoTemplate = (balanceInfo: any[]) => {
+  const balanceInfoTemplate = (walletAddress: string, balanceInfo: any[]) => {
     return {}
   }
 

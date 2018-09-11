@@ -11,7 +11,7 @@ export default (userStore, stellarWrapper, messagingProvider, messageFormatterPr
       const accountInfo = user
         ? await stellarWrapper.getBalanceInfo(user.publicKey)
         : null
-      messageSender.sendCustomMessages(from, formatter.balanceInfoTemplate(accountInfo, languageCode))
+      messageSender.sendCustomMessages(from, formatter.balanceInfoTemplate(user.publicKey, accountInfo, languageCode))
 
       return true
     } finally {

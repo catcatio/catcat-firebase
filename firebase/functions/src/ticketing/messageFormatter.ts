@@ -4,7 +4,7 @@ export interface IMessageFormatter {
   confirmTemplate: (pictureUrl: string, displayName: string, ownerProvider: string, eventTitle: string, tx: string) => object
   quickReplyTemplate: (message: string, ...options: string[]) => object
   confirmResultTemplate: (burnttx: string, firebaseTime: number, stellarTime: number) => object
-  balanceInfoTemplate: (balanceInfo: any[], languageCode: string) => object
+  balanceInfoTemplate: (walletAddress: string, balanceInfo: any[], languageCode: string) => object
   inviteTemplate: (eventId: string, userId: string, eventTitle: string, ticketRemaing: number, languageCode: string) => object
   providerName: string,
 }
