@@ -85,6 +85,11 @@ export default (ticketingSystem, botsSystem): RequestHandler => {
         }
         return ticketingSystem.sendIcs(icsParams.title, icsParams.email, requestParams)
 
+      case 'events.tickets.payment':
+        const itemCount = req.body.parameters['item-count']
+        return botsSystem.makePayment(itemCount <= 0 ? 1 : itemCount, requestParams)
+          .then(() => res.sendStatus(200))
+
       default:
         return sessionTask.then(isNewSession => {
           return ticketingSystem.handleUnknownEvent(isNewSession, requestParams)

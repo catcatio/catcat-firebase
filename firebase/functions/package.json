@@ -27,6 +27,7 @@
     "firebase-functions": "^2.0.4",
     "ics": "^2.7.2",
     "imagemagick-stream": "^4.1.1",
+    "line-pay": "^1.0.11",
     "mailgun-js": "^0.20.0",
     "moment": "^2.22.2",
     "pretty-hrtime": "^1.0.3",
