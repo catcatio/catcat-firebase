@@ -27,3 +27,5 @@ serviceAccountKey.json
 .runtimeconfig.json
 *.js
 *.js.map
+
+template
