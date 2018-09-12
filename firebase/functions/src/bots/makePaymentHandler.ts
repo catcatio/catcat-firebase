@@ -1,27 +1,19 @@
-import { IFirebaseConfig } from '../firebaseConfig'
 import { IMessageingProvider } from '../messaging'
 
-export default (messagingProvider: IMessageingProvider, transactionsRepository, {linePayChannelId, linePayChannelSecret, linePayConfirmUrl, linepayProduction}) => {
-  const linePay = require('line-pay')
-
-  const pay = new linePay({
-    channelId: linePayChannelId,
-    channelSecret: linePayChannelSecret,
-    isSandbox: !linepayProduction
-  })
-
+export default (messagingProvider: IMessageingProvider, transactionsRepository, {linePay, linePayConfirmUrl}) => {
   return async (itemCount = 1, { requestSource, from, languageCode }) => {
     console.log('makePayment', itemCount)
     const reservation: any = {
       productName: 'Chatbots & Blockchain',
       amount: 100 * itemCount,
       currency: 'THB', // TODO: currency always THB?
-      confirmUrl: linePayConfirmUrl,
+      confirmUrl: linePayConfirmUrl['demo'],
       confirmUrlType: 'SERVER',
-      orderId: `${from}-${Date.now()}`
+      orderId: `${Date.now()}-${from}`
     }
 
-    const response = await pay.reserve(reservation)
+    const response = await linePay.reserve(reservation)
+    console.log(JSON.stringify(response.info))
     reservation.transactionId = response.info.transactionId
     reservation.userId = from
 
@@ -30,8 +22,6 @@ export default (messagingProvider: IMessageingProvider, transactionsRepository, 
       status: 'new',
       createdDate: Date.now()
     })
-
-    console.log(JSON.stringify(response.info))
 
     const message = {
       type: 'template',

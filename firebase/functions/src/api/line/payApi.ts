@@ -1,17 +1,8 @@
 import { Request, Response, RequestHandler, Router } from 'express'
-//import * as linePay from 'line-pay'
 export const apiPath = '/pay'
 import { IMessageingProvider } from '../../messaging'
 
-export default (messagingProvider: IMessageingProvider, transactionsRepository, {linePayChannelId, linePayChannelSecret, linepayProduction}): RequestHandler => {
-  const linePay = require('line-pay')
-
-  const pay = new linePay({
-    channelId: linePayChannelId,
-    channelSecret: linePayChannelSecret,
-    isSandbox: !linepayProduction
-  })
-
+export default (messagingProvider: IMessageingProvider, transactionsRepository, {linePay}): RequestHandler => {
   const router = Router()
 
   router.get('/confirm', async (req: Request, res: Response) => {
@@ -36,7 +27,7 @@ export default (messagingProvider: IMessageingProvider, transactionsRepository, 
 
     console.log('confirmation', JSON.stringify(confirmation))
 
-    return pay.confirm(confirmation).then((response) => {
+    return linePay.confirm(confirmation).then((response) => {
       res.sendStatus(200)
 
       const messages = [{

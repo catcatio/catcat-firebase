@@ -39,10 +39,22 @@ export default (ticketingSystem, botsSystem): RequestHandler => {
         sendDialogflowTextMessage(res, languageCode === 'th' ? 'ลองดูรายการนี้นะ...' : 'Here is what we have...')
         return ticketingSystem.listEvent(requestParams)
 
+      case 'events.tickets.buy':
+        const preBuyTitle = req.body.parameters['event-title']
+        if (preBuyTitle) return res.sendStatus(200)
+        sendDialogflowTextMessage(res, languageCode === 'th' ? 'ลองดูรายการนี้นะ...' : 'Here is what we have...')
+        return ticketingSystem.listEvent(requestParams)
+
       case 'events.tickets.book-yes':
         // book an event
-        const title = req.body.parameters['event-title']
-        return ticketingSystem.bookEvent(requestParams, title)
+        const bookingTitle = req.body.parameters['event-title']
+        return ticketingSystem.bookEvent(requestParams, bookingTitle)
+          .then(() => res.sendStatus(200))
+
+      case 'events.tickets.buy-yes':
+        // buy an event
+        const buyingTitle = req.body.parameters['event-title']
+        return ticketingSystem.buyEvent(requestParams, buyingTitle)
           .then(() => res.sendStatus(200))
 
       case 'events.tickets.confirm-yes':

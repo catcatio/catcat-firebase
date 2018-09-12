@@ -1,10 +1,8 @@
-import * as StellarSdk from 'stellar-sdk'
-
 import { HrtimeMarker } from '../utils/hrtimeMarker'
 
-export default (eventStore, userStore, stellarWrapper, messagingProvider, messageFormatterProvider, masterAsset, masterDistributor, { ticketQrUrl }) => async ({ requestSource, from, languageCode }, eventTitle) => {
-  const hrMarker = HrtimeMarker.create('bookEvent')
-  console.log(`${requestSource}: ${from} start book event`)
+export default (eventStore, userStore, stellarWrapper, messagingProvider, messageFormatterProvider, masterAsset, masterDistributor, transactionsRepository, { ticketQrUrl, linePay, linePayConfirmUrl }) => async ({ requestSource, from, languageCode }, eventTitle) => {
+  const hrMarker = HrtimeMarker.create('buyEvent')
+  console.log(`${requestSource}: ${from} start buy event`)
   let firebaseTime = 0, stellarTime = 0, msg = ''
   try {
     let marker = hrMarker.mark('getEventByTitle')
@@ -23,10 +21,11 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
       return messageSender.sendMessage(from, msg)
     }
 
+    marker = hrMarker.mark('getUserByRequestSource')
     console.log(`event: ${event.id}`)
     msg = languageCode === 'th'
       ? `รอแปร๊บนะ กำลังจอง "${eventTitle}" ให้...`
-      : `Hold on, we're now booking "${eventTitle}" for you...`
+      : `Hold on, we're now making purchase "${eventTitle}" for you...`
     messageSender.sendMessage(from, msg)
 
     // check if there is any available ticket
@@ -43,7 +42,6 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
     }
 
     // get user by requestSource, or create new one if necessary
-    marker = hrMarker.mark('getUserByRequestSource')
     let user = await userStore.getByRequstSource(requestSource, from)
     user = user || await userStore.createUserFromTemp(requestSource, from, masterAsset)
     firebaseTime += marker.end().log().duration
@@ -61,7 +59,7 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
       console.error('EVENT_ALREADY_BOOK')
       msg = languageCode === 'th'
         ? 'ดูเหมือนว่า คุณมีตั๋วอยู่แล้วนะ'
-        : 'You have already booked the event'
+        : 'You have already bought the event'
       let retPromise = messageSender.sendMessage(from, msg)
 
       marker = hrMarker.mark('getTicketById')
@@ -82,56 +80,53 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
       return retPromise
     }
 
-    marker = hrMarker.mark('doBookTicket')
-    const userKey = StellarSdk.Keypair.fromPublicKey(user.publicKey)
-    const tmpEvent = Object.assign({}, event)
-    tmpEvent.asset = new StellarSdk.Asset(event.id, event.issuer)
-    tmpEvent.distributor = StellarSdk.Keypair.fromPublicKey(event.distributor)
-
-    const boughtMemo = `B:${tmpEvent.asset.getCode()}:${unusedTicket.id}`
-    const bought_tx = await stellarWrapper.doBookTicket(masterDistributor, masterAsset, userKey, tmpEvent, 1, boughtMemo)
-      .catch(() => null)
-    stellarTime += marker.end().log().duration
-
-    if (!bought_tx) {
-      console.error('EVENT_BOOK_ERROR')
-      msg = languageCode === 'th'
-        ? 'ขอโทษทีนะ เจอปัญหานิดหน่อยตอนจองตั๋ว จะเร่งแก้ไขให้นะ'
-        : 'Sorry, something went wrong. We will get back to you asap.'
-      return messageSender.sendMessage(from, msg)
+    // initiate LINE PAY flow
+    const reservation: any = {
+      productName: event.title,
+      amount: event.ticket_price,
+      currency: event.ticket_currency,
+      confirmUrl: linePayConfirmUrl['ticket'],
+      confirmUrlType: 'SERVER',
+      orderId: `${Date.now()}-${from}`
     }
 
-    marker = hrMarker.mark('updateBoughtTicket')
-    await eventStore.updateBoughtTicket(user, tmpEvent, unusedTicket, bought_tx, languageCode)
-      .then(() => eventStore.saveMemo(bought_tx, boughtMemo))
-    await userStore.updateBoughtTicket(user.id, tmpEvent.id, unusedTicket.id)
-    firebaseTime += marker.end().duration
+    console.log(JSON.stringify(reservation))
 
-    const ticketUrl = `${ticketQrUrl}/${tmpEvent.id}/${unusedTicket.id}/${requestSource.toLowerCase()}_${from}/${bought_tx}`
-    console.log(ticketUrl)
-    msg = languageCode === 'th'
-      ? `เจอกันที่งาน "${eventTitle}" นะ โชว์ตั๋วนี่เพื่อเข้างานได้เลย`
-      : `See you at "${eventTitle}" event! Do show this ticket when attend`
-    await messageSender.sendCustomMessages(from, formatter.ticketTemplate(event, ticketUrl))
-      .then(() => messageSender.sendMessage(from, msg))
+    const response = await linePay.reserve(reservation)
+    reservation.transactionId = response.info.transactionId
+    reservation.userId = from
 
-    // Offer adding event to calendar
-    msg = languageCode === 'th'
-      ? 'อยากเพิ่มนัดในปฏิทินด้วยมั๊ยเมี๊ยว~'
-      : 'Do you want to add this event on calendar?'
-    await messageSender.sendCustomMessages(from,
-      languageCode === 'th'
-        ? formatter.quickReplyTemplate(msg, 'มะ', {
-          'type': 'postback',
-          'label': 'เอาเอา',
-          'displayText': 'เอาเอา',
-          'data': 'ขอไอซีเอส',
-        })
-        : formatter.quickReplyTemplate(msg, 'No', 'gimme ics')
-    )
+    await transactionsRepository.put(reservation.transactionId, {
+      reservation,
+      status: 'new',
+      createdDate: Date.now(),
+      languageCode: languageCode,
+      userId: user.id,
+      eventId: event.id,
+      ticketId: unusedTicket.id,
+      eventTitle: event.title,
+      requestSource: requestSource,
+      from: from,
+      type: 'ticket'
+    })
 
-    console.info('EVENT_BOOK_OK')
-    return 'EVENT_BOOK_OK'
+    console.log(JSON.stringify(response.info))
+
+    const message = {
+      type: 'template',
+      altText: 'Please proceed to the payment.',
+      template: {
+        type: 'buttons',
+        text: `${event.ticket_price} THB for "${event.title}" ticket. Please proceed to the payment.`,
+        actions: [
+          { type: 'uri', label: 'Pay by LINE Pay', uri: response.info.paymentUrl.web }
+        ]
+      }
+    }
+
+    await messageSender.sendCustomMessages(from, message)
+    return 'EVENT_BUY_OK'
+
   } finally {
     console.log(`🔥  ${firebaseTime.toFixed(2)} ms    🚀  ${stellarTime.toFixed(2)} ms`)
     hrMarker.end().log()

@@ -9,6 +9,14 @@ const envConfig = config()
 
 const ticketingConfig = envConfig.ticketing
 
+const linePay = require('line-pay')
+
+const pay = new linePay({
+  channelId: ticketingConfig.linepaychannelid,
+  channelSecret: ticketingConfig.linepaychannelsecret,
+  isSandbox: ticketingConfig.linepayproduction !== 'true'
+})
+
 const firebaseConfig: IFirebaseConfig = {
   firestore: firestore,
   database: database,
@@ -24,10 +32,11 @@ const firebaseConfig: IFirebaseConfig = {
   ticketQrUrl: ticketingConfig.ticketqrurl,
   lineBotApi: ticketingConfig.linebotapi,
   lineChannelAccessToken: ticketingConfig.linechannelaccesstoken,
-  linePayChannelId: ticketingConfig.linepaychannelid,
-  linePayChannelSecret: ticketingConfig.linepaychannelsecret,
-  linePayConfirmUrl: ticketingConfig.linepayconfirmurl,
-  linepayProduction: ticketingConfig.linepayproduction === 'true',
+  linePayConfirmUrl: {
+    ticket: ticketingConfig.linepayconfirmurl,
+    demo: ticketingConfig.linepayconfirmdemourl,
+  },
+  linePay: pay,
   botLineId: ticketingConfig.botlineid,
   mailgunKey: ticketingConfig.mailgunkey,
   mailgunDomain: ticketingConfig.mailgundomain,
@@ -49,10 +58,8 @@ export interface IFirebaseConfig {
   ticketQrUrl: string,
   lineBotApi: string,
   lineChannelAccessToken: string,
-  linePayChannelId: string,
-  linePayChannelSecret: string,
-  linePayConfirmUrl: string,
-  linepayProduction: boolean,
+  linePayConfirmUrl: any,
+  linePay: any,
   botLineId: string,
   mailgunKey: string,
   mailgunDomain: string,

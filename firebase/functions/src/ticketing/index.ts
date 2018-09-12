@@ -26,11 +26,14 @@ export const ticketing = (messagingProvider: IMessageingProvider, firebaseConfig
   const tempUserRepository = firestoreRepoFactory(firestore, 'tmpusers')
   const providersRepository = firestoreRepoFactory(firestore, 'providers')
   const sessionsRepository = firestoreRepoFactory(firestore, 'sessions')
+  const transactionsRepository = firestoreRepoFactory(firestore, 'transactions')
 
   const userStore = userStoreFactory(userRepository, tempUserRepository, providersRepository)
 
   const listEvent = require('./listEventsHandle').default(eventStore, userStore, messagingProvider, messageFormatterProvider)
   const bookEvent = require('./bookEventHandler').default(eventStore, userStore, stellarWrapper, messagingProvider, messageFormatterProvider, masterAsset, masterDistributor, firebaseConfig)
+  const buyEvent = require('./buyEventHandler').default(eventStore, userStore, stellarWrapper, messagingProvider, messageFormatterProvider, masterAsset, masterDistributor, transactionsRepository, firebaseConfig)
+  const confirmPayment = require('./confirmPaymentEventHandler').default(eventStore, userStore, stellarWrapper, messagingProvider, messageFormatterProvider, masterAsset, masterDistributor, transactionsRepository, firebaseConfig)
   const useTicket = require('./useTicketHandler').default(eventStore, userStore, stellarWrapper, messagingProvider, messageFormatterProvider)
   const confirmTicket = require('./confirmTicketHandler').default(eventStore, userStore, stellarWrapper, messagingProvider, messageFormatterProvider)
   const getTicketParams = require('./getTicketParams').default(messagingProvider, firebaseConfig)
@@ -54,6 +57,8 @@ export const ticketing = (messagingProvider: IMessageingProvider, firebaseConfig
     bookEvent,
     confirmTicket,
     useTicket,
+    buyEvent,
+    confirmPayment,
     getTicketParams,
     handleUnknownEvent,
     isNewSession,

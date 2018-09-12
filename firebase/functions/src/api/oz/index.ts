@@ -9,6 +9,7 @@ import { default as apiHandler, apiPath } from './api'
 import { default as useTicketApiHandler, apiPath as useTicketApiPath } from './useTicketApi'
 import { default as qrApiHandler, apiPath as qrApiPath } from './qrApi'
 import { default as eventApiHandler, apiPath as eventApiPath } from './eventApi'
+import { default as paymentConfirmApiHandler, apiPath as paymentConfirmPath } from './paymentConfirmApi'
 import { initMessagingProvider } from '../../messaging'
 import { IFirebaseConfig } from '../../firebaseConfig'
 
@@ -29,6 +30,7 @@ export const ozApi = (config: IFirebaseConfig): Express => {
   api.get(useTicketApiPath, useTicketApiHandler(ticketingSystem))
   api.get(qrApiPath, qrApiHandler(ticketingSystem))
   api.use(eventApiPath, eventApiHandler(ticketingSystem))
+  api.use(paymentConfirmPath, paymentConfirmApiHandler(ticketingSystem))
 
   return api
 }

@@ -71,8 +71,16 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
           .setColor('#718792')
           .setAction({
             'type': 'message',
-            'label': bookedEvent && bookedEvent.indexOf(event.id) >= 0 ? `${languageCode === 'th' ? 'ยกเลิก' : 'CANCEL'}` : `${languageCode === 'th' ? 'จอง' : 'BOOK'} (${event.ticket_bought || 0}/${event.ticket_max})`,
-            'text': bookedEvent && bookedEvent.indexOf(event.id) >= 0 ? `${languageCode === 'th' ? 'ยกเลิก' : 'CANCEL'}` : `${languageCode === 'th' ? 'จองตั๋ว' : 'Book'} ${event.title}`,
+            'label': bookedEvent && bookedEvent.indexOf(event.id) >= 0
+              ? `${languageCode === 'th' ? 'ยกเลิก' : 'CANCEL'}`
+              : (event.ticket_price > 0
+                ? `${languageCode === 'th' ? 'ซื้อ' : 'BUY'} (${event.ticket_bought || 0}/${event.ticket_max})`
+                : `${languageCode === 'th' ? 'จอง' : 'BOOK'} (${event.ticket_bought || 0}/${event.ticket_max})`),
+            'text': bookedEvent && bookedEvent.indexOf(event.id) >= 0
+              ? `${languageCode === 'th' ? 'ยกเลิก' : 'CANCEL'}`
+              : (event.ticket_price > 0
+                ? `${languageCode === 'th' ? 'ซื้อตั๋ว' : 'Buy'} ${event.title}`
+                : `${languageCode === 'th' ? 'จองตั๋ว' : 'Book'} ${event.title}`),
           })
           .build())
         .addComponents(FlexComponentBuilder.flexBox()
