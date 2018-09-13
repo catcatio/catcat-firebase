@@ -6,5 +6,6 @@ export interface IMessageFormatter {
   confirmResultTemplate: (burnttx: string, firebaseTime: number, stellarTime: number) => object
   balanceInfoTemplate: (walletAddress: string, balanceInfo: any[], languageCode: string) => object
   inviteTemplate: (eventId: string, userId: string, eventTitle: string, ticketRemaing: number, languageCode: string) => object
+  makePaymentTemplate: (title: string, message: string, paymentLink: string) => object
   providerName: string,
 }

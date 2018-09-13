@@ -39,6 +39,10 @@ export const facebookMessageFormatter = ({ }): IMessageFormatter => {
     return {}
   }
 
+  const makePaymentTemplate = (title: string, message: string, paymentLink: string) => {
+    return {}
+  }
+
   return {
     listEvents,
     ticketTemplate,
@@ -47,6 +51,7 @@ export const facebookMessageFormatter = ({ }): IMessageFormatter => {
     confirmResultTemplate,
     balanceInfoTemplate,
     inviteTemplate,
-    providerName: 'facebook'
+    providerName: 'facebook',
+    makePaymentTemplate
   }
 }

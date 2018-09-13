@@ -58,7 +58,8 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
               : '💲 FREE')
             .setWrap(true)
             .setColor('#222222')
-            .setSize('md')
+            .setWeight('bold')
+            .setSize('xs')
             .build(),
           FlexComponentBuilder.flexText()
             .setText(`🎫 AVAILABLE (${event.ticket_max - (event.ticket_bought || 0)})`)
@@ -474,6 +475,54 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
     return template.build()
   }
 
+  const makePaymentTemplate = (title, message, paymentLink) => {
+    const lineTemplate = new FlexMessageBuilder()
+    const template = lineTemplate.flexMessage('Invite friend')
+      .addBubble()
+      .addHeader()
+      .addComponents(
+        FlexComponentBuilder.flexBox()
+          .setLayout('horizontal')
+          .addContents(FlexComponentBuilder.flexText()
+            .setText(title)
+            .setWeight('bold')
+            .setSize('sm')
+            .build())
+          .build()
+      )
+      .addBody()
+      .setStyleBackgroundColor('#EFEFEF')
+      .setStyleSeparator(true)
+      .setStyleSeparatorColor('#DDDDDD')
+      .setLayout('vertical')
+      .setSpacing('md')
+      .addComponents(
+        FlexComponentBuilder.flexText()
+          .setText(message)
+          .setWrap(true)
+          .setSize('sm')
+          .build()
+      )
+      .addFooter()
+      .setStyleSeparator(true)
+      .setStyleSeparatorColor('#DDDDDD')
+      .setLayout('horizontal')
+      .setSpacing('md')
+      .addComponents(
+        FlexComponentBuilder.flexButton()
+          .setStyle('secondary')
+          .setColor('#b0bec5')
+          .setAction({
+            'type': 'uri',
+            'label': 'Pay by LINE Pay',
+            'uri': paymentLink
+          })
+          .build(),
+      )
+
+    return template.build()
+  }
+
   return {
     listEvents,
     ticketTemplate,
@@ -482,6 +531,7 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
     confirmResultTemplate,
     providerName: 'line',
     balanceInfoTemplate,
-    inviteTemplate
+    inviteTemplate,
+    makePaymentTemplate
   }
 }
