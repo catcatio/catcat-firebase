@@ -1,13 +1,9 @@
 import { IMessageFormatter } from './messageFormatter'
 import { FlexMessage, FlexImage } from '@line/bot-sdk'
 import { FlexMessageBuilder, FlexComponentBuilder } from '../messaging/lineMessageBuilder'
+import { formatCurrency } from '../utils/formatCurrency'
+import { from as dayAgo } from '../utils/dayAgo'
 import * as dayjs from 'dayjs'
-const relativeTime = require('dayjs/plugin/relativeTime')
-dayjs.extend(relativeTime)
-
-const dayAgo = (day: dayjs.Dayjs) => {
-  return (day as any).fromNow()
-}
 
 const niceIssuer = (issuer) => `${issuer.substr(0, 2)}...${issuer.substr(issuer.length - 4, issuer.length)}`
 
@@ -55,6 +51,14 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
             .setWrap(true)
             .setColor('#999999')
             .setSize('xs')
+            .build(),
+          FlexComponentBuilder.flexText()
+            .setText(event.ticket_price > 0
+              ? `💲 ${formatCurrency(event.ticket_price)} ${event.ticket_currency}`
+              : '💲 FREE')
+            .setWrap(true)
+            .setColor('#222222')
+            .setSize('md')
             .build(),
           FlexComponentBuilder.flexText()
             .setText(`🎫 AVAILABLE (${event.ticket_max - (event.ticket_bought || 0)})`)
@@ -370,10 +374,7 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
             .setLayout('horizontal')
             .addContents(
               FlexComponentBuilder.flexText()
-                .setText(balance.balance.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2
-                }))
+                .setText(formatCurrency(balance.balance))
                 .setWrap(true)
                 .setSize('sm')
                 .build(),
@@ -465,7 +466,7 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
           .setAction({
             'type': 'uri',
             'label': languageCode === 'th' ? 'ชวนเพื่อน' : 'invite',
-            'uri': `line://msg/text/?https://t.catcat.io/?ref=${userId}_${eventId}`
+            'uri': `line://msg/text/?https://t.catcat.io/${eventId}`
           })
           .build(),
       )

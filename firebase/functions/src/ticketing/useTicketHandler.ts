@@ -1,13 +1,5 @@
 import { HrtimeMarker } from '../utils/hrtimeMarker'
-import * as dayjs from 'dayjs'
-const relativeTime = require('dayjs/plugin/relativeTime')
-const th = require('dayjs/locale/th')
-dayjs.extend(relativeTime)
-
-const dayAgo = (day: string, languageCode) => {
-  const opt: any = languageCode === 'th' ? { locale: th } : {}
-  return (dayjs(day, opt) as any).fromNow()
-}
+import { fromString as dayAgo } from '../utils/dayAgo'
 
 export default (eventStore, userStore, stellarWrapper, messagingProvider, messageFormatterProvider) => async (tx) => {
   const hrMarker = HrtimeMarker.create('useTicket')

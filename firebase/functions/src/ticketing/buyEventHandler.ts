@@ -1,4 +1,5 @@
 import { HrtimeMarker } from '../utils/hrtimeMarker'
+import { formatCurrency } from '../utils/formatCurrency'
 
 export default (eventStore, userStore, stellarWrapper, messagingProvider, messageFormatterProvider, masterAsset, masterDistributor, transactionsRepository, { ticketQrUrl, linePay, linePayConfirmUrl }) => async ({ requestSource, from, languageCode }, eventTitle) => {
   const hrMarker = HrtimeMarker.create('buyEvent')
@@ -117,7 +118,7 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
       altText: 'Please proceed to the payment.',
       template: {
         type: 'buttons',
-        text: `${event.ticket_price} THB for "${event.title}" ticket. Please proceed to the payment.`,
+        text: `${formatCurrency(event.ticket_price)} THB for "${event.title}" ticket. Please proceed to the payment.`,
         actions: [
           { type: 'uri', label: 'Pay by LINE Pay', uri: response.info.paymentUrl.web }
         ]
