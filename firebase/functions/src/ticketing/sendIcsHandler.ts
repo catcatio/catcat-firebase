@@ -107,7 +107,7 @@ export default (eventStore, userStore, messagingProvider, messageFormatterProvid
       if (user) {
         // send sharing link
         userStore.updateUserEmail(user.id, email)
-        const remaining = event.ticket_max - (event.ticket_bought || 0) - 1
+        const remaining = event.ticket_max - (event.ticket_bought || 0)
         msg = languageCode === 'th'
           ? 'รีบชวนเพื่อนก่อนตั๋วหมด กด "ชวนเพื่อน" ได้เลยจ้า'
           : 'Want to invite someone? Click "invite" before tickets running out!'
