@@ -113,18 +113,6 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
 
     console.log(JSON.stringify(response.info))
 
-    // const message = {
-    //   type: 'template',
-    //   altText: 'Please proceed to the payment.',
-    //   template: {
-    //     type: 'buttons',
-    //     text: `${formatCurrency(event.ticket_price)} THB for "${event.title}" ticket. Please proceed to the payment.`,
-    //     actions: [
-    //       { type: 'uri', label: 'Pay by LINE Pay', uri: response.info.paymentUrl.web }
-    //     ]
-    //   }
-    // }
-
     await messageSender.sendCustomMessages(
       from,
       formatter.makePaymentTemplate(
