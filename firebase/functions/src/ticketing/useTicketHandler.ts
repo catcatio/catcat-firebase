@@ -63,7 +63,7 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
 
       const eventFormatter = messageFormatterProvider.get(event.providers)
       orgMessageSender.sendMessage(orgAddress, 'This ticket has already been used')
-        .then(() => orgMessageSender.sendCustomMessages(orgAddress, eventFormatter.confirmResultTemplate(ticket.burnt_tx, firebaseTime, stellarTime)))
+        .then(() => orgMessageSender.sendCustomMessages(orgAddress, eventFormatter.confirmResultTemplate(ticket.burnt_tx, firebaseTime, stellarTime, ticket.burnt_date)))
       return Promise.reject('EVENT_TICKET_USED')
     } else {
       await ownerMessageSender.sendMessage(ownerAddress, userLanguageCode === 'th'
