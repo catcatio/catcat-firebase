@@ -117,7 +117,7 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
       from,
       formatter.makePaymentTemplate(
         'Please proceed to the payment',
-        `${formatCurrency(event.ticket_price)} THB for "${event.title}" ticket. Please proceed to the payment.`,
+        `${formatCurrency(event.ticket_price, true)} THB for "${event.title}" ticket. Please proceed to the payment.`,
         response.info.paymentUrl.web))
 
     return 'EVENT_BUY_OK'

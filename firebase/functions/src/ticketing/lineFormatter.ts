@@ -41,33 +41,33 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
             .setSize('md')
             .build(),
           FlexComponentBuilder.flexText()
-            .setText(event.venue)
+            .setText(`${dayjs(event.startDate).format('dddd, MMMM D, YYYY hh:mm')}`)
             .setWrap(true)
             .setColor('#999999')
             .setSize('xs')
             .build(),
           FlexComponentBuilder.flexText()
-            .setText(dayjs(event.startDate).format('dddd, MMMM D, YYYY h:mm A'))
+            .setText(`${event.venue}`)
             .setWrap(true)
             .setColor('#999999')
             .setSize('xs')
             .build(),
           FlexComponentBuilder.flexText()
-            .setText(event.ticket_price > 0
-              ? `💲 ${formatCurrency(event.ticket_price)} ${event.ticket_currency}`
-              : '💲 FREE')
-            .setWrap(true)
-            .setColor('#222222')
-            .setWeight('bold')
-            .setSize('xs')
-            .build(),
-          FlexComponentBuilder.flexText()
-            .setText(`🎫 AVAILABLE (${event.ticket_max - (event.ticket_bought || 0)})`)
+            .setText(`🎫  ${languageCode === 'th' ? 'ตั๋ว' : 'TICKET'} ${event.ticket_max - (event.ticket_bought || 0)} (${languageCode === 'th' ? 'จาก' : 'from'} ${event.ticket_max})`)
             .setWrap(true)
             .setWeight('bold')
             .setSize('xs')
             .setMargin('md')
             .setColor('#222222')
+            .build(),
+          FlexComponentBuilder.flexText()
+            .setText(event.ticket_price > 0
+              ? `💵  ${languageCode === 'th' ? 'ราคา' : 'PRICE'} ${formatCurrency(event.ticket_price, true)} ${event.ticket_currency}`
+              : '💵  FREE')
+            .setWrap(true)
+            .setColor('#222222')
+            .setWeight('bold')
+            .setSize('xs')
             .build())
         .addFooter()
         .setSpacing('sm')
@@ -79,8 +79,8 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
             'label': bookedEvent && bookedEvent.indexOf(event.id) >= 0
               ? `${languageCode === 'th' ? 'ยกเลิก' : 'CANCEL'}`
               : (event.ticket_price > 0
-                ? `${languageCode === 'th' ? 'ซื้อ' : 'BUY'} (${event.ticket_bought || 0}/${event.ticket_max})`
-                : `${languageCode === 'th' ? 'จอง' : 'BOOK'} (${event.ticket_bought || 0}/${event.ticket_max})`),
+                ? `${languageCode === 'th' ? 'ซื้อ' : 'BUY'}`
+                : `${languageCode === 'th' ? 'จอง' : 'BOOK'}`),
             'text': bookedEvent && bookedEvent.indexOf(event.id) >= 0
               ? `${languageCode === 'th' ? 'ยกเลิก' : 'CANCEL'}`
               : (event.ticket_price > 0
@@ -215,9 +215,11 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
               .setLayout('baseline')
               .setSpacing('md')
               .addContents(
-                FlexComponentBuilder.flexIcon()
-                  .setUrl('https://raw.githubusercontent.com/catcatio/material-design-icons/master/action/2x_web/ic_info_outline_black_18dp.png')
+                FlexComponentBuilder.flexText()
+                  .setText('💡')
                   .setSize('sm')
+                  .setGarvity('top')
+                  .setFlex(0)
                   .build(),
                 FlexComponentBuilder.flexText()
                   .setText(event.description)
@@ -233,12 +235,14 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
               .setLayout('baseline')
               .setSpacing('md')
               .addContents(
-                FlexComponentBuilder.flexIcon()
-                  .setUrl('https://raw.githubusercontent.com/catcatio/material-design-icons/master/device/2x_web/ic_access_time_black_18dp.png')
+                FlexComponentBuilder.flexText()
+                  .setText('🗓️')
                   .setSize('sm')
+                  .setGarvity('top')
+                  .setFlex(0)
                   .build(),
                 FlexComponentBuilder.flexText()
-                  .setText(dayjs(event.startDate).format('dddd, MMMM D, YYYY h:mm A'))
+                  .setText(dayjs(event.startDate).format('dddd, MMMM D, YYYY hh:mm'))
                   .setWrap(true)
                   .setColor('#666666')
                   .setGarvity('center')
@@ -251,9 +255,11 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
               .setLayout('baseline')
               .setSpacing('md')
               .addContents(
-                FlexComponentBuilder.flexIcon()
-                  .setUrl('https://raw.githubusercontent.com/catcatio/material-design-icons/master/communication/2x_web/ic_location_on_black_18dp.png')
+                FlexComponentBuilder.flexText()
+                  .setText('📍')
                   .setSize('sm')
+                  .setGarvity('top')
+                  .setFlex(0)
                   .build(),
                 FlexComponentBuilder.flexText()
                   .setText(event.venue)

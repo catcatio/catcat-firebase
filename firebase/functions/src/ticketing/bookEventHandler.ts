@@ -118,7 +118,7 @@ export default (eventStore, userStore, stellarWrapper, messagingProvider, messag
     // Offer adding event to calendar
     msg = languageCode === 'th'
       ? 'อยากเพิ่มนัดในปฏิทินด้วยมั๊ยเมี๊ยว~'
-      : 'Do you want to add this event on calendar?'
+      : 'Do you want to add this event to calendar?'
     await messageSender.sendCustomMessages(from,
       languageCode === 'th'
         ? formatter.quickReplyTemplate(msg, 'มะ', {
