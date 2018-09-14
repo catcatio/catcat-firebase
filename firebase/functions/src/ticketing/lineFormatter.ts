@@ -3,6 +3,7 @@ import { FlexMessage, FlexImage } from '@line/bot-sdk'
 import { FlexMessageBuilder, FlexComponentBuilder } from '../messaging/lineMessageBuilder'
 import { formatCurrency } from '../utils/formatCurrency'
 import { from as dayAgo } from '../utils/dayAgo'
+import { replaceAll } from '../utils/string'
 import * as dayjs from 'dayjs'
 
 const niceIssuer = (issuer) => `${issuer.substr(0, 2)}...${issuer.substr(issuer.length - 4, issuer.length)}`
@@ -36,12 +37,12 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
             .setSize('xl')
             .build(),
           FlexComponentBuilder.flexText()
-            .setText(`${event.description}`)
+            .setText(limitChar(replaceAll(event.description, '\\\\n', '\n'), 120))
             .setWrap(true)
             .setSize('md')
             .build(),
           FlexComponentBuilder.flexText()
-            .setText(`${dayjs(event.startDate).format('dddd, MMMM D, YYYY hh:mm')}`)
+            .setText(`${dayjs(event.startDate).format('dddd, MMMM D, YYYY HH:mm')}`)
             .setWrap(true)
             .setColor('#999999')
             .setSize('xs')
@@ -222,7 +223,7 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
                   .setFlex(0)
                   .build(),
                 FlexComponentBuilder.flexText()
-                  .setText(event.description)
+                  .setText(limitChar(replaceAll(event.description, '\\\\n', '\n'), 120))
                   .setWrap(true)
                   .setColor('#666666')
                   .setSize('sm')
@@ -242,7 +243,7 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
                   .setFlex(0)
                   .build(),
                 FlexComponentBuilder.flexText()
-                  .setText(dayjs(event.startDate).format('dddd, MMMM D, YYYY hh:mm'))
+                  .setText(dayjs(event.startDate).format('dddd, MMMM D, YYYY HH:mm'))
                   .setWrap(true)
                   .setColor('#666666')
                   .setGarvity('center')
