@@ -180,11 +180,8 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
     return template.build()
   }
 
-  const ticketTemplate = (event, ticketUrl) => {
-    console.log(`${imageResizeService}${encodeURIComponent(event.coverImage)}`)
-    const lineTemplate = new FlexMessageBuilder()
-    const template = lineTemplate.flexMessage(`Your ticket: ${event.title}`)
-      .addBubble()
+  const buildTicketTemplate = (template, event, ticketUrl) => {
+    return template.addBubble()
       .addHero(FlexComponentBuilder.flexImage()
         .setUrl(`${imageResizeService}${encodeURIComponent(event.coverImage)}&size=800&seed=${Date.now()}`)
         .setSize('full')
@@ -289,6 +286,22 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
           .setSize('xs')
           .build()
       )
+  }
+
+  const ticketTemplate = (event, ticketUrl) => {
+    console.log(`${imageResizeService}${encodeURIComponent(event.coverImage)}`)
+    const lineTemplate = new FlexMessageBuilder()
+    const template = lineTemplate.flexMessage(`Your ticket: ${event.title}`)
+    buildTicketTemplate(template, event, ticketUrl)
+    return template.build()
+  }
+
+  const ticketsTemplate = (tickets: { event, ticketUrl }[]) => {
+    const lineTemplate = new FlexMessageBuilder()
+    const template = lineTemplate.flexMessage('your tickets')
+      .addCarousel()
+    tickets.forEach(({ event, ticketUrl }) => buildTicketTemplate(template, event, ticketUrl))
+
     return template.build()
   }
 
@@ -623,6 +636,7 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
   return {
     listEvents,
     ticketTemplate,
+    ticketsTemplate,
     confirmTemplate,
     quickReplyTemplate,
     confirmResultTemplate,

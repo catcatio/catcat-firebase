@@ -34,14 +34,17 @@ export default (eventStore, userStore, messagingProvider, messageFormatterProvid
 
     if (tickets && tickets.length > 0) {
       const msg = languageCode === 'th'
-      ? 'นี่คือตั๋วของคุณ'
-      : 'Here is your ticket'
+        ? 'นี่คือตั๋วของคุณ'
+        : 'Here is your ticket'
       await messageSender.sendMessage(from, msg)
-      tickets.forEach((ticket, index) => {
+
+      const message = formatter.ticketsTemplate(tickets.map((ticket, index) => {
         const event = events[index]
-        const currTicketUrl = `${ticketQrUrl}/${ticket.event_id}/${ticket.id}/${requestSource.toLowerCase()}_${from}/${ticket.bought_tx}`
-        messageSender.sendCustomMessages(from, formatter.ticketTemplate(event, currTicketUrl))
-      })
+        const ticketUrl = `${ticketQrUrl}/${ticket.event_id}/${ticket.id}/${requestSource.toLowerCase()}_${from}/${ticket.bought_tx}`
+        return { event, ticketUrl }
+      }))
+
+      messageSender.sendCustomMessages(from, message)
     } else {
       console.error('EVENT_NOT_FOUND')
       const msg = languageCode === 'th'

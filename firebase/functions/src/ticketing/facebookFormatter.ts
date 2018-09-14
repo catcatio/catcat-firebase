@@ -47,9 +47,14 @@ export const facebookMessageFormatter = ({ }): IMessageFormatter => {
     return {}
   }
 
+  const ticketsTemplate = (tickets: {event: any, ticketUrl: string}[]) => {
+    return {}
+  }
+
   return {
     listEvents,
     ticketTemplate,
+    ticketsTemplate,
     confirmTemplate,
     quickReplyTemplate,
     confirmResultTemplate,
