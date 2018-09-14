@@ -43,6 +43,7 @@ export const ticketing = (messagingProvider: IMessageingProvider, firebaseConfig
   const viewTicket = require('./viewTicketHandler').default(eventStore, userStore, messagingProvider, messageFormatterProvider, firebaseConfig)
   const walletBalance = require('./walletBalanceHandler').default(userStore, stellarWrapper, messagingProvider, messageFormatterProvider)
   const sendIcs = require('./sendIcsHandler').default(eventStore, userStore, messagingProvider, messageFormatterProvider, firebaseConfig)
+  const createFacebookEvent = require('./createFacebookEventHandler').default(messagingProvider, messageFormatterProvider, firebaseConfig)
 
   const setupAfterEvent = async ({eventId}) => {
     console.log(`setupAfterEvent for ${eventId}`)
@@ -67,6 +68,7 @@ export const ticketing = (messagingProvider: IMessageingProvider, firebaseConfig
     walletBalance,
     setupAfterEvent,
     processAfterEvent,
-    sendIcs
+    sendIcs,
+    createFacebookEvent
   }
 }

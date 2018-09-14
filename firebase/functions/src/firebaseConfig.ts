@@ -40,7 +40,8 @@ const firebaseConfig: IFirebaseConfig = {
   botLineId: ticketingConfig.botlineid,
   mailgunKey: ticketingConfig.mailgunkey,
   mailgunDomain: ticketingConfig.mailgundomain,
-  catcatMail: ticketingConfig.catcatmail
+  catcatMail: ticketingConfig.catcatmail,
+  facebookEventScraperUrl: ticketingConfig.facebookeventscraperurl
 }
 
 export interface IFirebaseConfig {
@@ -63,7 +64,8 @@ export interface IFirebaseConfig {
   botLineId: string,
   mailgunKey: string,
   mailgunDomain: string,
-  catcatMail: string
+  catcatMail: string,
+  facebookEventScraperUrl: string
 }
 
 export default firebaseConfig

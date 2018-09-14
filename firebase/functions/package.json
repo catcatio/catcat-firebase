@@ -32,6 +32,7 @@
     "moment": "^2.22.2",
     "pretty-hrtime": "^1.0.3",
     "request": "^2.87.0",
+    "request-promise-native": "^1.0.5",
     "sanitize-filename": "^1.6.1",
     "stellar-sdk": "^0.9.2"
   },

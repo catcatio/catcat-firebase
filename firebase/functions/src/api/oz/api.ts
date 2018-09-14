@@ -102,6 +102,11 @@ export default (ticketingSystem, botsSystem): RequestHandler => {
         return botsSystem.makePayment(itemCount <= 0 ? 1 : itemCount, requestParams)
           .then(() => res.sendStatus(200))
 
+      case 'events.create.facebook':
+          const eventLink = req.body.parameters['event-link']
+          return ticketingSystem.createFacebookEvent(eventLink, requestParams)
+            .then(() => res.sendStatus(200))
+
       default:
         return sessionTask.then(isNewSession => {
           return ticketingSystem.handleUnknownEvent(isNewSession, requestParams)

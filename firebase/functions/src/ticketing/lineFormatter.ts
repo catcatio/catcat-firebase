@@ -10,7 +10,7 @@ const niceIssuer = (issuer) => `${issuer.substr(0, 2)}...${issuer.substr(issuer.
 
 export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter => {
   const limitChar = (str, limit) => {
-    return str.substr(0, limit)
+    return `${str.substr(0, limit)}${str.length > limit ? '...' : ''}`
   }
 
   const listEvents = (events: any[], bookedEvent: any[], languageCode: string): FlexMessage => {
@@ -193,7 +193,7 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
         .setAction({
           'type': 'uri',
           'uri': event.link,
-          'label': limitChar(event.title, 40)
+          'label': limitChar(event.title, 37)
         })
         .build() as FlexImage)
       .addBody()
@@ -530,6 +530,96 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
     return template.build()
   }
 
+  const previewFacebookEventTemplate = (event, link, limit) => {
+    const lineTemplate = new FlexMessageBuilder()
+    const template = lineTemplate.flexMessage('Preview event card')
+    const times = event.eventTime.split(' to ')
+
+    template.addBubble()
+      .addHero(FlexComponentBuilder.flexImage()
+        .setUrl(`${imageResizeService}${encodeURIComponent(event.coverImage)}&size=1000&seed=${Date.now()}`)
+        .setSize('full')
+        .setAspectRatio('1.91:1')
+        .setAspectMode('cover')
+        .build() as FlexImage)
+      .addBody()
+      .setLayout('vertical')
+      .setSpacing('sm')
+      .addComponents(
+        FlexComponentBuilder.flexText()
+          .setText(event.title)
+          .setWrap(true)
+          .setWeight('bold')
+          .setSize('xl')
+          .build(),
+        FlexComponentBuilder.flexText()
+          .setText(`${limitChar(replaceAll(event.description, '\\\\n', '\n'), 120)}`)
+          .setWrap(true)
+          .setSize('md')
+          .build(),
+        FlexComponentBuilder.flexText()
+          .setText(`${dayjs(times[0]).format('dddd, MMMM D, YYYY HH:mm')}`)
+          .setWrap(true)
+          .setColor('#999999')
+          .setSize('xs')
+          .build(),
+        FlexComponentBuilder.flexText()
+          .setText(`${limitChar(event.venue, 64)}`)
+          .setWrap(true)
+          .setColor('#999999')
+          .setSize('xs')
+          .build(),
+        FlexComponentBuilder.flexText()
+          .setText(`🎫  TICKET ${limit} (from ${limit})`)
+          .setWrap(true)
+          .setWeight('bold')
+          .setSize('xs')
+          .setMargin('md')
+          .setColor('#222222')
+          .build(),
+        FlexComponentBuilder.flexText()
+          .setText('💵  FREE')
+          .setWrap(true)
+          .setColor('#222222')
+          .setWeight('bold')
+          .setSize('xs')
+          .build())
+      .addFooter()
+      .setSpacing('sm')
+      .addComponents(FlexComponentBuilder.flexButton()
+        .setStyle('primary')
+        .setColor('#718792')
+        .setAction({
+          'type': 'message',
+          'label': 'BOOK',
+          'text': `BOOK ${event.title}`
+        })
+        .build())
+      .addComponents(FlexComponentBuilder.flexBox()
+        .setLayout('horizontal')
+        .setSpacing('md')
+        .addContents(
+          FlexComponentBuilder.flexButton()
+            .setAction({
+              'type': 'uri',
+              'label': 'MAP',
+              'uri': event.venueLink
+            })
+            .build(),
+          FlexComponentBuilder.flexButton()
+            .setAction({
+              'type': 'uri',
+              'label': 'MORE',
+              'uri': link
+            })
+            .build()
+        )
+        .build())
+
+    return template.build()
+  }
+
+
   return {
     listEvents,
     ticketTemplate,
@@ -539,6 +629,7 @@ export const lineMessageFormatter = ({ imageResizeService }): IMessageFormatter 
     providerName: 'line',
     balanceInfoTemplate,
     inviteTemplate,
-    makePaymentTemplate
+    makePaymentTemplate,
+    previewFacebookEventTemplate
   }
 }

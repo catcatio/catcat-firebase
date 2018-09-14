@@ -7,5 +7,6 @@ export interface IMessageFormatter {
   balanceInfoTemplate: (walletAddress: string, balanceInfo: any[], languageCode: string) => object
   inviteTemplate: (eventId: string, userId: string, eventTitle: string, ticketRemaing: number, languageCode: string) => object
   makePaymentTemplate: (title: string, message: string, paymentLink: string) => object
+  previewFacebookEventTemplate: (event: any, link: string, limit: number) => object
   providerName: string,
 }
